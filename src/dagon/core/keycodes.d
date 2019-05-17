@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.core.keycodes;
 
-import dagon.core.libs;
+import dagon.core.bindings;
 
 enum
 {

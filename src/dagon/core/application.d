@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2018 Timur Gafarov
+Copyright (c) 2017-2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -38,8 +38,16 @@ import std.file;
 import core.stdc.stdlib;
 
 import dlib.core.memory;
-import dagon.core.libs;
+import dagon.core.bindings;
 import dagon.core.event;
+import dagon.core.time;
+
+debug
+{
+    version = DagonDebug;
+}
+
+version = DagonDebug;
 
 void exitWithError(string message)
 {
@@ -91,6 +99,8 @@ class Application: EventListener
     string libdir;
     
     private EventManager _eventManager;
+    
+    private double elapsedTime = 0.0;
 
     /++
         Constructor.
@@ -145,7 +155,6 @@ class Application: EventListener
         height = winHeight;
 
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -155,7 +164,7 @@ class Application: EventListener
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
         window = SDL_CreateWindow(toStringz(windowTitle),
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if (window is null)
             exitWithError("Error: failed to create window: " ~ to!string(SDL_GetError()));
 
@@ -189,16 +198,17 @@ class Application: EventListener
         // Initialize OpenGL
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClearDepth(1.0);
+        glEnable(GL_SCISSOR_TEST);
         glDepthFunc(GL_LESS);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_POLYGON_OFFSET_FILL);
         glCullFace(GL_BACK);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         SDL_GL_SwapWindow(window);
         
-        debug
+        version(DagonDebug)
         {
             if (hasKHRDebug)
             {
@@ -211,6 +221,11 @@ class Application: EventListener
             }
         }
     }
+    
+    void maximizeWindow()
+    {
+        SDL_MaximizeWindow(window);
+    }
 
     override void onUserEvent(int code)
     {
@@ -220,7 +235,7 @@ class Application: EventListener
         }
     }
 
-    void onUpdate(double dt)
+    void onUpdate(Time t)
     {
         // Override me
     }
@@ -237,31 +252,31 @@ class Application: EventListener
         if (error != GL_NO_ERROR)
         {
             writefln("OpenGL error %s: %s", error, GLErrorStrings[error]);
-            //eventManager.running = false;
         }
     }
 
     void run()
     {
+        Time t;
         while(eventManager.running)
         {
-            beginRender();
-            onUpdate(eventManager.deltaTime);
+            eventManager.update();
+            processEvents();
+            
+            t.delta = eventManager.deltaTime;
+            t.elapsed = elapsedTime;
+            elapsedTime += t.elapsed;
+            
+            onUpdate(t);
             onRender();
-            endRender();
+            
+            version(DagonDebug)
+            {
+                checkGLError();
+            }
+            
+            SDL_GL_SwapWindow(window);
         }
-    }
-
-    void beginRender()
-    {
-        eventManager.update();
-        processEvents();
-    }
-
-    void endRender()
-    {
-        debug checkGLError();
-        SDL_GL_SwapWindow(window);
     }
 
     void exit()

@@ -25,46 +25,11 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon;
+module dagon.graphics.drawable;
 
-public
+public import dagon.graphics.state;
+
+interface Drawable
 {
-    import dlib;
-
-    import dagon.core.application;
-    import dagon.core.bindings;
-    import dagon.core.config;
-    import dagon.core.event;
-    import dagon.core.input;
-    import dagon.core.keycodes;
-    import dagon.core.locale;
-    import dagon.core.props;
-    import dagon.core.time;
-    import dagon.core.vfs;
-
-    import dagon.graphics.camera;
-    import dagon.graphics.drawable;
-    import dagon.graphics.entity;
-    import dagon.graphics.material;
-    import dagon.graphics.mesh;
-    import dagon.graphics.shader;
-    import dagon.graphics.shaderloader;
-    import dagon.graphics.shapes;
-    import dagon.graphics.state;
-    import dagon.graphics.texture;
-    import dagon.graphics.updateable;
-    import dagon.graphics.shaders.defaultshader;
-    
-    import dagon.render.framebuffer;
-    import dagon.render.pipeline;
-    import dagon.render.stage;
-    import dagon.render.view;
-    
-    import dagon.resource.scene;
-    
-    import dagon.ui.font;
-    import dagon.ui.freeview;
-    import dagon.ui.ftfont;
-	import dagon.ui.nuklear;
-    import dagon.ui.textline;
+    void render(State* state);
 }

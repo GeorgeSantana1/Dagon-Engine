@@ -31,16 +31,16 @@ import std.math;
 import std.algorithm;
 
 import dlib.core.memory;
+import dlib.core.ownership;
 import dlib.math.vector;
 import dlib.image.color;
 import dlib.image.image;
 import dlib.image.unmanaged;
 import dlib.container.dict;
 
-import dagon.core.libs;
-import dagon.core.ownership;
+import dagon.core.bindings;
 import dagon.graphics.texture;
-import dagon.graphics.rc;
+import dagon.graphics.state;
 import dagon.graphics.shader;
 
 enum
@@ -432,7 +432,7 @@ class Material: Owner
         return customShader;
     }
 
-    void bind(RenderingContext* rc)
+    void bind(State* state)
     {
         auto iblending = "blending" in inputs;
         auto iculling = "culling" in inputs;
@@ -447,10 +447,6 @@ class Material: Owner
             glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             glBlendFuncSeparatei(1, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             glBlendFuncSeparatei(2, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-            //glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            //glBlendFunci(1, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            //glBlendFunci(2, GL_SRC_ALPHA, GL_ONE);
         }
         else if (iblending.asInteger == Additive)
         {
@@ -467,55 +463,48 @@ class Material: Owner
             glEnable(GL_CULL_FACE);
         }
 
-        if (!icolorWrite.asBool)
+        if (!icolorWrite.asBool || !state.colorMask)
         {
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         }
 
-        if (!idepthWrite.asBool && !rc.shadowPass)
+        if (!idepthWrite.asBool || !state.depthMask)
         {
             glDepthMask(GL_FALSE);
         }
 
-        RenderingContext rcLocal = *rc;
-        rcLocal.material = this;
+        State stateLocal = *state;
+        stateLocal.material = this;
 
-        if (rc.overrideShader)
+        if (state.overrideShader)
         {
-            rc.overrideShader.bind(&rcLocal);
+            state.overrideShader.bind(&stateLocal);
         }
         else if (shader)
         {
-            shader.bind(&rcLocal);
+            shader.bind(&stateLocal);
         }
     }
 
-    void unbind(RenderingContext* rc)
+    void unbind(State* state)
     {
         auto icolorWrite = "colorWrite" in inputs;
         auto idepthWrite = "depthWrite" in inputs;
 
-        RenderingContext rcLocal = *rc;
-        rcLocal.material = this;
+        State stateLocal = *state;
+        stateLocal.material = this;
 
-        if (rc.overrideShader)
+        if (state.overrideShader)
         {
-            rc.overrideShader.unbind(&rcLocal);
+            state.overrideShader.unbind(&stateLocal);
         }
         else if (shader)
         {
-            shader.unbind(&rcLocal);
+            shader.unbind(&stateLocal);
         }
 
-        if (!idepthWrite.asBool && rc.depthPass)
-        {
-            glDepthMask(GL_TRUE);
-        }
-
-        if (!icolorWrite.asBool && rc.colorPass)
-        {
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        }
+        glDepthMask(GL_TRUE);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
         glDisable(GL_CULL_FACE);
 
@@ -524,6 +513,3 @@ class Material: Owner
         glDisablei(GL_BLEND, 2);
     }
 }
-
-deprecated("use `Material` instead") alias GenericMaterial = Material;
-deprecated("use `Material` instead") alias ShaderMaterial = Material;

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2018 Timur Gafarov
+Copyright (c) 2017-2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -35,16 +35,16 @@ import std.utf;
 import std.file;
 
 import dlib.core.memory;
+import dlib.core.ownership;
 import dlib.core.stream;
 import dlib.container.dict;
 import dlib.text.utf8;
 import dlib.math.vector;
 import dlib.image.color;
 
-import dagon.core.ownership;
 import dagon.ui.font;
-import dagon.graphics.rc;
 import dagon.graphics.shaderloader;
+import dagon.graphics.state;
 
 version(NoFreetype)
 {
@@ -57,7 +57,7 @@ else
 
 version(EnableFreetype):
 
-import dagon.core.libs;
+import dagon.core.bindings;
 
 struct Glyph
 {
@@ -106,8 +106,8 @@ final class FreeTypeFont: Font
     GLint glyphTextureLoc;
     GLint glyphColorLoc;
 
-    string vs = import("Text.vs");
-    string fs = import("Text.fs");
+    string vs = import("Glyph.vs");
+    string fs = import("Glyph.fs");
 
     this(uint height, Owner o)
     {
@@ -316,7 +316,6 @@ final class FreeTypeFont: Font
         FT_Bitmap bitmap = bitmapGlyph.bitmap;
 
         glBindTexture(GL_TEXTURE_2D, glyph.textureId);
-        glUniform1i(glyphTextureLoc, 0);
 
         float chWidth = cast(float)bitmap.width;
         float chHeight = cast(float)bitmap.rows;
@@ -355,18 +354,18 @@ final class FreeTypeFont: Font
         return cast(int)(glyph.advanceX >> 6);
     }
 
-    override void render(RenderingContext* rc, Color4f color, string str)
+    override void render(State* state, Color4f color, string str)
     {
         if (!canRender)
             return;
 
         glUseProgram(shaderProgram);
 
-        glUniformMatrix4fv(modelViewMatrixLoc, 1, GL_FALSE, rc.modelViewMatrix.arrayof.ptr);
-        glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, rc.projectionMatrix.arrayof.ptr);
-
+        glUniformMatrix4fv(modelViewMatrixLoc, 1, GL_FALSE, state.modelViewMatrix.arrayof.ptr);
+        glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, state.projectionMatrix.arrayof.ptr);
         glUniform4fv(glyphColorLoc, 1, color.arrayof.ptr);
-
+        glUniform1i(glyphTextureLoc, 0);
+        
         float shift = 0.0f;
         UTF8Decoder dec = UTF8Decoder(str);
         int ch;

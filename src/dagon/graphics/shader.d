@@ -1,5 +1,5 @@
 ﻿/*
-Copyright (c) 2018 Timur Gafarov
+Copyright (c) 2018-2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -38,10 +38,10 @@ import dlib.math.vector;
 import dlib.math.matrix;
 import dlib.image.color;
 
-import dagon.core.libs;
-import dagon.graphics.rc;
+import dagon.core.bindings;
 import dagon.graphics.shaderloader;
 import dagon.graphics.texture;
+import dagon.graphics.state;
 
 // TODO: move to separate module
 class MappedList(T): Owner
@@ -109,6 +109,7 @@ abstract class BaseShaderParameter: Owner
     Shader shader;
     string name;
     GLint location;
+    bool autoBind = true;
 
     this(Shader shader, string name)
     {
@@ -367,8 +368,21 @@ class Shader: Owner
             return sp;
         }
     }
+    
+    BaseShaderParameter getParameter(string name)
+    {
+        if (name in parameters.indices)
+        {
+            return parameters.get(name);
+        }
+        else
+        {
+            writefln("Warning: unknown shader parameter \"%s\"", name);
+            return null;
+        }
+    }
 
-    T getParameter(T)(string name)
+    T getParameterValue(T)(string name)
     {
         if (name in parameters.indices)
         {
@@ -391,20 +405,9 @@ class Shader: Owner
         }
     }
 
-    void bindProgram()
+    void bind(State* state)
     {
         program.bind();
-    }
-
-    void unbindProgram()
-    {
-        program.unbind();
-    }
-
-    void bind(RenderingContext* rc)
-    {
-        if (rc.rebindShaderProgram)
-            bindProgram();
 
         GLsizei n;
         glGetProgramStageiv(program.program, GL_VERTEX_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &n);
@@ -417,7 +420,8 @@ class Shader: Owner
 
         foreach(v; parameters.data)
         {
-            v.bind();
+            if (v.autoBind)
+                v.bind();
         }
 
         if (vertexSubroutineIndices.length)
@@ -427,15 +431,15 @@ class Shader: Owner
             glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, cast(uint)fragmentSubroutineIndices.length, fragmentSubroutineIndices.ptr);
     }
 
-    void unbind(RenderingContext* rc)
+    void unbind(State* state)
     {
         foreach(v; parameters.data)
         {
-            v.unbind();
+            if (v.autoBind)
+                v.unbind();
         }
 
-        if (rc.rebindShaderProgram)
-            unbindProgram();
+        program.unbind();
     }
     
     void validate()

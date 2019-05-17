@@ -25,46 +25,44 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon;
+module dagon.graphics.shaders.defaultshader;
 
-public
+import std.stdio;
+import std.math;
+
+import dlib.core.memory;
+import dlib.core.ownership;
+import dlib.math.vector;
+import dlib.math.matrix;
+import dlib.math.transformation;
+import dlib.math.interpolation;
+import dlib.image.color;
+
+import dagon.core.bindings;
+import dagon.graphics.shader;
+import dagon.graphics.state;
+
+class DefaultShader: Shader
 {
-    import dlib;
+    string vs = import("Default.vs");
+    string fs = import("Default.fs");
 
-    import dagon.core.application;
-    import dagon.core.bindings;
-    import dagon.core.config;
-    import dagon.core.event;
-    import dagon.core.input;
-    import dagon.core.keycodes;
-    import dagon.core.locale;
-    import dagon.core.props;
-    import dagon.core.time;
-    import dagon.core.vfs;
+    this(Owner owner)
+    {
+        auto myProgram = New!ShaderProgram(vs, fs, this);
+        super(myProgram, owner);
+    }
 
-    import dagon.graphics.camera;
-    import dagon.graphics.drawable;
-    import dagon.graphics.entity;
-    import dagon.graphics.material;
-    import dagon.graphics.mesh;
-    import dagon.graphics.shader;
-    import dagon.graphics.shaderloader;
-    import dagon.graphics.shapes;
-    import dagon.graphics.state;
-    import dagon.graphics.texture;
-    import dagon.graphics.updateable;
-    import dagon.graphics.shaders.defaultshader;
-    
-    import dagon.render.framebuffer;
-    import dagon.render.pipeline;
-    import dagon.render.stage;
-    import dagon.render.view;
-    
-    import dagon.resource.scene;
-    
-    import dagon.ui.font;
-    import dagon.ui.freeview;
-    import dagon.ui.ftfont;
-	import dagon.ui.nuklear;
-    import dagon.ui.textline;
+    override void bind(State* state)
+    {
+        setParameter("modelViewMatrix", state.modelViewMatrix);
+        setParameter("projectionMatrix", state.projectionMatrix);
+
+        super.bind(state);
+    }
+
+    override void unbind(State* state)
+    {
+        super.unbind(state);
+    }
 }

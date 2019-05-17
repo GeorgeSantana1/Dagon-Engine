@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2018 Timur Gafarov
+Copyright (c) 2017-2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -31,12 +31,12 @@ import std.stdio;
 import std.math;
 
 import dlib.core.memory;
+import dlib.core.ownership;
 import dlib.image.color;
 import dlib.image.image;
 import dlib.math.vector;
 
-import dagon.core.libs;
-import dagon.core.ownership;
+import dagon.core.bindings;
 
 class Texture: Owner
 {
@@ -60,17 +60,17 @@ class Texture: Owner
 
     protected bool mipmapGenerated = false;
 
-    this(Owner o)
+    this(Owner owner)
     {
-        super(o);
+        super(owner);
         translation = Vector2f(0.0f, 0.0f);
         scale = Vector2f(1.0f, 1.0f);
         rotation = 0.0f;
     }
 
-    this(SuperImage img, Owner o, bool genMipmaps = false)
+    this(SuperImage img, Owner owner, bool genMipmaps = false)
     {
-        super(o);
+        super(owner);
         translation = Vector2f(0.0f, 0.0f);
         scale = Vector2f(1.0f, 1.0f);
         rotation = 0.0f;

@@ -32,11 +32,10 @@ import std.stdio;
 import std.ascii;
 import std.conv;
 import dlib.core.memory;
+import dlib.core.ownership;
 import dlib.container.array;
-import dagon.core.libs;
-import dagon.core.ownership;
+import dagon.core.bindings;
 import dagon.core.input;
-import dagon.resource.asset;
 
 enum EventType
 {
@@ -54,7 +53,7 @@ enum EventType
     FocusLoss,
     FocusGain,
     Quit,
-    AssetReload,
+    FileChange,
     UserEvent
 }
 
@@ -72,7 +71,7 @@ struct Event
     int userCode;
     int mouseWheelX;
     int mouseWheelY;
-    Asset asset;
+    string filename;
 }
 
 class EventManager
@@ -112,9 +111,6 @@ class EventManager
     uint deltaTimeMs = 0;
     int fps = 0;
 
-    //uint videoWidth;
-    //uint videoHeight;
-
     uint windowWidth;
     uint windowHeight;
     bool windowFocused = true;
@@ -130,10 +126,6 @@ class EventManager
 
         windowWidth = winWidth;
         windowHeight = winHeight;
-
-        //auto videoInfo = SDL_GetVideoInfo();
-        //videoWidth = videoInfo.current_w;
-        //videoHeight = videoInfo.current_h;
 
         if(SDL_NumJoysticks() > 0)
         {
@@ -181,12 +173,15 @@ class EventManager
             writeln("Warning: event stack overflow");
     }
     
+    /*
+    // TODO: file change event
     void generateAssetReloadEvent(Asset asset)
     {
         Event e = Event(EventType.AssetReload);
         e.asset = asset;
         addUserEvent(e);
     }
+    */
 
     void addUserEvent(Event e)
     {
@@ -591,8 +586,8 @@ abstract class EventListener: Owner
             case EventType.Quit:
                 onQuit();
                 break;
-            case EventType.AssetReload:
-                onAssetReload(e.asset);
+            case EventType.FileChange:
+                onFileChange(e.filename);
                 break;
             case EventType.UserEvent:
                 onUserEvent(e.userCode);
@@ -615,6 +610,6 @@ abstract class EventListener: Owner
     void onFocusLoss() {}
     void onFocusGain() {}
     void onQuit() {}
-    void onAssetReload(Asset asset) {}
+    void onFileChange(string filename) {}
     void onUserEvent(int code) {}
 }

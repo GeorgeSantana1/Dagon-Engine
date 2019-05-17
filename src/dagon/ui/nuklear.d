@@ -29,19 +29,21 @@ module dagon.ui.nuklear;
 
 import core.stdc.stdarg;
 
+import dlib.core.ownership;
 import dlib.image.color;
 import dlib.container.array;
 import dlib.text.utf8;
 import dlib.text.unmanagedstring;
 
-import dagon.core.interfaces;
-import dagon.core.ownership;
+import dagon.core.time;
 import dagon.core.event;
 import dagon.core.keycodes;
 import dagon.core.locale;
+import dagon.graphics.drawable;
+import dagon.graphics.updateable;
 import dagon.graphics.shaderloader;
 import dagon.graphics.texture;
-import dagon.resource.fontasset;
+//import dagon.resource.fontasset;
 
 version(NoNuklear)
 {
@@ -54,7 +56,7 @@ else
 
 version(EnableNuklear):
 
-import dagon.core.libs;
+import dagon.core.bindings;
 
 alias nk_color NKColor;
 alias nk_colorf NKColorf;
@@ -155,7 +157,7 @@ struct NuklearEvent
     int down;
 }
 
-class NuklearGUI : Owner, Drawable
+class NuklearGUI : Owner, Updateable, Drawable
 {
     NuklearEvent[10] events;
     int eventsCount = 0;
@@ -270,7 +272,7 @@ class NuklearGUI : Owner, Drawable
         glBindVertexArray(0);
     }
 
-    override void update(double dt)
+    override void update(Time t)
     {
         nk_clear(&ctx);
 
@@ -303,7 +305,7 @@ class NuklearGUI : Owner, Drawable
         nk_input_end(&ctx);
     }
 
-    override void render(RenderingContext* rc)
+    override void render(State* state)
     {
         const(int) maxVertexBuffer = 512 * 1024;
         const(int) maxElementBuffer = 128 * 1024;
@@ -316,7 +318,7 @@ class NuklearGUI : Owner, Drawable
 
         glUseProgram(shaderProgram);
         glUniform1i(textureLoc, 0);
-        glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, rc.projectionMatrix.arrayof.ptr);
+        glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, state.projectionMatrix.arrayof.ptr);
 
         const(nk_draw_command) *cmd;
         void *vertices;
@@ -460,9 +462,19 @@ class NuklearGUI : Owner, Drawable
             return fontDefaultGlyphRanges;
     }
 
+	/*
+	//TODO
     NKFont* addFont(FontAsset font, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)
     {
         return addFont(font.buffer.ptr, font.buffer.length, height, range);
+    }
+	*/
+
+    NKFont* addFont(string filename, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)
+    {
+		import std.file;
+		ubyte[] buffer = cast(ubyte[])std.file.read(filename);
+        return addFont(buffer.ptr, buffer.length, height, range);
     }
 
     NKFont* addFont(ubyte* buffer, ulong len, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)

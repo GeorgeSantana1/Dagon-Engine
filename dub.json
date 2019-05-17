@@ -1,5 +1,5 @@
 {
-    "name": "dagon",
+    "name": "dagon-ng",
     "description": "3D game engine for D",
     "homepage": "https://gecko0307.github.io/dagon",
     "license": "BSL-1.0",
@@ -14,11 +14,15 @@
     "importPaths": ["src"],
     "sourcePaths": ["src"],
     "stringImportPaths": ["shaders", "data/__internal"],
+    
+    "mainSourceFile": "src/main.d",
 
     "dependencies": {
         "dlib": "0.16.0",
         "bindbc-opengl": "0.4.0",
-        "bindbc-sdl": "0.4.1"
+        "bindbc-sdl": "0.4.1",
+        "bindbc-ft": "0.1.0",
+        "bindbc-nuklear": "0.1.0"
     },
 
     "versions": [
@@ -34,37 +38,11 @@
     
     "configurations": [
         {
-            "name": "library",
-            "targetType": "library",
-            "dependencies": {
-                "bindbc-ft": "0.1.0",
-                "bindbc-nuklear": "0.1.0"
-            },
-        },
-        {
-            "name": "Minimal",
-            "targetType": "library",
-            "versions": ["NoFreetype", "NoNuklear"]
-        },
-        {
-            "name": "NoFreetype",
-            "targetType": "library",
-            "dependencies": {
-                "bindbc-nuklear": "0.1.0"
-            },
-            "versions": ["NoFreetype"]
-        },
-        {
-            "name": "NoNuklear",
-            "targetType": "library",
-            "dependencies": {
-                "bindbc-ft": "0.1.0",
-            },
-            "versions": ["NoNuklear"]
-        },
+            "name": "application",
+            "targetType": "executable"
+        }
     ],
     
     "copyFiles-windows-x86": ["lib/x86/*.dll"],
-    "copyFiles-windows-x86_64": ["lib/x64/*.dll"],
-    "copyFiles": ["data", "gamecontrollerdb.txt"],
+    "copyFiles-windows-x86_64": ["lib/x64/*.dll"]
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2019 Timur Gafarov
+Copyright (c) 2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -25,46 +25,58 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon;
+module dagon.graphics.state;
 
-public
+import dlib.math.vector;
+import dlib.math.matrix;
+import dagon.graphics.material;
+import dagon.graphics.shader;
+
+struct State
 {
-    import dlib;
+    //Vector3f cameraPosition;
+    //Vector3f prevCameraPosition;
 
-    import dagon.core.application;
-    import dagon.core.bindings;
-    import dagon.core.config;
-    import dagon.core.event;
-    import dagon.core.input;
-    import dagon.core.keycodes;
-    import dagon.core.locale;
-    import dagon.core.props;
-    import dagon.core.time;
-    import dagon.core.vfs;
+    Matrix4x4f modelViewMatrix;
 
-    import dagon.graphics.camera;
-    import dagon.graphics.drawable;
-    import dagon.graphics.entity;
-    import dagon.graphics.material;
-    import dagon.graphics.mesh;
-    import dagon.graphics.shader;
-    import dagon.graphics.shaderloader;
-    import dagon.graphics.shapes;
-    import dagon.graphics.state;
-    import dagon.graphics.texture;
-    import dagon.graphics.updateable;
-    import dagon.graphics.shaders.defaultshader;
+    Matrix4x4f modelMatrix;
+    Matrix4x4f invModelMatrix;
+
+    Matrix4x4f viewMatrix;
+    Matrix4x4f invViewMatrix;
+
+    Matrix4x4f viewRotationMatrix;
+    Matrix4x4f invViewRotationMatrix;
+
+    Matrix4x4f projectionMatrix;
+    Matrix4x4f normalMatrix;
     
-    import dagon.render.framebuffer;
-    import dagon.render.pipeline;
-    import dagon.render.stage;
-    import dagon.render.view;
+    Material material;
+    Shader overrideShader;
     
-    import dagon.resource.scene;
+    bool colorMask;
+    bool depthMask;
     
-    import dagon.ui.font;
-    import dagon.ui.freeview;
-    import dagon.ui.ftfont;
-	import dagon.ui.nuklear;
-    import dagon.ui.textline;
+    void reset()
+    {
+        modelViewMatrix = Matrix4x4f.identity;
+        
+        modelMatrix = Matrix4x4f.identity;
+        invModelMatrix = Matrix4x4f.identity;
+
+        viewMatrix = Matrix4x4f.identity;
+        invViewMatrix = Matrix4x4f.identity;
+
+        viewRotationMatrix = Matrix4x4f.identity;
+        invViewRotationMatrix = Matrix4x4f.identity;
+
+        projectionMatrix = Matrix4x4f.identity;
+        normalMatrix = Matrix4x4f.identity;
+        
+        material = null;
+        overrideShader = null;
+        
+        colorMask = true;
+        depthMask = true;
+    }
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2019 Timur Gafarov
+Copyright (c) 2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -25,46 +25,29 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon;
+module dagon.render.framebuffer;
 
-public
+import dlib.core.memory;
+import dlib.core.ownership;
+
+import dagon.core.bindings;
+
+class Framebuffer: Owner
 {
-    import dlib;
-
-    import dagon.core.application;
-    import dagon.core.bindings;
-    import dagon.core.config;
-    import dagon.core.event;
-    import dagon.core.input;
-    import dagon.core.keycodes;
-    import dagon.core.locale;
-    import dagon.core.props;
-    import dagon.core.time;
-    import dagon.core.vfs;
-
-    import dagon.graphics.camera;
-    import dagon.graphics.drawable;
-    import dagon.graphics.entity;
-    import dagon.graphics.material;
-    import dagon.graphics.mesh;
-    import dagon.graphics.shader;
-    import dagon.graphics.shaderloader;
-    import dagon.graphics.shapes;
-    import dagon.graphics.state;
-    import dagon.graphics.texture;
-    import dagon.graphics.updateable;
-    import dagon.graphics.shaders.defaultshader;
+    this(Owner owner)
+    {
+        super(owner);
+        
+        // TODO
+    }
     
-    import dagon.render.framebuffer;
-    import dagon.render.pipeline;
-    import dagon.render.stage;
-    import dagon.render.view;
+    ~this()
+    {
+        // TODO
+    }
     
-    import dagon.resource.scene;
-    
-    import dagon.ui.font;
-    import dagon.ui.freeview;
-    import dagon.ui.ftfont;
-	import dagon.ui.nuklear;
-    import dagon.ui.textline;
+    void resize(uint width, uint height)
+    {
+        // TODO
+    }
 }
