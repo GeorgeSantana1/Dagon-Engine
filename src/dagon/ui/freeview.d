@@ -165,8 +165,8 @@ class FreeviewComponent: EntityComponent
             {                
                 float t = (eventManager.mouseX - prevMouseX);
                 float p = (eventManager.mouseY - prevMouseY);
-                pitch(p);
-                turn(t);
+                pitchSmooth(p, 4.0f);
+                turnSmooth(t, 4.0f);
             }
 
             prevMouseX = eventManager.mouseX;
