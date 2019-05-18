@@ -38,7 +38,7 @@ class SceneApplication: Application
         stage2d = New!RenderStage(pipeline, scene.hud);
         stage2d.clear = false;
         
-        view3d = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight, this);
+        view3d = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
         stage3d.view = view3d;
         camera = New!Camera(scene.entityManager);
         freeview = New!FreeviewComponent(eventManager, camera);
@@ -66,9 +66,9 @@ class SceneApplication: Application
         styleTable[NK_COLOR_BUTTON] = gui.rgba(185, 185, 185, 255);
         styleTable[NK_COLOR_BUTTON_HOVER] = gui.rgba(170, 170, 170, 255);
         styleTable[NK_COLOR_BUTTON_ACTIVE] = gui.rgba(160, 160, 160, 255);
-        styleTable[NK_COLOR_TOGGLE] = gui.rgba(150, 150, 150, 255);
+        styleTable[NK_COLOR_TOGGLE] = gui.rgba(190, 190, 190, 255);
         styleTable[NK_COLOR_TOGGLE_HOVER] = gui.rgba(120, 120, 120, 255);
-        styleTable[NK_COLOR_TOGGLE_CURSOR] = gui.rgba(175, 175, 175, 255);
+        styleTable[NK_COLOR_TOGGLE_CURSOR] = gui.rgba(70, 70, 70, 255);
         styleTable[NK_COLOR_SELECT] = gui.rgba(190, 190, 190, 255);
         styleTable[NK_COLOR_SELECT_ACTIVE] = gui.rgba(175, 175, 175, 255);
         styleTable[NK_COLOR_SLIDER] = gui.rgba(190, 190, 190, 255);
@@ -137,7 +137,7 @@ class SceneApplication: Application
     
     override void onResize(int width, int height)
     {
-        view3d.resize(width - 300, height);
+        view3d.resize(width - 300, height - 40);
         view2d.resize(width, height);
     }
     
