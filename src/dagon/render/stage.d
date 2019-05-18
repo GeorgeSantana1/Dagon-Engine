@@ -59,8 +59,6 @@ class RenderStage: Owner
         state.reset();
         defaultShader = New!DefaultShader(this);
         defaultMaterial = New!Material(defaultShader, this);
-        defaultMaterial.depthWrite = false;
-        defaultMaterial.culling = false;
     }
 
     void update(Time t)
@@ -93,6 +91,7 @@ class RenderStage: Owner
             foreach(entity; group)
             {
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
+                state.normalMatrix = state.modelViewMatrix.inverse.transposed;
                 
                 if (entity.material)
                     entity.material.bind(&state);

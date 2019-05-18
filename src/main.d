@@ -273,6 +273,8 @@ class SceneApplication: Application
         stage3d = New!RenderStage(pipeline);
         stage2d = New!RenderStage(pipeline);
         stage2d.clear = false;
+        stage2d.defaultMaterial.depthWrite = false;
+        stage2d.defaultMaterial.culling = false;
         
         view3d = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
         stage3d.view = view3d;

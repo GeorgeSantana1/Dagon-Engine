@@ -57,6 +57,9 @@ class DefaultShader: Shader
     {
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
+        setParameter("normalMatrix", state.normalMatrix);
+        setParameter("viewMatrix", state.viewMatrix);
+        setParameter("invViewMatrix", state.invViewMatrix);
 
         super.bind(state);
     }
