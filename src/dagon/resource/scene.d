@@ -27,23 +27,129 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.resource.scene;
 
+import std.path;
+
 import dlib.core.memory;
 import dlib.core.ownership;
+import dagon.core.application;
 import dagon.core.bindings;
+import dagon.core.event;
+import dagon.core.time;
 import dagon.graphics.entity;
+import dagon.resource.asset;
+import dagon.resource.obj;
 
-class Scene: Owner
+class Scene: EventListener
 {
+    Application application;
+    AssetManager assetManager;
     EntityManager entityManager;
     EntityGroupSpatial spatial;
     EntityGroupHUD hud;
+    bool isLoading = false;
+    bool loaded = false;
     
-    this(Owner owner)
+    this(Application application)
     {
-        super(owner);
+        super(application.eventManager, application);
+        this.application = application;
         entityManager = New!EntityManager(this);
         spatial = New!EntityGroupSpatial(entityManager, this);
         hud = New!EntityGroupHUD(entityManager, this);
+        
+        assetManager = New!AssetManager(eventManager, this);
+        beforeLoad();
+        isLoading = true;
+        assetManager.loadThreadSafePart();
+    }
+    
+    // Set preload to true if you want to load the asset immediately
+    // before actual loading (e.g., to render a loading screen)
+    Asset addAsset(Asset asset, string filename, bool preload = false)
+    {
+        if (preload)
+            assetManager.preloadAsset(asset, filename);
+        else
+            assetManager.addAsset(asset, filename);
+        return asset;
+    }
+    
+    T add(T)(string filename, bool preload = false)
+    {
+        T asset;
+        if (assetManager.assetExists(filename))
+            asset = cast(T)assetManager.getAsset(filename);
+        else
+        {
+            asset = New!T(assetManager);
+            addAsset(asset, filename, preload);
+        }
+        return asset;
+    }
+    
+    auto add(string filename)(bool preload = false)
+    {
+        enum string ext = extension(filename);
+        static if (ext == ".obj")
+        {
+            return add!OBJAsset(filename, preload);
+        }
+        else
+        {
+            // TODO: generic file asset
+            static assert(0, "Unknown file type: " ~ filename);
+        }
+    }
+    
+    // Override me
+    void beforeLoad()
+    {
+    }
+    
+    // Override me
+    void onLoad(Time t, float progress)
+    {
+    }
+    
+    // Override me
+    void afterLoad()
+    {
+        
+    }
+    
+    // Override me
+    void onUpdate(Time t)
+    {
+    }
+    
+    import std.stdio;
+    
+    void update(Time t)
+    {        
+        if (isLoading)
+        {
+            onLoad(t, assetManager.nextLoadingPercentage);
+            isLoading = assetManager.isLoading;
+        }
+        else
+        {
+            if (!loaded)
+            {
+                assetManager.loadThreadUnsafePart();
+                writeln("Loaded");
+                loaded = true;
+                afterLoad();
+            }
+            
+            processEvents();
+            
+            onUpdate(t);
+            
+            foreach(e; entityManager.entities)
+            {
+                e.update(t);
+            }
+        }
     }
 }
 

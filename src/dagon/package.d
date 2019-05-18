@@ -60,6 +60,9 @@ public
     import dagon.render.stage;
     import dagon.render.view;
     
+    import dagon.resource.asset;
+    import dagon.resource.boxfs;
+    import dagon.resource.obj;
     import dagon.resource.scene;
     
     import dagon.ui.font;

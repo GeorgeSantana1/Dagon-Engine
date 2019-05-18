@@ -173,15 +173,12 @@ class EventManager
             writeln("Warning: event stack overflow");
     }
     
-    /*
-    // TODO: file change event
-    void generateAssetReloadEvent(Asset asset)
+    void generateFileChangeEvent(string filename)
     {
-        Event e = Event(EventType.AssetReload);
-        e.asset = asset;
+        Event e = Event(EventType.FileChange);
+        e.filename = filename;
         addUserEvent(e);
     }
-    */
 
     void addUserEvent(Event e)
     {

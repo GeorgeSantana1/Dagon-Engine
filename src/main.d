@@ -4,21 +4,16 @@ import std.stdio;
 
 import dagon;
 
-class SceneApplication: Application
+class MyScene: Scene
 {
-    Scene scene;
-    Cadencer cadencer;
-    RenderPipeline pipeline;
-    RenderStage stage3d;
-    RenderStage stage2d;
+    SceneApplication sceneApplication;
     
-    RenderView view3d;
-    RenderView view2d;
+    OBJAsset aSuzanne;
     
     Camera camera;
     FreeviewComponent freeview;
     
-    Entity box;   
+    Entity model;   
     float angle = 0.0f;
     
     FreeTypeFont font;
@@ -27,34 +22,34 @@ class SceneApplication: Application
     
     NuklearGUI gui;
     
-    this(string[] args)
+    this(SceneApplication app)
     {
-        super(1280, 720, false, "Dagon NG", args);
-        
-        scene = New!Scene(this);
-        cadencer = New!Cadencer(&fixedUpdate, 60, this);
-        pipeline = New!RenderPipeline(eventManager, this);
-        stage3d = New!RenderStage(pipeline, scene.spatial);
-        stage2d = New!RenderStage(pipeline, scene.hud);
-        stage2d.clear = false;
-        
-        view3d = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
-        stage3d.view = view3d;
-        camera = New!Camera(scene.entityManager);
+        super(app);
+        sceneApplication = app;
+    }
+    
+    override void beforeLoad()
+    {
+        aSuzanne = add!"data/suzanne.obj";
+    }
+
+    override void onLoad(Time t, float progress)
+    {
+    }
+    
+    override void afterLoad()
+    {
+        camera = New!Camera(entityManager);
         freeview = New!FreeviewComponent(eventManager, camera);
-        view3d.camera = camera;
+        sceneApplication.activeCamera = camera;
         
-        view2d = New!RenderView(0, 0, eventManager.windowWidth, eventManager.windowHeight, this);
-        view2d.ortho = true;
-        stage2d.view = view2d;
+        model = New!Entity(entityManager);
+        model.position = Vector3f(0, 0, 0);
+        model.drawable = aSuzanne.mesh; //New!ShapeBox(Vector3f(1, 1, 1), assetManager);
         
-        box = New!Entity(scene.entityManager);
-        box.position = Vector3f(0, 0, 0);
-        box.drawable = New!ShapeBox(Vector3f(1, 1, 1), this);
-        
-        gui = New!NuklearGUI(eventManager, this);
+        gui = New!NuklearGUI(eventManager, assetManager);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
-        auto eNuklear = New!Entity(scene.entityManager, -1);
+        auto eNuklear = New!Entity(entityManager, -1);
         eNuklear.drawable = gui;
         
         NKColor[] styleTable;
@@ -90,24 +85,22 @@ class SceneApplication: Application
         gui.styleFromTable(styleTable.ptr);
         Delete(styleTable);
         
-        font = New!FreeTypeFont(14, this);
+        font = New!FreeTypeFont(14, assetManager);
         font.createFromFile("data/font/DroidSans.ttf");
         font.prepareVAO();
-        text = New!Entity(scene.entityManager, -1);
-        infoText = New!TextLine(font, "Hello, World!", this);
+        text = New!Entity(entityManager, -1);
+        infoText = New!TextLine(font, "Hello, World!", assetManager);
         infoText.color = Color4f(0.27f, 0.27f, 0.27f, 1.0f);
         text.drawable = infoText;
         text.position.x = 10;
         text.position.y = eventManager.windowHeight - 10;
-        
-        maximizeWindow();
     }
     
     char[100] textBuffer;
     
-    void fixedUpdate(Time t)
+    override void onUpdate(Time t)
     {
-        box.rotation = rotationQuaternion!float(Axis.y, degtorad(angle));
+        model.rotation = rotationQuaternion!float(Axis.y, degtorad(angle));
         
         text.position.y = eventManager.windowHeight - 10;
         
@@ -116,35 +109,12 @@ class SceneApplication: Application
         infoText.setText(s);
         
         updateUserInterface(t);
-        
-        foreach(e; scene.entityManager.entities)
-        {
-            e.update(t);
-        }
-        
-        pipeline.update(t);
     }
-    
-    override void onUpdate(Time t)
-    {
-        cadencer.update(t);
-    }
-    
-    override void onRender()
-    {
-        pipeline.render();
-    }
-    
-    override void onResize(int width, int height)
-    {
-        view3d.resize(width - 300, height - 40);
-        view2d.resize(width, height);
-    }
-    
+
     override void onKeyDown(int key)
     {
         //if (key == KEY_ESCAPE)
-        //    exit();
+        //    application.exit();
         if (key == KEY_BACKSPACE)
             gui.inputKeyDown(NK_KEY_BACKSPACE);
         else if (key == KEY_C && eventManager.keyPressed[KEY_LCTRL])
@@ -205,7 +175,7 @@ class SceneApplication: Application
                     if (gui.menuItemLabel("New", NK_TEXT_LEFT)) { }
                     if (gui.menuItemLabel("Open", NK_TEXT_LEFT)) { }
                     if (gui.menuItemLabel("Save", NK_TEXT_LEFT)) { }
-                    if (gui.menuItemLabel("Exit", NK_TEXT_LEFT)) { exit(); }
+                    if (gui.menuItemLabel("Exit", NK_TEXT_LEFT)) { application.exit(); }
                     gui.menuEnd();
                 }
                     
@@ -274,6 +244,74 @@ class SceneApplication: Application
         }
         gui.end();
     }
+}
+
+class SceneApplication: Application
+{
+    Scene currentScene;
+    Cadencer cadencer;
+    RenderPipeline pipeline;
+    RenderStage stage3d;
+    RenderStage stage2d;
+    
+    RenderView view3d;
+    RenderView view2d;
+    
+    void activeCamera(Camera camera)
+    {
+        view3d.camera = camera;
+    }
+
+    this(string[] args)
+    {
+        super(1280, 720, false, "Dagon NG", args);
+        
+        cadencer = New!Cadencer(&fixedUpdate, 60, this);
+        
+        pipeline = New!RenderPipeline(eventManager, this);
+        
+        stage3d = New!RenderStage(pipeline);
+        stage2d = New!RenderStage(pipeline);
+        stage2d.clear = false;
+        
+        view3d = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
+        stage3d.view = view3d;
+        
+        view2d = New!RenderView(0, 0, eventManager.windowWidth, eventManager.windowHeight, this);
+        view2d.ortho = true;
+        stage2d.view = view2d;
+        
+        maximizeWindow();
+        
+        currentScene = New!MyScene(this);
+        stage3d.group = currentScene.spatial;
+        stage2d.group = currentScene.hud;
+    }
+    
+    char[100] textBuffer;
+    
+    void fixedUpdate(Time t)
+    {
+        currentScene.update(t);
+        pipeline.update(t);
+    }
+    
+    override void onUpdate(Time t)
+    {
+        cadencer.update(t);
+    }
+    
+    override void onRender()
+    {
+        pipeline.render();
+    }
+    
+    override void onResize(int width, int height)
+    {
+        view3d.resize(width - 300, height - 40);
+        view2d.resize(width, height);
+    }
+    
 }
 
 void main(string[] args)

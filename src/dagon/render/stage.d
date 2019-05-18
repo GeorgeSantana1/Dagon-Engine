@@ -50,7 +50,7 @@ class RenderStage: Owner
     DefaultShader defaultShader;
     bool clear = true;
     
-    this(RenderPipeline pipeline, EntityGroup group)
+    this(RenderPipeline pipeline, EntityGroup group = null)
     {
         super(pipeline);
         this.pipeline = pipeline;
