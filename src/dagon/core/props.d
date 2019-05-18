@@ -122,22 +122,6 @@ class Properties: Owner
         else
             return DProperty(DPropType.Undefined, "");
     }
-/*
-    DProperty opIndexAssign(DProperty v, string name)
-    {
-        if (name in props)
-        {
-            Delete(props[name].name);
-            Delete(props[name].data);
-            props[name] = v;
-        }
-        else
-        {
-            props[name] = v;
-        }
-        return v;
-    }
-*/
 
     void set(DPropType type, string name, string value)
     {
@@ -149,11 +133,9 @@ class Properties: Owner
             auto nameCopy = copyStr(name);
             auto valueCopy = copyStr(value);
             props[nameCopy] = DProperty(type, nameCopy, valueCopy);
-            //props[name] = v;
         }
         else
         {
-            //props[name] = v;
             auto nameCopy = copyStr(name);
             auto valueCopy = copyStr(value);
             props[nameCopy] = DProperty(type, nameCopy, valueCopy);
@@ -307,10 +289,6 @@ bool parseProperties(string input, Properties props)
                 break;
             }
             
-            //auto nameCopy = copyStr(propName);
-            //auto valueCopy = copyStr(propValue.data);
-
-            //props[nameCopy] = DProperty(propType, nameCopy, valueCopy);
             props.set(propType, propName, cast(string)propValue.data);
             
             expect = Expect.PropName;

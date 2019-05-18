@@ -53,9 +53,4 @@ class Camera: Entity
     {
         return absoluteTransformation;
     }
-
-    // TODO: pixel to ray
-    // TODO: point to pixel
-    // TODO: pixel visible
-    // TODO: extract frustum
 }

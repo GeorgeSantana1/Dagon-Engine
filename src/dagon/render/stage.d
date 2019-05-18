@@ -59,7 +59,7 @@ class RenderStage: Owner
         state.reset();
         defaultShader = New!DefaultShader(this);
         defaultMaterial = New!Material(defaultShader, this);
-		defaultMaterial.depthWrite = false;
+        defaultMaterial.depthWrite = false;
         defaultMaterial.culling = false;
     }
 

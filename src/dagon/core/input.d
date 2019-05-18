@@ -43,7 +43,6 @@ import dlib.text.unmanagedstring;
 import dagon.core.event;
 import dagon.core.bindings;
 import dagon.core.keycodes;
-//import dagon.resource.asset;
 import dagon.core.config;
 
 enum BindingType

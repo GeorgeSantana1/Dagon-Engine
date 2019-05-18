@@ -191,4 +191,3 @@ class Mesh: Owner, Drawable
         }
     }
 }
-

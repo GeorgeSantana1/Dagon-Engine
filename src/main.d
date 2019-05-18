@@ -24,9 +24,9 @@ class SceneApplication: Application
     FreeTypeFont font;
     Entity text;
     TextLine infoText;
-	
-	NuklearGUI gui;
-
+    
+    NuklearGUI gui;
+    
     this(string[] args)
     {
         super(1280, 720, false, "Dagon NG", args);
@@ -51,11 +51,11 @@ class SceneApplication: Application
         box = New!Entity(scene.entityManager);
         box.position = Vector3f(0, 0, 0);
         box.drawable = New!ShapeBox(Vector3f(1, 1, 1), this);
-		
-		gui = New!NuklearGUI(eventManager, this);
+        
+        gui = New!NuklearGUI(eventManager, this);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
         auto eNuklear = New!Entity(scene.entityManager, -1);
-		eNuklear.drawable = gui;
+        eNuklear.drawable = gui;
         
         font = New!FreeTypeFont(14, this);
         font.createFromFile("data/font/DroidSans.ttf");
@@ -81,9 +81,9 @@ class SceneApplication: Application
         uint n = sprintf(textBuffer.ptr, "FPS: %u", eventManager.fps);
         string s = cast(string)textBuffer[0..n];
         infoText.setText(s);
-		
-		updateUserInterface(t);
-    
+        
+        updateUserInterface(t);
+        
         foreach(e; scene.entityManager.entities)
         {
             e.update(t);
@@ -112,8 +112,8 @@ class SceneApplication: Application
     {
         if (key == KEY_ESCAPE)
             exit();
-		else if (key == KEY_BACKSPACE)
-			gui.inputKeyDown(NK_KEY_BACKSPACE);
+        else if (key == KEY_BACKSPACE)
+            gui.inputKeyDown(NK_KEY_BACKSPACE);
         else if (key == KEY_C && eventManager.keyPressed[KEY_LCTRL])
             gui.inputKeyDown(NK_KEY_COPY);
         else if (key == KEY_V && eventManager.keyPressed[KEY_LCTRL])
@@ -121,20 +121,20 @@ class SceneApplication: Application
         else if (key == KEY_A && eventManager.keyPressed[KEY_LCTRL])
             gui.inputKeyDown(NK_KEY_TEXT_SELECT_ALL);
     }
-	
-	override void onKeyUp(int key)
+    
+    override void onKeyUp(int key)
     {
         if (key == KEY_BACKSPACE)
             gui.inputKeyUp(NK_KEY_BACKSPACE);
-	}
-	
-	override void onMouseButtonDown(int button)
+    }
+    
+    override void onMouseButtonDown(int button)
     {
         gui.inputButtonDown(button);
         freeview.active = !gui.itemIsAnyActive();
-	}
-	
-	override void onMouseButtonUp(int button)
+    }
+    
+    override void onMouseButtonUp(int button)
     {
         gui.inputButtonUp(button);
     }
@@ -149,17 +149,17 @@ class SceneApplication: Application
         freeview.active = !gui.itemIsAnyActive();
         if (!freeview.active)
             gui.inputScroll(x, y);
-	}
-	
-	Color4f lightColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
-	float sunPitch = 0.0f;
-	float sunTurn = 0.0f;
+    }
+    
+    Color4f lightColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
+    float sunPitch = 0.0f;
+    float sunTurn = 0.0f;
     bool option;
     float value = 0.5f;
-	
-	void updateUserInterface(Time t)
-    { 
-		gui.update(t);
+    
+    void updateUserInterface(Time t)
+    {
+        gui.update(t);
         
         if (gui.begin("Menu", NKRect(0, 0, eventManager.windowWidth, 40), 0))
         {
@@ -195,7 +195,7 @@ class SceneApplication: Application
             gui.menubarEnd();
         }
         gui.end();
-		
+        
         if (gui.begin("Properties", NKRect(0, 40, 300, eventManager.windowHeight - 40), NK_WINDOW_TITLE))
         {
             if (gui.treePush(NK_TREE_NODE, "Sun", NK_MINIMIZED))
@@ -237,28 +237,11 @@ class SceneApplication: Application
                 static char[256] buffer = "test";
                 gui.layoutRowDynamic(35, 1);
                 gui.editString(NK_EDIT_FIELD, buffer.ptr, &len, 255, null);
-                //gui.layoutRowStatic(150, 150, 1);
-                //gui.image(aTexCrateDiffuse.texture.toNKImage);
-                //gui.layoutRowDynamic(35, 1);
                 gui.treePop();
             }
         }
         gui.end();
-
-        /*
-        if (gui.begin("Input and Texture", NKRect(1000, 100, 230, 200), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE))
-        {
-            static int len = 4;
-            static char[256] buffer = "test";
-            gui.layoutRowDynamic(35, 1);
-            gui.editString(NK_EDIT_SIMPLE, buffer.ptr, &len, 255, null);
-            gui.layoutRowStatic(150, 150, 1);
-            //gui.image(aTexCrateDiffuse.texture.toNKImage);
-            gui.layoutRowDynamic(35, 1);
-        }
-        gui.end();
-        */
-	}
+    }
 }
 
 void main(string[] args)

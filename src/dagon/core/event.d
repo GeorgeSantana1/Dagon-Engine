@@ -221,7 +221,7 @@ class EventManager
         if (joystick)
         {
             double a = cast(double)(SDL_JoystickGetAxis(joystick, axis));
-            return a / 32768.0f; //28000.0f;
+            return a / 32768.0f;
         }
         else if (controller)
         {
@@ -405,41 +405,7 @@ class EventManager
                         addEvent(e);
                     }
                     break;
-/*
-                case SDL_ACTIVEEVENT:
-                    if (event.active.state & SDL_APPACTIVE)
-                    {
-                        if (event.active.gain == 0)
-                        {
-                            writeln("Deactivated");
-                            windowFocused = false;
-                            e = Event(EventType.FocusLoss);
-                        }
-                        else
-                        {
-                            writeln("Activated");
-                            windowFocused = true;
-                            e = Event(EventType.FocusGain);
-                        }
-                    }
-                    else if (event.active.state & SDL_APPINPUTFOCUS)
-                    {
-                        if (event.active.gain == 0)
-                        {
-                            writeln("Lost focus");
-                            windowFocused = false;
-                            e = Event(EventType.FocusLoss);
-                        }
-                        else
-                        {
-                            writeln("Gained focus");
-                            windowFocused = true;
-                            e = Event(EventType.FocusGain);
-                        }
-                    }
-                    addEvent(e);
-                    break;
-*/
+
                 case SDL_QUIT:
                     exit();
                     e = Event(EventType.Quit);
@@ -486,8 +452,8 @@ class EventManager
 
     void setMouseToCenter()
     {
-        float x = (cast(float)windowWidth)/2;
-        float y = (cast(float)windowHeight)/2;
+        float x = (cast(float)windowWidth) / 2;
+        float y = (cast(float)windowHeight) / 2;
         setMouse(cast(int)x, cast(int)y);
     }
 

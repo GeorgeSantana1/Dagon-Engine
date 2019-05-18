@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2018 Timur Gafarov
+Copyright (c) 2017-2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -306,4 +306,3 @@ enum: ubyte
     MB_X1MASK = SDL_BUTTON!MB_X1,
     MB_X2MASK = SDL_BUTTON!MB_X2,
 }
-

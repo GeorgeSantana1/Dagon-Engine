@@ -102,4 +102,9 @@ class RenderView: Owner
         this.height = height;
         aspectRatio = cast(float)width / cast(float)height;
     }
+
+    // TODO: pixel to ray
+    // TODO: point to pixel
+    // TODO: pixel visible
+    // TODO: extract frustum
 }

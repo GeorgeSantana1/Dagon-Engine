@@ -325,7 +325,7 @@ final class FreeTypeFont: Font
         float x = 0.5f / texWidth + chWidth / texWidth;
         float y = 0.5f / texHeight + chHeight / texHeight;
 
-        Vector2f glyphPosition = Vector2f(shift + bitmapGlyph.left, -bitmapGlyph.top); //-(bitmapGlyph.top - bitmap.rows))
+        Vector2f glyphPosition = Vector2f(shift + bitmapGlyph.left, -bitmapGlyph.top);
         Vector2f glyphScale = Vector2f(bitmap.width, bitmap.rows);
         Vector2f glyphTexcoordScale = Vector2f(x, y);
 

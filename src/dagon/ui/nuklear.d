@@ -462,18 +462,18 @@ class NuklearGUI : Owner, Updateable, Drawable
             return fontDefaultGlyphRanges;
     }
 
-	/*
-	//TODO
+    /*
+    //TODO
     NKFont* addFont(FontAsset font, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)
     {
         return addFont(font.buffer.ptr, font.buffer.length, height, range);
     }
-	*/
+    */
 
     NKFont* addFont(string filename, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)
     {
-		import std.file;
-		ubyte[] buffer = cast(ubyte[])std.file.read(filename);
+        import std.file;
+        ubyte[] buffer = cast(ubyte[])std.file.read(filename);
         return addFont(buffer.ptr, buffer.length, height, range);
     }
 
