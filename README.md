@@ -22,7 +22,7 @@ Status:
 * [ ] Animated models
 * [x] Images
 * [x] Textures
-* [ ] Materials
+* [x] Materials, shaders
 * [ ] Cubemaps
 * [ ] Lights
 * [ ] Shadows
