@@ -40,6 +40,9 @@ import dagon.resource.asset;
 import dagon.resource.obj;
 import dagon.resource.image;
 import dagon.resource.texture;
+import dagon.resource.font;
+import dagon.resource.text;
+import dagon.resource.binary;
 
 class Scene: EventListener
 {
@@ -102,25 +105,71 @@ class Scene: EventListener
         return tex;
     }
     
-    T add(T)(string filename, bool preload = false)
+    version(NoFreetype)
     {
-        T asset;
+        pragma(msg, "Warning: Dagon is compiled without Freetype support, Scene.addFontAsset is not available");
+    }
+    else
+    {
+        FontAsset addFontAsset(string filename, uint height, bool preload = false)
+        {
+            FontAsset font;
+            if (assetManager.assetExists(filename))
+                font = cast(FontAsset)assetManager.getAsset(filename);
+            else
+            {
+                font = New!FontAsset(height, assetManager);
+                addAsset(font, filename, preload);
+            }
+            return font;
+        }
+    }
+
+    OBJAsset addOBJAsset(string filename, bool preload = false)
+    {
+        OBJAsset obj;
         if (assetManager.assetExists(filename))
-            asset = cast(T)assetManager.getAsset(filename);
+            obj = cast(OBJAsset)assetManager.getAsset(filename);
         else
         {
-            asset = New!T(assetManager);
-            addAsset(asset, filename, preload);
+            obj = New!OBJAsset(assetManager);
+            addAsset(obj, filename, preload);
         }
-        return asset;
+        return obj;
     }
     
-    auto add(string filename)(bool preload = false)
+    TextAsset addTextAsset(string filename, bool preload = false)
+    {
+        TextAsset text;
+        if (assetManager.assetExists(filename))
+            text = cast(TextAsset)assetManager.getAsset(filename);
+        else
+        {
+            text = New!TextAsset(assetManager);
+            addAsset(text, filename, preload);
+        }
+        return text;
+    }
+    
+    BinaryAsset addBinaryAsset(string filename, bool preload = false)
+    {
+        BinaryAsset bin;
+        if (assetManager.assetExists(filename))
+            bin = cast(BinaryAsset)assetManager.getAsset(filename);
+        else
+        {
+            bin = New!BinaryAsset(assetManager);
+            addAsset(bin, filename, preload);
+        }
+        return bin;
+    }
+    
+    auto add(string filename, float height = 12.0f)(bool preload = false)
     {
         enum string ext = extension(filename);
-        static if (ext == ".obj")
+        static if (ext == ".obj" || ext == ".OBJ")
         {
-            return add!OBJAsset(filename, preload);
+            return addOBJAsset(filename, preload);
         }
         else static if (
             ext == ".png" || ext == ".PNG" ||
@@ -132,10 +181,17 @@ class Scene: EventListener
         {
             return addTextureAsset(filename, preload);
         }
+        else static if (ext == ".ttf" || ext == ".TTF")
+        {
+            return addFontAsset(filename, height, preload);
+        }
+        else static if (ext == ".txt" || ext == ".TXT")
+        {
+            return addTextAsset(filename, preload);
+        }
         else
         {
-            // TODO: generic file asset
-            static assert(0, "Unknown file type: " ~ filename);
+            return addBinaryAsset(filename, preload);
         }
     }
     
