@@ -31,7 +31,7 @@ class MyScene: Scene
     
     override void beforeLoad()
     {
-        aSuzanne = add!"data/suzanne.obj";
+        aSuzanne = addOBJAsset("data/suzanne.obj");
         aHeightmap = addImageAsset("data/heightmap.png");
     }
 
@@ -41,20 +41,22 @@ class MyScene: Scene
     
     override void afterLoad()
     {
-        camera = New!Camera(entityManager);
+        camera = addCamera();
         freeview = New!FreeviewComponent(eventManager, camera);
         sceneApplication.activeCamera = camera;
         
-        model = New!Entity(entityManager);
+        model = addEntity();
         model.position = Vector3f(0, 0, 0);
-        //model.drawable = aSuzanne.mesh;
+        model.drawable = aSuzanne.mesh;
+        /*
         auto heightmap = New!ImageHeightmap(aHeightmap.image, 10.0f, assetManager);
         auto terrain = New!Terrain(128, 64, heightmap, assetManager);
         model.drawable = terrain;
+        */
         
         gui = New!NuklearGUI(eventManager, assetManager);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
-        auto eNuklear = New!Entity(entityManager, -1);
+        auto eNuklear = addEntityHUD();
         eNuklear.drawable = gui;
         
         NKColor[] styleTable;
@@ -93,7 +95,7 @@ class MyScene: Scene
         font = New!FreeTypeFont(14, assetManager);
         font.createFromFile("data/font/DroidSans.ttf");
         font.prepareVAO();
-        text = New!Entity(entityManager, -1);
+        text = addEntityHUD();
         infoText = New!TextLine(font, "Hello, World!", assetManager);
         infoText.color = Color4f(0.27f, 0.27f, 0.27f, 1.0f);
         text.drawable = infoText;
@@ -274,8 +276,8 @@ class SceneApplication: Application
         cadencer = New!Cadencer(&fixedUpdate, 60, this);
         
         pipeline = New!RenderPipeline(eventManager, this);
+        stage3d = New!DeferredGeometryStage(pipeline);
         
-        stage3d = New!RenderStage(pipeline);
         stage2d = New!RenderStage(pipeline);
         stage2d.clear = false;
         stage2d.defaultMaterial.depthWrite = false;
@@ -291,7 +293,7 @@ class SceneApplication: Application
         maximizeWindow();
         
         currentScene = New!MyScene(this);
-        stage3d.group = currentScene.spatial;
+        stage3d.group = currentScene.spatialOpaque;
         stage2d.group = currentScene.hud;
     }
     

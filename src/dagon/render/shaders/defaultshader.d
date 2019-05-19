@@ -25,7 +25,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.graphics.shaders.defaultshader;
+module dagon.render.shaders.defaultshader;
 
 import std.stdio;
 import std.math;

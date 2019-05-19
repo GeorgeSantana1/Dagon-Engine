@@ -36,6 +36,7 @@ import dagon.core.bindings;
 import dagon.core.event;
 import dagon.core.time;
 import dagon.graphics.entity;
+import dagon.graphics.camera;
 import dagon.resource.asset;
 import dagon.resource.obj;
 import dagon.resource.image;
@@ -50,6 +51,7 @@ class Scene: EventListener
     AssetManager assetManager;
     EntityManager entityManager;
     EntityGroupSpatial spatial;
+    EntityGroupSpatialOpaque spatialOpaque;
     EntityGroupHUD hud;
     bool isLoading = false;
     bool loaded = false;
@@ -60,6 +62,7 @@ class Scene: EventListener
         this.application = application;
         entityManager = New!EntityManager(this);
         spatial = New!EntityGroupSpatial(entityManager, this);
+        spatialOpaque = New!EntityGroupSpatialOpaque(entityManager, this);
         hud = New!EntityGroupHUD(entityManager, this);
         
         assetManager = New!AssetManager(eventManager, this);
@@ -164,35 +167,28 @@ class Scene: EventListener
         return bin;
     }
     
-    auto add(string filename, float height = 12.0f)(bool preload = false)
+    Entity addEntity(Entity parent = null)
     {
-        enum string ext = extension(filename);
-        static if (ext == ".obj" || ext == ".OBJ")
-        {
-            return addOBJAsset(filename, preload);
-        }
-        else static if (
-            ext == ".png" || ext == ".PNG" ||
-            ext == ".jpg" || ext == ".JPG" || 
-            ext == ".jpeg" || ext == ".JPEG" ||
-            ext == ".tga" || ext == ".TGA" || 
-            ext == ".bmp" || ext == ".BMP" || 
-            ext == ".hdr" || ext == ".HDR")
-        {
-            return addTextureAsset(filename, preload);
-        }
-        else static if (ext == ".ttf" || ext == ".TTF")
-        {
-            return addFontAsset(filename, height, preload);
-        }
-        else static if (ext == ".txt" || ext == ".TXT")
-        {
-            return addTextAsset(filename, preload);
-        }
-        else
-        {
-            return addBinaryAsset(filename, preload);
-        }
+        Entity e = New!Entity(entityManager);
+        if (parent)
+            e.setParent(parent);
+        return e;
+    }
+    
+    Entity addEntityHUD(Entity parent = null)
+    {
+        Entity e = New!Entity(entityManager, -1);
+        if (parent)
+            e.setParent(parent);
+        return e;
+    }
+    
+    Camera addCamera(Entity parent = null)
+    {
+        Camera c = New!Camera(entityManager);
+        if (parent)
+            c.setParent(parent);
+        return c;
     }
     
     // Override me
@@ -266,6 +262,38 @@ class EntityGroupSpatial: Owner, EntityGroup
             auto e = entities[i];
             if (e.layer >= 0)
             {
+                res = dg(e);
+                if (res)
+                    break;
+            }
+        }
+        return res;
+    }
+}
+
+class EntityGroupSpatialOpaque: Owner, EntityGroup
+{
+    EntityManager entityManager;
+
+    this(EntityManager entityManager, Owner owner)
+    {
+        super(owner);
+        this.entityManager = entityManager;
+    }
+
+    int opApply(scope int delegate(Entity) dg)
+    {
+        int res = 0;
+        auto entities = entityManager.entities.data;
+        for(size_t i = 0; i < entities.length; i++)
+        {
+            auto e = entities[i];
+            if (e.layer >= 0)
+            {
+                bool opaque = true;
+                if (e.material)
+                    opaque = !e.material.isTransparent;
+                    
                 res = dg(e);
                 if (res)
                     break;

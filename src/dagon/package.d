@@ -56,12 +56,13 @@ public
     import dagon.graphics.terrain;
     import dagon.graphics.texture;
     import dagon.graphics.updateable;
-    import dagon.graphics.shaders.defaultshader;
     
+    import dagon.render.deferred;
     import dagon.render.framebuffer;
     import dagon.render.pipeline;
     import dagon.render.stage;
     import dagon.render.view;
+    import dagon.render.shaders.defaultshader;
     
     import dagon.resource.asset;
     import dagon.resource.binary;

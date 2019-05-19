@@ -38,6 +38,8 @@ import dlib.image.color;
 import dagon.core.bindings;
 import dagon.graphics.camera;
 
+import dagon.render.pipeline;
+
 class RenderView: Owner
 {    
     Camera camera;
@@ -48,6 +50,7 @@ class RenderView: Owner
     float aspectRatio;
     bool ortho = false;
     Color4f backgroundColor;
+    RenderPipeline pipeline;
     
     this(uint x, uint y, uint width, uint height, Owner owner)
     {

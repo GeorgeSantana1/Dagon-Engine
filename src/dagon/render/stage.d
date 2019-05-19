@@ -36,10 +36,10 @@ import dagon.core.time;
 import dagon.graphics.entity;
 import dagon.graphics.material;
 import dagon.graphics.shader;
-import dagon.graphics.shaders.defaultshader;
 import dagon.graphics.state;
 import dagon.render.pipeline;
 import dagon.render.view;
+import dagon.render.shaders.defaultshader;
 
 class RenderStage: Owner
 {
@@ -109,7 +109,7 @@ class RenderStage: Owner
                     entity.drawable.render(&state);
                 
                 if (entity.material)
-                    entity.material.unbind(&state);
+                        entity.material.unbind(&state);
                 else
                     defaultMaterial.unbind(&state);
             }
