@@ -29,6 +29,7 @@ module dagon.render.view;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.math.vector;
 import dlib.math.matrix;
 import dlib.math.transformation;
 import dlib.math.utils;
@@ -94,6 +95,30 @@ class RenderView: Owner
             return orthoMatrix(0.0f, width, height, 0.0f, 0.0f, zFar);
         else
             return perspectiveMatrix(fov, aspectRatio, zNear, zFar);
+    }
+    
+    float zNear()
+    {
+        if (camera)
+            return camera.zNear;
+        else
+            return 0.01f;
+    }
+    
+    float zFar()
+    {
+        if (camera)
+            return camera.zFar;
+        else
+            return 1000.0f;
+    }
+    
+    Vector3f cameraPosition()
+    {
+        if (camera)
+            return camera.positionAbsolute;
+        else
+            return Vector3f(0.0f, 0.0f, 0.0f);
     }
     
     void resize(uint width, uint height)

@@ -190,6 +190,14 @@ class Entity: Owner, Updateable
         components.free();
     }
     
+    Vector3f positionAbsolute()
+    {
+        if (parent)
+            return position * parent.absoluteTransformation;
+        else
+            return position;
+    }
+    
     ~this()
     {
         release();

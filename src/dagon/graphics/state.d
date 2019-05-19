@@ -33,9 +33,12 @@ import dagon.graphics.material;
 import dagon.graphics.shader;
 
 struct State
-{
-    //Vector3f cameraPosition;
-    //Vector3f prevCameraPosition;
+{   
+    Vector2f resolution;
+    float zNear;
+    float zFar;
+    
+    Vector3f cameraPosition;
 
     Matrix4x4f modelViewMatrix;
 
@@ -59,6 +62,12 @@ struct State
     
     void reset()
     {
+        resolution = Vector2f(0.0f, 0.0f);
+        zNear = 0.0f;
+        zFar = 0.0f;
+    
+        cameraPosition = Vector3f(0.0f, 0.0f, 0.0f);
+    
         modelViewMatrix = Matrix4x4f.identity;
         
         modelMatrix = Matrix4x4f.identity;

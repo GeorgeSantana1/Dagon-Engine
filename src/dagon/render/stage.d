@@ -29,6 +29,7 @@ module dagon.render.stage;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.math.vector;
 
 import dagon.core.bindings;
 import dagon.core.time;
@@ -68,6 +69,12 @@ class RenderStage: Owner
             state.viewMatrix = view.viewMatrix();
             state.invViewMatrix = view.invViewMatrix();
             state.projectionMatrix = view.projectionMatrix();
+            
+            state.resolution = Vector2f(view.width, view.height);
+            state.zNear = view.zNear;
+            state.zFar = view.zFar;
+    
+            state.cameraPosition = view.cameraPosition;
         }
     }
     
