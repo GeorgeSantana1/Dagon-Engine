@@ -25,79 +25,47 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.graphics.state;
+module dagon.render.shaders.fallback;
 
+import std.stdio;
+import std.math;
+
+import dlib.core.memory;
+import dlib.core.ownership;
 import dlib.math.vector;
 import dlib.math.matrix;
+import dlib.math.transformation;
+import dlib.math.interpolation;
+import dlib.image.color;
 
 import dagon.core.bindings;
-import dagon.graphics.material;
 import dagon.graphics.shader;
+import dagon.graphics.state;
 
-struct State
-{   
-    Vector2f resolution;
-    float zNear;
-    float zFar;
-    
-    Vector3f cameraPosition;
+class FallbackShader: Shader
+{
+    string vs = import("Fallback.vs");
+    string fs = import("Fallback.fs");
 
-    Matrix4x4f modelViewMatrix;
-
-    Matrix4x4f modelMatrix;
-    Matrix4x4f invModelMatrix;
-
-    Matrix4x4f viewMatrix;
-    Matrix4x4f invViewMatrix;
-
-    Matrix4x4f viewRotationMatrix;
-    Matrix4x4f invViewRotationMatrix;
-
-    Matrix4x4f projectionMatrix;
-    Matrix4x4f invProjectionMatrix;
-    
-    Matrix4x4f normalMatrix;
-    
-    Material material;
-    Shader overrideShader;
-    
-    bool colorMask;
-    bool depthMask;
-    
-    GLuint colorTexture;
-    GLuint depthTexture;
-    
-    void reset()
+    this(Owner owner)
     {
-        resolution = Vector2f(0.0f, 0.0f);
-        zNear = 0.0f;
-        zFar = 0.0f;
-    
-        cameraPosition = Vector3f(0.0f, 0.0f, 0.0f);
-    
-        modelViewMatrix = Matrix4x4f.identity;
-        
-        modelMatrix = Matrix4x4f.identity;
-        invModelMatrix = Matrix4x4f.identity;
+        auto myProgram = New!ShaderProgram(vs, fs, this);
+        super(myProgram, owner);
+    }
 
-        viewMatrix = Matrix4x4f.identity;
-        invViewMatrix = Matrix4x4f.identity;
+    override void bind(State* state)
+    {
+        setParameter("modelViewMatrix", state.modelViewMatrix);
+        setParameter("projectionMatrix", state.projectionMatrix);
+        setParameter("normalMatrix", state.normalMatrix);
+        setParameter("viewMatrix", state.viewMatrix);
+        setParameter("invViewMatrix", state.invViewMatrix);
 
-        viewRotationMatrix = Matrix4x4f.identity;
-        invViewRotationMatrix = Matrix4x4f.identity;
+        super.bind(state);
+    }
 
-        projectionMatrix = Matrix4x4f.identity;
-        invProjectionMatrix = Matrix4x4f.identity;
-        
-        normalMatrix = Matrix4x4f.identity;
-        
-        material = null;
-        overrideShader = null;
-        
-        colorMask = true;
-        depthMask = true;
-        
-        colorTexture = 0;
-        depthTexture = 0;
+    override void unbind(State* state)
+    {
+        super.unbind(state);
     }
 }

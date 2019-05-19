@@ -47,12 +47,11 @@ class MyScene: Scene
         
         model = addEntity();
         model.position = Vector3f(0, 0, 0);
-        model.drawable = aSuzanne.mesh;
-        /*
+        //model.drawable = aSuzanne.mesh;
+
         auto heightmap = New!ImageHeightmap(aHeightmap.image, 10.0f, assetManager);
         auto terrain = New!Terrain(128, 64, heightmap, assetManager);
         model.drawable = terrain;
-        */
         
         gui = New!NuklearGUI(eventManager, assetManager);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
@@ -257,16 +256,20 @@ class SceneApplication: Application
 {
     Scene currentScene;
     Cadencer cadencer;
-    RenderPipeline pipeline;
-    RenderStage stage3d;
-    RenderStage stage2d;
     
-    RenderView view3d;
-    RenderView view2d;
+    RenderPipeline pipeline;
+    
+    DeferredGeometryStage stageGeom;
+    DeferredDebugOutputStage stageDebug;
+    RenderStage stageHUD;
+    
+    RenderView viewGeom;
+    RenderView viewDebug;
+    RenderView viewHUD;
     
     void activeCamera(Camera camera)
     {
-        view3d.camera = camera;
+        viewGeom.camera = camera;
     }
 
     this(string[] args)
@@ -276,25 +279,29 @@ class SceneApplication: Application
         cadencer = New!Cadencer(&fixedUpdate, 60, this);
         
         pipeline = New!RenderPipeline(eventManager, this);
-        stage3d = New!DeferredGeometryStage(pipeline);
         
-        stage2d = New!RenderStage(pipeline);
-        stage2d.clear = false;
-        stage2d.defaultMaterial.depthWrite = false;
-        stage2d.defaultMaterial.culling = false;
+        stageGeom = New!DeferredGeometryStage(pipeline);
+        viewGeom = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
+        stageGeom.view = viewGeom;
         
-        view3d = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
-        stage3d.view = view3d;
+        stageDebug = New!DeferredDebugOutputStage(pipeline, stageGeom);
+        viewDebug = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
+        viewDebug.ortho = true;
+        stageDebug.view = viewDebug;
         
-        view2d = New!RenderView(0, 0, eventManager.windowWidth, eventManager.windowHeight, this);
-        view2d.ortho = true;
-        stage2d.view = view2d;
+        stageHUD = New!RenderStage(pipeline);
+        stageHUD.clear = false;
+        stageHUD.defaultMaterial.depthWrite = false;
+        stageHUD.defaultMaterial.culling = false;
+        viewHUD = New!RenderView(0, 0, eventManager.windowWidth, eventManager.windowHeight, this);
+        viewHUD.ortho = true;
+        stageHUD.view = viewHUD;
         
         maximizeWindow();
         
         currentScene = New!MyScene(this);
-        stage3d.group = currentScene.spatialOpaque;
-        stage2d.group = currentScene.hud;
+        stageGeom.group = currentScene.spatialOpaque;
+        stageHUD.group = currentScene.hud;
     }
     
     char[100] textBuffer;
@@ -317,10 +324,10 @@ class SceneApplication: Application
     
     override void onResize(int width, int height)
     {
-        view3d.resize(width - 300, height - 40);
-        view2d.resize(width, height);
+        viewGeom.resize(width - 300, height - 40);
+        viewDebug.resize(width - 300, height - 40);
+        viewHUD.resize(width, height);
     }
-    
 }
 
 void main(string[] args)

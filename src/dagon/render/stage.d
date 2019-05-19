@@ -31,6 +31,7 @@ import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
 
+import dagon.core.event;
 import dagon.core.bindings;
 import dagon.core.time;
 import dagon.graphics.entity;
@@ -39,36 +40,39 @@ import dagon.graphics.shader;
 import dagon.graphics.state;
 import dagon.render.pipeline;
 import dagon.render.view;
-import dagon.render.shaders.defaultshader;
+import dagon.render.shaders.fallback;
 
-class RenderStage: Owner
+class RenderStage: EventListener
 {
     RenderPipeline pipeline;
     RenderView view;
     EntityGroup group;
     State state;
     Material defaultMaterial;
-    DefaultShader defaultShader;
+    FallbackShader defaultShader;
     bool clear = true;
     
     this(RenderPipeline pipeline, EntityGroup group = null)
     {
-        super(pipeline);
+        super(pipeline.eventManager, pipeline);
         this.pipeline = pipeline;
         this.group = group;
         pipeline.addStage(this);
         state.reset();
-        defaultShader = New!DefaultShader(this);
+        defaultShader = New!FallbackShader(this);
         defaultMaterial = New!Material(defaultShader, this);
     }
 
     void update(Time t)
     {
+        processEvents();
+    
         if (view)
         {
             state.viewMatrix = view.viewMatrix();
             state.invViewMatrix = view.invViewMatrix();
             state.projectionMatrix = view.projectionMatrix();
+            state.invProjectionMatrix = state.projectionMatrix.inverse;
             
             state.resolution = Vector2f(view.width, view.height);
             state.zNear = view.zNear;

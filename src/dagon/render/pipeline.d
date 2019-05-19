@@ -38,15 +38,13 @@ import dagon.core.time;
 import dagon.graphics.entity;
 import dagon.render.stage;
 
-class RenderPipeline: Owner
+class RenderPipeline: EventListener
 {
-    EventManager eventManager;
     DynamicArray!RenderStage stages;
     
     this(EventManager eventManager, Owner owner)
     {
-        super(owner);
-        this.eventManager = eventManager;
+        super(eventManager, owner);
     }
     
     ~this()
@@ -65,7 +63,9 @@ class RenderPipeline: Owner
     }
     
     void update(Time t)
-    {        
+    {
+        processEvents();
+        
         foreach(stage; stages.data)
         {
             stage.update(t);

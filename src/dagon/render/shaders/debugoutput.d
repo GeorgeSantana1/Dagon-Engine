@@ -25,7 +25,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.shaders.defaultshader;
+module dagon.render.shaders.debugoutput;
 
 import std.stdio;
 import std.math;
@@ -42,10 +42,10 @@ import dagon.core.bindings;
 import dagon.graphics.shader;
 import dagon.graphics.state;
 
-class DefaultShader: Shader
+class DebugOutputShader: Shader
 {
-    string vs = import("Default.vs");
-    string fs = import("Default.fs");
+    string vs = import("DebugOutput.vs");
+    string fs = import("DebugOutput.fs");
 
     this(Owner owner)
     {
@@ -55,11 +55,24 @@ class DefaultShader: Shader
 
     override void bind(State* state)
     {
-        setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
-        setParameter("normalMatrix", state.normalMatrix);
-        setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
+        setParameter("invProjectionMatrix", state.invProjectionMatrix);
+        setParameter("resolution", state.resolution);
+        setParameter("zNear", state.zNear);
+        setParameter("zFar", state.zFar);
+        
+        // Texture 0 - color buffer
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, state.colorTexture);
+        setParameter("colorBuffer", 0);
+        
+        // Texture 1 - depth buffer
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, state.depthTexture);
+        setParameter("depthBuffer", 1);
+        
+        glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
     }
@@ -67,5 +80,7 @@ class DefaultShader: Shader
     override void unbind(State* state)
     {
         super.unbind(state);
+        
+        // TODO: unbind textures
     }
 }

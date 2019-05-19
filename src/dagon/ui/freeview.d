@@ -202,18 +202,9 @@ class FreeviewComponent: EntityComponent
         entity.transformation = transform;
         entity.invTransformation = invTransform;
         
-        if (entity.parent)
-        {
-            entity.absoluteTransformation = entity.parent.absoluteTransformation * entity.transformation;
-            entity.invAbsoluteTransformation = entity.invTransformation * entity.parent.invAbsoluteTransformation;
-            entity.prevAbsoluteTransformation = entity.parent.prevAbsoluteTransformation * entity.prevTransformation;
-        }
-        else
-        {
-            entity.absoluteTransformation = entity.transformation;
-            entity.invAbsoluteTransformation = entity.invTransformation;
-            entity.prevAbsoluteTransformation = entity.prevTransformation;
-        }
+        entity.absoluteTransformation = entity.transformation;
+        entity.invAbsoluteTransformation = entity.invTransformation;
+        entity.prevAbsoluteTransformation = entity.prevTransformation;
     }
     
     void pitch(float theta)

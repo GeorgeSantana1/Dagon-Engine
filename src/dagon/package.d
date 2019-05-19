@@ -49,6 +49,7 @@ public
     import dagon.graphics.material;
     import dagon.graphics.mesh;
     import dagon.graphics.opensimplex;
+    import dagon.graphics.screensurface;
     import dagon.graphics.shader;
     import dagon.graphics.shaderloader;
     import dagon.graphics.shapes;
@@ -59,10 +60,12 @@ public
     
     import dagon.render.deferred;
     import dagon.render.framebuffer;
+    import dagon.render.gbuffer;
     import dagon.render.pipeline;
     import dagon.render.stage;
     import dagon.render.view;
-    import dagon.render.shaders.defaultshader;
+    import dagon.render.shaders.fallback;
+    import dagon.render.shaders.geometry;
     
     import dagon.resource.asset;
     import dagon.resource.binary;

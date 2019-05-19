@@ -27,28 +27,130 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.render.deferred;
 
+import std.stdio;
+
 import dlib.core.memory;
 import dlib.core.ownership;
 
+import dagon.core.bindings;
 import dagon.core.event;
 import dagon.graphics.entity;
+import dagon.graphics.screensurface;
 import dagon.render.pipeline;
 import dagon.render.stage;
-import dagon.render.shaders.geometryshader;
+import dagon.render.gbuffer;
+import dagon.render.shaders.geometry;
+import dagon.render.shaders.debugoutput;
 
 class DeferredGeometryStage: RenderStage
 {
-    // TODO: render to g-buffer instead of main framebuffer
-    
+    GBuffer gbuffer;
     GeometryShader geometryShader;
     
     this(RenderPipeline pipeline, EntityGroup group = null)
     {
         super(pipeline, group);
-        
         geometryShader = New!GeometryShader(this);        
         state.overrideShader = geometryShader;
     }
+    
+    override void onResize(int w, int h)
+    {
+        if (gbuffer && view)
+        {
+            writeln("gbuffer resize ", view.width, "x", view.height);
+            gbuffer.resize(view.width, view.height);
+        }
+    }
+    
+    override void render()
+    {
+        if (!gbuffer && view)
+        {
+            gbuffer = New!GBuffer(view.width, view.height, this);
+        }
+        
+        if (view && group)
+        {
+            gbuffer.bind();
+            
+            glScissor(0, 0, view.width, view.height);
+            glViewport(0, 0, view.width, view.height);
+             
+            glClearColor(
+                view.backgroundColor.r, 
+                view.backgroundColor.g,
+                view.backgroundColor.b,
+                view.backgroundColor.a);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            foreach(entity; group)
+            {
+                state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
+                state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+               
+                if (entity.material)
+                    entity.material.bind(&state);
+                else
+                    defaultMaterial.bind(&state);
+                
+                if (entity.drawable)
+                    entity.drawable.render(&state);
+                    
+                if (entity.material)
+                    entity.material.unbind(&state);
+                else
+                    defaultMaterial.unbind(&state);
+            }
+            
+            gbuffer.unbind();
+        }
+    }
 }
 
-// TODO: debug stage (g-buffer visualization)
+class DeferredDebugOutputStage: RenderStage
+{
+    DeferredGeometryStage geometryStage;
+    ScreenSurface screenSurface;
+    DebugOutputShader debugOutputShader;
+    
+    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    {
+        super(pipeline);
+        
+        this.geometryStage = geometryStage;
+        screenSurface = New!ScreenSurface(this);
+        debugOutputShader = New!DebugOutputShader(this);
+    }
+    
+    override void render()
+    {
+        if (view && geometryStage)
+        {
+            state.zNear = geometryStage.state.zNear;
+            state.zFar = geometryStage.state.zFar;
+            state.invViewMatrix = geometryStage.state.invViewMatrix;
+            state.invProjectionMatrix = geometryStage.state.invProjectionMatrix;
+            
+            state.colorTexture = geometryStage.gbuffer.colorTexture;
+            state.depthTexture = geometryStage.gbuffer.depthTexture;
+            
+            glScissor(view.x, view.y, view.width, view.height);
+            glViewport(view.x, view.y, view.width, view.height);
+            
+            glClearColor(
+                view.backgroundColor.r, 
+                view.backgroundColor.g,
+                view.backgroundColor.b,
+                view.backgroundColor.a);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            debugOutputShader.bind(&state);
+            screenSurface.render(&state);
+            debugOutputShader.unbind(&state);
+        }
+    }
+}
+
+// TODO: lighting stage
+
