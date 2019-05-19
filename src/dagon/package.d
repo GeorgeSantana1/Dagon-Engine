@@ -45,12 +45,15 @@ public
     import dagon.graphics.camera;
     import dagon.graphics.drawable;
     import dagon.graphics.entity;
+    import dagon.graphics.heightmap;
     import dagon.graphics.material;
     import dagon.graphics.mesh;
+    import dagon.graphics.opensimplex;
     import dagon.graphics.shader;
     import dagon.graphics.shaderloader;
     import dagon.graphics.shapes;
     import dagon.graphics.state;
+    import dagon.graphics.terrain;
     import dagon.graphics.texture;
     import dagon.graphics.updateable;
     import dagon.graphics.shaders.defaultshader;
@@ -64,6 +67,7 @@ public
     import dagon.resource.boxfs;
     import dagon.resource.obj;
     import dagon.resource.scene;
+    import dagon.resource.texture;
     
     import dagon.ui.font;
     import dagon.ui.freeview;

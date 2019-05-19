@@ -9,11 +9,12 @@ class MyScene: Scene
     SceneApplication sceneApplication;
     
     OBJAsset aSuzanne;
+    TextureAsset aHeightmap;
     
     Camera camera;
     FreeviewComponent freeview;
     
-    Entity model;   
+    Entity model;
     float angle = 0.0f;
     
     FreeTypeFont font;
@@ -31,6 +32,7 @@ class MyScene: Scene
     override void beforeLoad()
     {
         aSuzanne = add!"data/suzanne.obj";
+        aHeightmap = add!"data/heightmap.png";
     }
 
     override void onLoad(Time t, float progress)
@@ -45,7 +47,10 @@ class MyScene: Scene
         
         model = New!Entity(entityManager);
         model.position = Vector3f(0, 0, 0);
-        model.drawable = aSuzanne.mesh; //New!ShapeBox(Vector3f(1, 1, 1), assetManager);
+        //model.drawable = aSuzanne.mesh;
+        auto heightmap = New!ImageHeightmap(aHeightmap.texture.image, 10.0f, assetManager);
+        auto terrain = New!Terrain(128, 64, heightmap, assetManager);
+        model.drawable = terrain;
         
         gui = New!NuklearGUI(eventManager, assetManager);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);

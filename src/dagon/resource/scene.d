@@ -38,6 +38,7 @@ import dagon.core.time;
 import dagon.graphics.entity;
 import dagon.resource.asset;
 import dagon.resource.obj;
+import dagon.resource.texture;
 
 class Scene: EventListener
 {
@@ -74,6 +75,19 @@ class Scene: EventListener
         return asset;
     }
     
+    TextureAsset addTextureAsset(string filename, bool preload = false)
+    {
+        TextureAsset tex;
+        if (assetManager.assetExists(filename))
+            tex = cast(TextureAsset)assetManager.getAsset(filename);
+        else
+        {
+            tex = New!TextureAsset(assetManager.imageFactory, assetManager.hdrImageFactory, assetManager);
+            addAsset(tex, filename, preload);
+        }
+        return tex;
+    }
+    
     T add(T)(string filename, bool preload = false)
     {
         T asset;
@@ -93,6 +107,16 @@ class Scene: EventListener
         static if (ext == ".obj")
         {
             return add!OBJAsset(filename, preload);
+        }
+        else static if (
+            ext == ".png" || ext == ".PNG" ||
+            ext == ".jpg" || ext == ".JPG" || 
+            ext == ".jpeg" || ext == ".JPEG" ||
+            ext == ".tga" || ext == ".TGA" || 
+            ext == ".bmp" || ext == ".BMP" || 
+            ext == ".hdr" || ext == ".HDR")
+        {
+            return addTextureAsset(filename, preload);
         }
         else
         {
