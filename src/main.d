@@ -9,7 +9,7 @@ class MyScene: Scene
     SceneApplication sceneApplication;
     
     OBJAsset aSuzanne;
-    TextureAsset aHeightmap;
+    ImageAsset aHeightmap;
     
     Camera camera;
     FreeviewComponent freeview;
@@ -32,7 +32,7 @@ class MyScene: Scene
     override void beforeLoad()
     {
         aSuzanne = add!"data/suzanne.obj";
-        aHeightmap = add!"data/heightmap.png";
+        aHeightmap = addImageAsset("data/heightmap.png");
     }
 
     override void onLoad(Time t, float progress)
@@ -48,7 +48,7 @@ class MyScene: Scene
         model = New!Entity(entityManager);
         model.position = Vector3f(0, 0, 0);
         //model.drawable = aSuzanne.mesh;
-        auto heightmap = New!ImageHeightmap(aHeightmap.texture.image, 10.0f, assetManager);
+        auto heightmap = New!ImageHeightmap(aHeightmap.image, 10.0f, assetManager);
         auto terrain = New!Terrain(128, 64, heightmap, assetManager);
         model.drawable = terrain;
         

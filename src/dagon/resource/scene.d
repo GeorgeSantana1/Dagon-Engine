@@ -38,6 +38,7 @@ import dagon.core.time;
 import dagon.graphics.entity;
 import dagon.resource.asset;
 import dagon.resource.obj;
+import dagon.resource.image;
 import dagon.resource.texture;
 
 class Scene: EventListener
@@ -73,6 +74,19 @@ class Scene: EventListener
         else
             assetManager.addAsset(asset, filename);
         return asset;
+    }
+    
+    ImageAsset addImageAsset(string filename, bool preload = false)
+    {
+        ImageAsset img;
+        if (assetManager.assetExists(filename))
+            img = cast(ImageAsset)assetManager.getAsset(filename);
+        else
+        {
+            img = New!ImageAsset(assetManager.imageFactory, assetManager.hdrImageFactory, assetManager);
+            addAsset(img, filename, preload);
+        }
+        return img;
     }
     
     TextureAsset addTextureAsset(string filename, bool preload = false)

@@ -20,7 +20,7 @@ Status:
 * [ ] *.iqm
 * [ ] *.asset
 * [ ] Animated models
-* [ ] Images
+* [x] Images
 * [x] Textures
 * [ ] Materials
 * [ ] Cubemaps

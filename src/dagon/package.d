@@ -65,8 +65,10 @@ public
     
     import dagon.resource.asset;
     import dagon.resource.boxfs;
+    import dagon.resource.image;
     import dagon.resource.obj;
     import dagon.resource.scene;
+    import dagon.resource.text;
     import dagon.resource.texture;
     
     import dagon.ui.font;
