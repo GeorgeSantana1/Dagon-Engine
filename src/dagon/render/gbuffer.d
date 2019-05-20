@@ -42,9 +42,9 @@ class GBuffer: Owner
     GLuint framebuffer;
     GLuint colorTexture = 0;
     GLuint depthTexture = 0;
+    GLuint normalTexture = 0;
     //TODO:
     //GLuint pbrTexture = 0;
-    //GLuint normalTexture = 0;
     //GLuint velocityTexture = 0;
     //GLuint emissionTexture = 0;
     
@@ -81,13 +81,23 @@ class GBuffer: Owner
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, null);
         glBindTexture(GL_TEXTURE_2D, 0);
         
+        glGenTextures(1, &normalTexture);
+        glBindTexture(GL_TEXTURE_2D, normalTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, null);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
         glGenFramebuffers(1, &framebuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
         
-        GLenum[1] drawBuffers = [GL_COLOR_ATTACHMENT0];
-        glDrawBuffers(1, drawBuffers.ptr);
+        GLenum[2] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1];
+        glDrawBuffers(2, drawBuffers.ptr);
 
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -106,6 +116,9 @@ class GBuffer: Owner
         
         if (glIsTexture(depthTexture))
             glDeleteTextures(1, &depthTexture);
+            
+        if (glIsTexture(normalTexture))
+            glDeleteTextures(1, &normalTexture);
     }
     
     ~this()

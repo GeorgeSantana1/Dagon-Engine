@@ -77,11 +77,7 @@ class DeferredGeometryStage: RenderStage
             glScissor(0, 0, view.width, view.height);
             glViewport(0, 0, view.width, view.height);
              
-            glClearColor(
-                view.backgroundColor.r, 
-                view.backgroundColor.g,
-                view.backgroundColor.b,
-                view.backgroundColor.a);
+            glClearColor(0.0, 0.0, 0.0, 0.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
             foreach(entity; group)
@@ -113,6 +109,7 @@ class DeferredDebugOutputStage: RenderStage
     DeferredGeometryStage geometryStage;
     ScreenSurface screenSurface;
     DebugOutputShader debugOutputShader;
+    int outputMode = 3;
     
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
@@ -129,22 +126,25 @@ class DeferredDebugOutputStage: RenderStage
         {
             state.zNear = geometryStage.state.zNear;
             state.zFar = geometryStage.state.zFar;
+            state.viewMatrix = geometryStage.state.viewMatrix;
             state.invViewMatrix = geometryStage.state.invViewMatrix;
             state.invProjectionMatrix = geometryStage.state.invProjectionMatrix;
             
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
+            state.normalTexture = geometryStage.gbuffer.normalTexture;
             
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
             
             glClearColor(
-                view.backgroundColor.r, 
-                view.backgroundColor.g,
-                view.backgroundColor.b,
-                view.backgroundColor.a);
+                geometryStage.view.backgroundColor.r, 
+                geometryStage.view.backgroundColor.g,
+                geometryStage.view.backgroundColor.b,
+                geometryStage.view.backgroundColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
+            debugOutputShader.outputMode = outputMode;
             debugOutputShader.bind(&state);
             screenSurface.render(&state);
             debugOutputShader.unbind(&state);

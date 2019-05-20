@@ -10,6 +10,7 @@ class MyScene: Scene
     
     OBJAsset aSuzanne;
     ImageAsset aHeightmap;
+    TextureAsset aTexGrass;
     
     Camera camera;
     FreeviewComponent freeview;
@@ -33,6 +34,7 @@ class MyScene: Scene
     {
         aSuzanne = addOBJAsset("data/suzanne.obj");
         aHeightmap = addImageAsset("data/heightmap.png");
+        aTexGrass = addTextureAsset("data/grass.png");
     }
 
     override void onLoad(Time t, float progress)
@@ -43,14 +45,18 @@ class MyScene: Scene
     {
         camera = addCamera();
         freeview = New!FreeviewComponent(eventManager, camera);
+        freeview.zoom(-100);
         sceneApplication.activeCamera = camera;
         
         model = addEntity();
-        model.position = Vector3f(0, 0, 0);
+        model.position = Vector3f(-256, 0, -256);
         //model.drawable = aSuzanne.mesh;
+        model.material = New!Material(null, assetManager);
+        model.material.diffuse = aTexGrass.texture;
+        model.material.textureScale = Vector2f(10.0f, 10.0f);
 
-        auto heightmap = New!ImageHeightmap(aHeightmap.image, 10.0f, assetManager);
-        auto terrain = New!Terrain(128, 64, heightmap, assetManager);
+        auto heightmap = New!ImageHeightmap(aHeightmap.image, 30.0f, assetManager);
+        auto terrain = New!Terrain(512, 64, heightmap, assetManager);
         model.drawable = terrain;
         
         gui = New!NuklearGUI(eventManager, assetManager);
@@ -164,7 +170,7 @@ class MyScene: Scene
     float sunPitch = 0.0f;
     float sunTurn = 0.0f;
     bool option;
-    
+
     void updateUserInterface(Time t)
     {
         gui.update(t);
@@ -206,6 +212,16 @@ class MyScene: Scene
         
         if (gui.begin("Properties", NKRect(0, 40, 300, eventManager.windowHeight - 40), NK_WINDOW_TITLE))
         {
+            if (gui.treePush(NK_TREE_NODE, "Output Mode", NK_MAXIMIZED))
+            {
+                gui.layoutRowDynamic(30, 1);
+                
+                sceneApplication.outputMode = 
+                    gui.comboString("Color\0Normal\0Position\0Composite\0", sceneApplication.outputMode, 4, 25, NKVec2(260, 200));
+                gui.treePop();
+            }
+            
+        /*
             if (gui.treePush(NK_TREE_NODE, "Sun", NK_MINIMIZED))
             {
                 gui.layoutRowDynamic(30, 1);    
@@ -247,6 +263,7 @@ class MyScene: Scene
                 gui.editString(NK_EDIT_FIELD, buffer.ptr, &len, 255, null);
                 gui.treePop();
             }
+        */
         }
         gui.end();
     }
@@ -266,6 +283,8 @@ class SceneApplication: Application
     RenderView viewGeom;
     RenderView viewDebug;
     RenderView viewHUD;
+    
+    int outputMode = 3;
     
     void activeCamera(Camera camera)
     {
@@ -309,6 +328,7 @@ class SceneApplication: Application
     void fixedUpdate(Time t)
     {
         currentScene.update(t);
+        stageDebug.outputMode = outputMode;
         pipeline.update(t);
     }
     

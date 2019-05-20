@@ -46,6 +46,8 @@ class DebugOutputShader: Shader
 {
     string vs = import("DebugOutput.vs");
     string fs = import("DebugOutput.fs");
+    
+    int outputMode = 3;
 
     this(Owner owner)
     {
@@ -56,11 +58,15 @@ class DebugOutputShader: Shader
     override void bind(State* state)
     {
         setParameter("projectionMatrix", state.projectionMatrix);
+        
+        setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
         setParameter("invProjectionMatrix", state.invProjectionMatrix);
         setParameter("resolution", state.resolution);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
+        
+        setParameter("outputMode", outputMode);
         
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
@@ -71,6 +77,11 @@ class DebugOutputShader: Shader
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, state.depthTexture);
         setParameter("depthBuffer", 1);
+        
+        // Texture 2 - normal buffer
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, state.normalTexture);
+        setParameter("normalBuffer", 2);
         
         glActiveTexture(GL_TEXTURE0);
 
