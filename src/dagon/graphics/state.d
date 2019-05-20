@@ -42,20 +42,19 @@ struct State
     
     Vector3f cameraPosition;
 
-    Matrix4x4f modelViewMatrix;
-
     Matrix4x4f modelMatrix;
     Matrix4x4f invModelMatrix;
 
     Matrix4x4f viewMatrix;
     Matrix4x4f invViewMatrix;
 
-    Matrix4x4f viewRotationMatrix;
-    Matrix4x4f invViewRotationMatrix;
+    //Matrix4x4f viewRotationMatrix;
+    //Matrix4x4f invViewRotationMatrix;
 
     Matrix4x4f projectionMatrix;
     Matrix4x4f invProjectionMatrix;
     
+    Matrix4x4f modelViewMatrix;
     Matrix4x4f normalMatrix;
     
     Material material;
@@ -75,8 +74,6 @@ struct State
         zFar = 0.0f;
     
         cameraPosition = Vector3f(0.0f, 0.0f, 0.0f);
-    
-        modelViewMatrix = Matrix4x4f.identity;
         
         modelMatrix = Matrix4x4f.identity;
         invModelMatrix = Matrix4x4f.identity;
@@ -84,12 +81,13 @@ struct State
         viewMatrix = Matrix4x4f.identity;
         invViewMatrix = Matrix4x4f.identity;
 
-        viewRotationMatrix = Matrix4x4f.identity;
-        invViewRotationMatrix = Matrix4x4f.identity;
+        //viewRotationMatrix = Matrix4x4f.identity;
+        //invViewRotationMatrix = Matrix4x4f.identity;
 
         projectionMatrix = Matrix4x4f.identity;
         invProjectionMatrix = Matrix4x4f.identity;
         
+        modelViewMatrix = Matrix4x4f.identity;
         normalMatrix = Matrix4x4f.identity;
         
         material = null;

@@ -71,6 +71,7 @@ class RenderStage: EventListener
         {
             state.viewMatrix = view.viewMatrix();
             state.invViewMatrix = view.invViewMatrix();
+            
             state.projectionMatrix = view.projectionMatrix();
             state.invProjectionMatrix = state.projectionMatrix.inverse;
             

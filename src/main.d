@@ -281,7 +281,6 @@ class SceneApplication: Application
     RenderStage stageHUD;
     
     RenderView viewGeom;
-    RenderView viewDebug;
     RenderView viewHUD;
     
     int outputMode = 3;
@@ -304,9 +303,7 @@ class SceneApplication: Application
         stageGeom.view = viewGeom;
         
         stageDebug = New!DeferredDebugOutputStage(pipeline, stageGeom);
-        viewDebug = New!RenderView(300, 0, eventManager.windowWidth - 300, eventManager.windowHeight - 40, this);
-        viewDebug.ortho = true;
-        stageDebug.view = viewDebug;
+        stageDebug.view = viewGeom;
         
         stageHUD = New!RenderStage(pipeline);
         stageHUD.clear = false;
@@ -345,7 +342,6 @@ class SceneApplication: Application
     override void onResize(int width, int height)
     {
         viewGeom.resize(width - 300, height - 40);
-        viewDebug.resize(width - 300, height - 40);
         viewHUD.resize(width, height);
     }
 }
