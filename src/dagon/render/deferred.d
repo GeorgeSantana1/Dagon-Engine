@@ -151,6 +151,3 @@ class DeferredDebugOutputStage: RenderStage
         }
     }
 }
-
-// TODO: lighting stage
-

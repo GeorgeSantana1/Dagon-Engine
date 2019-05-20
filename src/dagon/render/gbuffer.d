@@ -43,10 +43,6 @@ class GBuffer: Owner
     GLuint colorTexture = 0;
     GLuint depthTexture = 0;
     GLuint normalTexture = 0;
-    //TODO:
-    //GLuint pbrTexture = 0;
-    //GLuint velocityTexture = 0;
-    //GLuint emissionTexture = 0;
     
     this(uint w, uint h, Owner owner)
     {

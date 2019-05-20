@@ -26,20 +26,14 @@ subroutine uniform srtColor diffuse;
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragNormal;
 
-//layout(location = 1) out vec4 fragPBR;
-//layout(location = 3) out vec4 fragVelocity;
-//layout(location = 4) out vec4 fragEmission;
-
 void main()
 {
     vec3 N = normalize(normal);
     vec4 diff = diffuse(texCoord);
     
-    // This is written to frag_color.w and frag_position.w
-    // and determines that the fragment belongs to foreground object.
-    // TODO: cutout alpha
-    const float geometryMask = 1.0;
+    if (diff.a < 1.0)
+        discard;
     
-    fragColor = vec4(diff.rgb, geometryMask);
+    fragColor = vec4(diff.rgb, 1.0);
     fragNormal = vec4(N, 0.0);
 }
