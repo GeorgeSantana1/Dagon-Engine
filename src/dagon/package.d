@@ -41,6 +41,11 @@ public
     import dagon.core.props;
     import dagon.core.time;
     import dagon.core.vfs;
+    
+    import dagon.game.deferredrenderer;
+    import dagon.game.game;
+    import dagon.game.hudrenderer;
+    import dagon.game.renderer;
 
     import dagon.graphics.camera;
     import dagon.graphics.drawable;

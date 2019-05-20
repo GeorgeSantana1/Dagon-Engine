@@ -124,6 +124,12 @@ class RenderView: Owner
             return Vector3f(0.0f, 0.0f, 0.0f);
     }
     
+    void setPosition(uint x, uint y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+    
     void resize(uint width, uint height)
     {
         this.width = width;

@@ -330,3 +330,4 @@ class EntityGroupHUD: Owner, EntityGroup
         return res;
     }
 }
+
