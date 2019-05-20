@@ -23,12 +23,11 @@ in vec2 texCoord;
 
 layout(location = 0) out vec4 fragColor;
 
-vec3 reconstructPosition(float depth)
+vec3 positionFromDepth(float depth)
 {
-    float x = texCoord.x * 2.0 - 1.0; 
-    float y = texCoord.y * 2.0 - 1.0; 
-    vec4 temp = invProjectionMatrix * vec4(x, y, depth, 1.0);
-    return temp.xyz / temp.w;
+    vec4 clipPos = vec4(vec3(texCoord, depth) * 2.0 - 1.0, 1.0);
+    vec4 res = invProjectionMatrix * clipPos;
+    return res.xyz / res.w;
 }
 
 void main()
@@ -42,8 +41,8 @@ void main()
 
     vec3 albedo = col.rgb;
     
-    float depth = 2.0 * texture(depthBuffer, texCoord).x - 1.0;
-    vec3 eyePos = reconstructPosition(depth);
+    float depth = texture(depthBuffer, texCoord).x;
+    vec3 eyePos = positionFromDepth(depth);
     vec3 worldPos = (invViewMatrix * vec4(eyePos, 1.0)).xyz;
     
     vec3 N = normalize(texture(normalBuffer, texCoord).rgb);
