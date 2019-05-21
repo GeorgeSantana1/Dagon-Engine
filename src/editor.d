@@ -101,40 +101,7 @@ class Editor: Scene
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
         auto eNuklear = addEntityHUD();
         eNuklear.drawable = gui;
-        
-        NKColor[] styleTable;
-        styleTable = New!(NKColor[])(NK_COLOR_COUNT);
-        styleTable[NK_COLOR_TEXT] = gui.rgba(70, 70, 70, 255);
-        styleTable[NK_COLOR_WINDOW] = gui.rgba(175, 175, 175, 255);
-        styleTable[NK_COLOR_HEADER] = gui.rgba(175, 175, 175, 255);
-        styleTable[NK_COLOR_BORDER] = gui.rgba(70, 70, 70, 255);
-        styleTable[NK_COLOR_BUTTON] = gui.rgba(185, 185, 185, 255);
-        styleTable[NK_COLOR_BUTTON_HOVER] = gui.rgba(170, 170, 170, 255);
-        styleTable[NK_COLOR_BUTTON_ACTIVE] = gui.rgba(160, 160, 160, 255);
-        styleTable[NK_COLOR_TOGGLE] = gui.rgba(190, 190, 190, 255);
-        styleTable[NK_COLOR_TOGGLE_HOVER] = gui.rgba(120, 120, 120, 255);
-        styleTable[NK_COLOR_TOGGLE_CURSOR] = gui.rgba(70, 70, 70, 255);
-        styleTable[NK_COLOR_SELECT] = gui.rgba(190, 190, 190, 255);
-        styleTable[NK_COLOR_SELECT_ACTIVE] = gui.rgba(175, 175, 175, 255);
-        styleTable[NK_COLOR_SLIDER] = gui.rgba(190, 190, 190, 255);
-        styleTable[NK_COLOR_SLIDER_CURSOR] = gui.rgba(80, 80, 80, 255);
-        styleTable[NK_COLOR_SLIDER_CURSOR_HOVER] = gui.rgba(70, 70, 70, 255);
-        styleTable[NK_COLOR_SLIDER_CURSOR_ACTIVE] = gui.rgba(60, 60, 60, 255);
-        styleTable[NK_COLOR_PROPERTY] = gui.rgba(190, 190, 190, 255);
-        styleTable[NK_COLOR_EDIT] = gui.rgba(150, 150, 150, 255);
-        styleTable[NK_COLOR_EDIT_CURSOR] = gui.rgba(0, 0, 0, 255);
-        styleTable[NK_COLOR_COMBO] = gui.rgba(175, 175, 175, 255);
-        styleTable[NK_COLOR_CHART] = gui.rgba(160, 160, 160, 255);
-        styleTable[NK_COLOR_CHART_COLOR] = gui.rgba(45, 45, 45, 255);
-        styleTable[NK_COLOR_CHART_COLOR_HIGHLIGHT] = gui.rgba( 255, 0, 0, 255);
-        styleTable[NK_COLOR_SCROLLBAR] = gui.rgba(180, 180, 180, 255);
-        styleTable[NK_COLOR_SCROLLBAR_CURSOR] = gui.rgba(140, 140, 140, 255);
-        styleTable[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = gui.rgba(150, 150, 150, 255);
-        styleTable[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = gui.rgba(160, 160, 160, 255);
-        styleTable[NK_COLOR_TAB_HEADER] = gui.rgba(180, 180, 180, 255);
-        gui.styleFromTable(styleTable.ptr);
-        Delete(styleTable);
-        
+
         font = New!FreeTypeFont(14, assetManager);
         font.createFromFile("data/font/DroidSans.ttf");
         font.prepareVAO();
@@ -229,7 +196,7 @@ class Editor: Scene
                     if (gui.menuItemLabel("Exit", NK_TEXT_LEFT)) { application.exit(); }
                     gui.menuEnd();
                 }
-                    
+                
                 if (gui.menuBeginLabel("Edit", NK_TEXT_LEFT, NKVec2(200, 200)))
                 {
                     gui.layoutRowDynamic(25, 1);
@@ -308,7 +275,7 @@ class Editor: Scene
                 gui.editString(NK_EDIT_FIELD, buffer.ptr, &len, 255, null);
                 gui.treePop();
             }
-        */
+            */
         }
         gui.end();
     }
