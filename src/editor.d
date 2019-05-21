@@ -41,6 +41,8 @@ class Editor: Scene
     Camera camera;
     FreeviewComponent freeview;
     
+    Light sun;
+    
     Entity eTerrain;
     Entity eModel;
     
@@ -50,6 +52,9 @@ class Editor: Scene
     
     NuklearGUI gui;
     Color4f envColor = Color4f(0.8f, 0.8f, 1.0f, 1.0f);
+    
+    float sunPitch = -45.0f;
+    float sunTurn = 0.0f;
     
     this(Game game)
     {
@@ -75,8 +80,7 @@ class Editor: Scene
         freeview.zoom(-100);
         game.renderer.activeCamera = camera;
         
-        auto sun = addLight(LightType.Sun);
-        sun.pitch(-45.0f);
+        sun = addLight(LightType.Sun);
         
         eTerrain = addEntity();
         eTerrain.position = Vector3f(-256, 0, -256);
@@ -146,8 +150,6 @@ class Editor: Scene
     
     override void onUpdate(Time t)
     {
-        //model.rotation = rotationQuaternion!float(Axis.y, degtorad(angle));
-        
         text.position.y = eventManager.windowHeight - 10;
         
         uint n = sprintf(textBuffer.ptr, "FPS: %u", eventManager.fps);
@@ -157,15 +159,19 @@ class Editor: Scene
         updateUserInterface(t);
         
         environment.backgroundColor = envColor;
-        environment.ambientColor = envColor * 0.5f;
+        environment.ambientColor = envColor * 0.25f;
         environment.fogColor = envColor;
+        
+        sun.rotation = 
+            rotationQuaternion!float(Axis.y, degtorad(sunTurn)) *
+            rotationQuaternion!float(Axis.x, degtorad(sunPitch));
     }
 
     override void onKeyDown(int key)
     {
         if (key == KEY_ESCAPE)
             application.exit();
-        if (key == KEY_BACKSPACE)
+        else if (key == KEY_BACKSPACE)
             gui.inputKeyDown(NK_KEY_BACKSPACE);
         else if (key == KEY_C && eventManager.keyPressed[KEY_LCTRL])
             gui.inputKeyDown(NK_KEY_COPY);
@@ -245,32 +251,36 @@ class Editor: Scene
         
         if (gui.begin("Properties", NKRect(0, 40, 300, eventManager.windowHeight - 40), NK_WINDOW_TITLE))
         {
-            if (gui.treePush(NK_TREE_NODE, "Output Mode", NK_MAXIMIZED))
+            if (gui.treePush(NK_TREE_NODE, "Render", NK_MAXIMIZED))
             {
                 gui.layoutRowDynamic(30, 1);
                 
                 game.renderer.outputMode = 
                     cast(DebugOutputMode)gui.comboString("Color\0Normal\0Position\0Radiance\0", game.renderer.outputMode, 4, 25, NKVec2(260, 200));
                     
-                gui.layoutRowDynamic(150, 1);
+                gui.treePop();
+            }
+            
+            if (gui.treePush(NK_TREE_NODE, "Environment", NK_MAXIMIZED))
+            {
+                gui.layoutRowDynamic(150, 1); 
                 envColor = gui.colorPicker(envColor, NK_RGB);
                 gui.layoutRowDynamic(25, 1);
                 envColor.r = gui.property("#R:", 0f, envColor.r, 1.0f, 0.01f, 0.005f);
                 envColor.g = gui.property("#G:", 0f, envColor.g, 1.0f, 0.01f, 0.005f);
                 envColor.b = gui.property("#B:", 0f, envColor.b, 1.0f, 0.01f, 0.005f);
-                    
+                
+                gui.layoutRowDynamic(25, 2);
+                gui.label("Sun pitch:", NK_TEXT_LEFT);
+                gui.slider(-180.0f, &sunPitch, 180.0f, 1.0f);
+                
+                gui.layoutRowDynamic(25, 2);
+                gui.label("Sun turn:", NK_TEXT_LEFT);
+                gui.slider(-180.0f, &sunTurn, 180.0f, 1.0f);
                 gui.treePop();
             }
             
-        /*
-            if (gui.treePush(NK_TREE_NODE, "Sun", NK_MINIMIZED))
-            {
-                gui.layoutRowDynamic(30, 1);    
-                sunPitch = gui.property("Pitch:", -180f, sunPitch, 0f, 1f, 0.5f);
-                sunTurn = gui.property("Turn:", -180f, sunTurn, 180f, 1f, 0.5f);
-                gui.treePop();
-            }
-                
+            /*
             if (gui.treePush(NK_TREE_NODE, "Options", NK_MINIMIZED))
             {
                 gui.layoutRowDynamic(30, 2);
