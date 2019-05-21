@@ -30,6 +30,7 @@ module dagon.render.stage;
 import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
+import dlib.image.color;
 
 import dagon.core.event;
 import dagon.core.bindings;
@@ -50,6 +51,7 @@ class RenderStage: EventListener
     State state;
     Material defaultMaterial;
     FallbackShader defaultShader;
+    bool active = true;
     bool clear = true;
     
     this(RenderPipeline pipeline, EntityGroup group = null)
@@ -92,11 +94,15 @@ class RenderStage: EventListener
                 
             if (clear)
             {
+                Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
+                if (state.environment)
+                    backgroundColor = state.environment.backgroundColor;
+                
                 glClearColor(
-                    view.backgroundColor.r, 
-                    view.backgroundColor.g,
-                    view.backgroundColor.b,
-                    view.backgroundColor.a);
+                    backgroundColor.r,
+                    backgroundColor.g,
+                    backgroundColor.b,
+                    backgroundColor.a);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             }
         

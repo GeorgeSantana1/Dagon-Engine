@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019 Timur Gafarov
+Copyright (c) 2017-2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -25,60 +25,26 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.pipeline;
+module dagon.graphics.environment;
 
-import dlib.core.memory;
 import dlib.core.ownership;
-import dlib.container.array;
-import dlib.math.matrix;
+import dlib.image.color;
 
-import dagon.core.bindings;
-import dagon.core.event;
-import dagon.core.time;
-import dagon.graphics.entity;
-import dagon.render.stage;
+import dagon.graphics.texture;
 
-class RenderPipeline: EventListener
+class Environment: Owner
 {
-    DynamicArray!RenderStage stages;
+    Color4f backgroundColor = Color4f(0.8f, 0.8f, 1.0f, 1.0f);
     
-    this(EventManager eventManager, Owner owner)
+    Color4f ambientColor = Color4f(0.8f, 0.8f, 1.0f, 1.0f);
+    Texture ambientMap;
+    
+    Color4f fogColor = Color4f(0.8f, 0.8f, 1.0f, 1.0f);
+    float fogStart = 0.0f;
+    float fogEnd = 1000.0f;
+    
+    this(Owner o)
     {
-        super(eventManager, owner);
-    }
-    
-    ~this()
-    {
-        stages.free();
-    }
-    
-    void addStage(RenderStage stage)
-    {
-        stages.append(stage);
-    }
-    
-    void removeStage(RenderStage stage)
-    {
-        stages.removeFirst(stage);
-    }
-    
-    void update(Time t)
-    {
-        processEvents();
-        
-        foreach(stage; stages.data)
-        {
-            if (stage.active)
-                stage.update(t);
-        }
-    }
-    
-    void render()
-    {   
-        foreach(stage; stages.data)
-        {
-            if (stage.active)
-                stage.render();
-        }
+        super(o);
     }
 }

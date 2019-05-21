@@ -25,7 +25,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.shaders.debugoutput;
+module dagon.render.shaders.environment;
 
 import std.stdio;
 import std.math;
@@ -41,14 +41,11 @@ import dlib.image.color;
 import dagon.core.bindings;
 import dagon.graphics.shader;
 import dagon.graphics.state;
-import dagon.render.deferred;
 
-class DebugOutputShader: Shader
+class EnvironmentShader: Shader
 {
-    string vs = import("DebugOutput.vs");
-    string fs = import("DebugOutput.fs");
-    
-    DebugOutputMode outputMode = DebugOutputMode.Radiance;
+    string vs = import("Environment.vs");
+    string fs = import("Environment.fs");
 
     this(Owner owner)
     {
@@ -58,16 +55,29 @@ class DebugOutputShader: Shader
 
     override void bind(State* state)
     {
-        setParameter("projectionMatrix", state.projectionMatrix);
-        
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
+        setParameter("projectionMatrix", state.projectionMatrix);
         setParameter("invProjectionMatrix", state.invProjectionMatrix);
         setParameter("resolution", state.resolution);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
         
-        setParameter("outputMode", cast(int)outputMode);
+        // Environment
+        if (state.environment)
+        {
+            setParameter("ambientColor", state.environment.ambientColor);
+            setParameter("fogColor", state.environment.fogColor);
+            setParameter("fogStart", state.environment.fogStart);
+            setParameter("fogEnd", state.environment.fogEnd);
+        }
+        else
+        {
+            setParameter("ambientColor", Color4f(0.5f, 0.5f, 0.5f, 1.0f));
+            setParameter("fogColor", Color4f(0.5f, 0.5f, 0.5f, 1.0f));
+            setParameter("fogStart", 0.0f);
+            setParameter("fogEnd", 1000.0f);
+        }
         
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);

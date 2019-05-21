@@ -39,9 +39,10 @@ import dagon.game.renderer;
 class DeferredRenderer: Renderer
 {
     DeferredGeometryStage stageGeom;
+    DeferredEnvironmentStage stageEnvironment;
     DeferredDebugOutputStage stageDebug;
     
-    int outputMode = 3;
+    DebugOutputMode outputMode = DebugOutputMode.Radiance;
     
     this(EventManager eventManager, Owner owner)
     {
@@ -50,17 +51,25 @@ class DeferredRenderer: Renderer
         stageGeom = New!DeferredGeometryStage(pipeline);
         stageGeom.view = view;
         
+        stageEnvironment = New!DeferredEnvironmentStage(pipeline, stageGeom);
+        stageEnvironment.view = view;
+        
         stageDebug = New!DeferredDebugOutputStage(pipeline, stageGeom);
         stageDebug.view = view;
+        stageDebug.active = false;
     }
     
     override void scene(Scene s)
     {
         stageGeom.group = s.spatialOpaque;
+        stageGeom.state.environment = s.environment;
+        stageEnvironment.state.environment = s.environment;
+        stageDebug.state.environment = s.environment;
     }
     
     override void update(Time t)
     {
+        stageDebug.active = (outputMode != DebugOutputMode.Radiance);
         stageDebug.outputMode = outputMode;
         super.update(t);
     }

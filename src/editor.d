@@ -41,14 +41,15 @@ class Editor: Scene
     Camera camera;
     FreeviewComponent freeview;
     
-    Entity model;
-    float angle = 0.0f;
+    Entity eTerrain;
+    Entity eModel;
     
     FreeTypeFont font;
     Entity text;
     TextLine infoText;
     
     NuklearGUI gui;
+    Color4f envColor = Color4f(0.8f, 0.8f, 1.0f, 1.0f);
     
     this(Game game)
     {
@@ -74,16 +75,20 @@ class Editor: Scene
         freeview.zoom(-100);
         game.renderer.activeCamera = camera;
         
-        model = addEntity();
-        model.position = Vector3f(-256, 0, -256);
-        //model.drawable = aSuzanne.mesh;
-        model.material = New!Material(null, assetManager);
-        model.material.diffuse = aTexGrass.texture;
-        model.material.textureScale = Vector2f(10.0f, 10.0f);
+        eTerrain = addEntity();
+        eTerrain.position = Vector3f(-256, 0, -256);
+        eTerrain.material = New!Material(null, assetManager);
+        eTerrain.material.diffuse = aTexGrass.texture;
+        eTerrain.material.textureScale = Vector2f(10.0f, 10.0f);
 
         auto heightmap = New!ImageHeightmap(aHeightmap.image, 30.0f, assetManager);
         auto terrain = New!Terrain(512, 64, heightmap, assetManager);
-        model.drawable = terrain;
+        eTerrain.drawable = terrain;
+        
+        eModel = addEntity();
+        eModel.position.y = 33.0f;
+        eModel.scaling = Vector3f(10.0f, 10.0f, 10.0f);
+        eModel.drawable = aSuzanne.mesh;
         
         gui = New!NuklearGUI(eventManager, assetManager);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
@@ -138,7 +143,7 @@ class Editor: Scene
     
     override void onUpdate(Time t)
     {
-        model.rotation = rotationQuaternion!float(Axis.y, degtorad(angle));
+        //model.rotation = rotationQuaternion!float(Axis.y, degtorad(angle));
         
         text.position.y = eventManager.windowHeight - 10;
         
@@ -147,12 +152,16 @@ class Editor: Scene
         infoText.setText(s);
         
         updateUserInterface(t);
+        
+        environment.backgroundColor = envColor;
+        environment.ambientColor = envColor;
+        environment.fogColor = envColor;
     }
 
     override void onKeyDown(int key)
     {
-        //if (key == KEY_ESCAPE)
-        //    application.exit();
+        if (key == KEY_ESCAPE)
+            application.exit();
         if (key == KEY_BACKSPACE)
             gui.inputKeyDown(NK_KEY_BACKSPACE);
         else if (key == KEY_C && eventManager.keyPressed[KEY_LCTRL])
@@ -191,11 +200,6 @@ class Editor: Scene
         if (!freeview.active)
             gui.inputScroll(x, y);
     }
-    
-    Color4f lightColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
-    float sunPitch = 0.0f;
-    float sunTurn = 0.0f;
-    bool option;
 
     void updateUserInterface(Time t)
     {
@@ -243,7 +247,15 @@ class Editor: Scene
                 gui.layoutRowDynamic(30, 1);
                 
                 game.renderer.outputMode = 
-                    gui.comboString("Color\0Normal\0Position\0Composite\0", game.renderer.outputMode, 4, 25, NKVec2(260, 200));
+                    cast(DebugOutputMode)gui.comboString("Color\0Normal\0Position\0Radiance\0", game.renderer.outputMode, 4, 25, NKVec2(260, 200));
+                    
+                gui.layoutRowDynamic(150, 1);
+                envColor = gui.colorPicker(envColor, NK_RGB);
+                gui.layoutRowDynamic(25, 1);
+                envColor.r = gui.property("#R:", 0f, envColor.r, 1.0f, 0.01f, 0.005f);
+                envColor.g = gui.property("#G:", 0f, envColor.g, 1.0f, 0.01f, 0.005f);
+                envColor.b = gui.property("#B:", 0f, envColor.b, 1.0f, 0.01f, 0.005f);
+                    
                 gui.treePop();
             }
             
@@ -267,12 +279,6 @@ class Editor: Scene
                 
             if (gui.treePush(NK_TREE_NODE, "Create Light", NK_MINIMIZED))
             {
-                gui.layoutRowDynamic(150, 1);
-                lightColor = gui.colorPicker(lightColor, NK_RGB);
-                gui.layoutRowDynamic(25, 1);
-                lightColor.r = gui.property("#R:", 0f, lightColor.r, 1.0f, 0.01f, 0.005f);
-                lightColor.g = gui.property("#G:", 0f, lightColor.g, 1.0f, 0.01f, 0.005f);
-                lightColor.b = gui.property("#B:", 0f, lightColor.b, 1.0f, 0.01f, 0.005f);
                 gui.layoutRowDynamic(25, 1);
                 if (gui.buttonLabel("Create"))
                 {

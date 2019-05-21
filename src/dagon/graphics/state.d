@@ -33,6 +33,7 @@ import dlib.math.matrix;
 import dagon.core.bindings;
 import dagon.graphics.material;
 import dagon.graphics.shader;
+import dagon.graphics.environment;
 
 struct State
 {   
@@ -48,9 +49,6 @@ struct State
     Matrix4x4f viewMatrix;
     Matrix4x4f invViewMatrix;
 
-    //Matrix4x4f viewRotationMatrix;
-    //Matrix4x4f invViewRotationMatrix;
-
     Matrix4x4f projectionMatrix;
     Matrix4x4f invProjectionMatrix;
     
@@ -59,6 +57,8 @@ struct State
     
     Material material;
     Shader overrideShader;
+    
+    Environment environment;
     
     bool colorMask;
     bool depthMask;
@@ -81,9 +81,6 @@ struct State
         viewMatrix = Matrix4x4f.identity;
         invViewMatrix = Matrix4x4f.identity;
 
-        //viewRotationMatrix = Matrix4x4f.identity;
-        //invViewRotationMatrix = Matrix4x4f.identity;
-
         projectionMatrix = Matrix4x4f.identity;
         invProjectionMatrix = Matrix4x4f.identity;
         
@@ -92,6 +89,8 @@ struct State
         
         material = null;
         overrideShader = null;
+        
+        environment = null;
         
         colorMask = true;
         depthMask = true;

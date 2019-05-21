@@ -11,12 +11,10 @@ uniform mat4 invProjectionMatrix;
 uniform float zNear;
 uniform float zFar;
 
-const vec3 sunDirection = normalize(vec3(1.0, 1.0, 1.0));
-
 // 0 - color
 // 1 - normal
 // 2 - position
-// 3 - composite
+// 3 - radiance
 uniform int outputMode;
 
 in vec2 texCoord;
@@ -45,19 +43,13 @@ void main()
     float depth = texture(depthBuffer, texCoord).x;
     vec3 eyePos = unproject(vec3(texCoord, depth));
     vec3 worldPos = (invViewMatrix * vec4(eyePos, 1.0)).xyz;
-    
     vec3 N = normalize(texture(normalBuffer, texCoord).rgb);
-    vec3 L = normalize((viewMatrix * vec4(sunDirection, 0.0)).xyz);
-    
-    float diffuse = max(0.0, dot(N, L));
-    vec3 composite = albedo * diffuse;
     
     float colorWeight = float(outputMode == 0);
     float normalWeight = float(outputMode == 1);
     float posWeight = float(outputMode == 2);
-    float compositeWeight = float(outputMode == 3);
 
-    vec3 output = albedo * colorWeight + N * normalWeight + eyePos * posWeight + composite * compositeWeight;
+    vec3 output = albedo * colorWeight + N * normalWeight + eyePos * posWeight;
     
     fragColor = vec4(output, 1.0);
 }

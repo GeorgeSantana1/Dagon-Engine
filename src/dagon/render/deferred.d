@@ -31,6 +31,7 @@ import std.stdio;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.core.event;
@@ -40,6 +41,7 @@ import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.gbuffer;
 import dagon.render.shaders.geometry;
+import dagon.render.shaders.environment;
 import dagon.render.shaders.debugoutput;
 
 class DeferredGeometryStage: RenderStage
@@ -103,17 +105,67 @@ class DeferredGeometryStage: RenderStage
     }
 }
 
+class DeferredEnvironmentStage: RenderStage
+{
+    DeferredGeometryStage geometryStage;
+    ScreenSurface screenSurface;
+    EnvironmentShader environmentShader;
+    
+    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    {
+        super(pipeline);
+        this.geometryStage = geometryStage;
+        screenSurface = New!ScreenSurface(this);
+        environmentShader = New!EnvironmentShader(this);
+    }
+    
+    override void render()
+    {
+        if (view && geometryStage)
+        {
+            state.colorTexture = geometryStage.gbuffer.colorTexture;
+            state.depthTexture = geometryStage.gbuffer.depthTexture;
+            state.normalTexture = geometryStage.gbuffer.normalTexture;
+            
+            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
+            if (state.environment)
+                backgroundColor = state.environment.backgroundColor;
+            
+            glScissor(view.x, view.y, view.width, view.height);
+            glViewport(view.x, view.y, view.width, view.height);
+            
+            glClearColor(
+                backgroundColor.r, 
+                backgroundColor.g,
+                backgroundColor.b,
+                backgroundColor.a);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            environmentShader.bind(&state);
+            screenSurface.render(&state);
+            environmentShader.unbind(&state);
+        }
+    }
+}
+
+enum DebugOutputMode: int
+{
+    Color = 0,
+    Normal = 1,
+    Position = 2,
+    Radiance = 3
+}
+
 class DeferredDebugOutputStage: RenderStage
 {
     DeferredGeometryStage geometryStage;
     ScreenSurface screenSurface;
     DebugOutputShader debugOutputShader;
-    int outputMode = 3;
+    DebugOutputMode outputMode = DebugOutputMode.Radiance;
     
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
         super(pipeline);
-        
         this.geometryStage = geometryStage;
         screenSurface = New!ScreenSurface(this);
         debugOutputShader = New!DebugOutputShader(this);
@@ -127,14 +179,18 @@ class DeferredDebugOutputStage: RenderStage
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
             
+            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
+            if (state.environment)
+                backgroundColor = state.environment.backgroundColor;
+            
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
             
             glClearColor(
-                view.backgroundColor.r, 
-                view.backgroundColor.g,
-                view.backgroundColor.b,
-                view.backgroundColor.a);
+                backgroundColor.r, 
+                backgroundColor.g,
+                backgroundColor.b,
+                backgroundColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
             debugOutputShader.outputMode = outputMode;

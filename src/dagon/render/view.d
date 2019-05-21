@@ -33,7 +33,6 @@ import dlib.math.vector;
 import dlib.math.matrix;
 import dlib.math.transformation;
 import dlib.math.utils;
-import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.graphics.camera;
@@ -49,7 +48,6 @@ class RenderView: Owner
     uint height;
     float aspectRatio;
     bool ortho = false;
-    Color4f backgroundColor;
     RenderPipeline pipeline;
     
     this(uint x, uint y, uint width, uint height, Owner owner)
@@ -60,7 +58,6 @@ class RenderView: Owner
         this.width = width;
         this.height = height;
         aspectRatio = cast(float)width / cast(float)height;
-        backgroundColor = Color4f(0.5f, 0.5f, 0.5f, 1.0f);
     }
     
     ~this()

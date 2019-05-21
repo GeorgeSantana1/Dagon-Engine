@@ -37,6 +37,7 @@ import dagon.core.event;
 import dagon.core.time;
 import dagon.graphics.entity;
 import dagon.graphics.camera;
+import dagon.graphics.environment;
 import dagon.resource.asset;
 import dagon.resource.obj;
 import dagon.resource.image;
@@ -53,6 +54,7 @@ class Scene: EventListener
     EntityGroupSpatial spatial;
     EntityGroupSpatialOpaque spatialOpaque;
     EntityGroupHUD hud;
+    Environment environment;
     bool isLoading = false;
     bool loaded = false;
     
@@ -64,6 +66,8 @@ class Scene: EventListener
         spatial = New!EntityGroupSpatial(entityManager, this);
         spatialOpaque = New!EntityGroupSpatialOpaque(entityManager, this);
         hud = New!EntityGroupHUD(entityManager, this);
+        
+        environment = New!Environment(this);
         
         assetManager = New!AssetManager(eventManager, this);
         beforeLoad();

@@ -50,6 +50,7 @@ public
     import dagon.graphics.camera;
     import dagon.graphics.drawable;
     import dagon.graphics.entity;
+    import dagon.graphics.environment;
     import dagon.graphics.heightmap;
     import dagon.graphics.material;
     import dagon.graphics.mesh;
@@ -69,6 +70,7 @@ public
     import dagon.render.pipeline;
     import dagon.render.stage;
     import dagon.render.view;
+    import dagon.render.shaders.environment;
     import dagon.render.shaders.fallback;
     import dagon.render.shaders.geometry;
     
