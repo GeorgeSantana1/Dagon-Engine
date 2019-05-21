@@ -34,6 +34,7 @@ import dagon.core.bindings;
 import dagon.graphics.material;
 import dagon.graphics.shader;
 import dagon.graphics.environment;
+import dagon.graphics.light;
 
 struct State
 {   
@@ -59,6 +60,7 @@ struct State
     Shader overrideShader;
     
     Environment environment;
+    Light light;
     
     bool colorMask;
     bool depthMask;
@@ -91,6 +93,7 @@ struct State
         overrideShader = null;
         
         environment = null;
+        light = null;
         
         colorMask = true;
         depthMask = true;

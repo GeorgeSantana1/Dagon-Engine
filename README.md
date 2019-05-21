@@ -24,7 +24,7 @@ Status:
 * [x] Textures
 * [x] Materials, shaders
 * [ ] Cubemaps
-* [ ] Lights
+* [x] Lights
 * [ ] Shadows
 * [x] Terrain
 * [ ] Sky

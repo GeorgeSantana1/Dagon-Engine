@@ -37,6 +37,7 @@ import dagon.core.event;
 import dagon.core.time;
 import dagon.graphics.entity;
 import dagon.graphics.camera;
+import dagon.graphics.light;
 import dagon.graphics.environment;
 import dagon.resource.asset;
 import dagon.resource.obj;
@@ -54,6 +55,7 @@ class Scene: EventListener
     EntityGroupSpatial spatial;
     EntityGroupSpatialOpaque spatialOpaque;
     EntityGroupHUD hud;
+    EntityGroupLights lights;
     Environment environment;
     bool isLoading = false;
     bool loaded = false;
@@ -66,6 +68,7 @@ class Scene: EventListener
         spatial = New!EntityGroupSpatial(entityManager, this);
         spatialOpaque = New!EntityGroupSpatialOpaque(entityManager, this);
         hud = New!EntityGroupHUD(entityManager, this);
+        lights = New!EntityGroupLights(entityManager, this);
         
         environment = New!Environment(this);
         
@@ -193,6 +196,15 @@ class Scene: EventListener
         if (parent)
             c.setParent(parent);
         return c;
+    }
+    
+    Light addLight(LightType type, Entity parent = null)
+    {
+        Light light = New!Light(entityManager);
+        if (parent)
+            light.setParent(parent);
+        light.type = type;
+        return light;
     }
     
     // Override me
@@ -335,3 +347,30 @@ class EntityGroupHUD: Owner, EntityGroup
     }
 }
 
+class EntityGroupLights: Owner, EntityGroup
+{
+    EntityManager entityManager;
+
+    this(EntityManager entityManager, Owner owner)
+    {
+        super(owner);
+        this.entityManager = entityManager;
+    }
+
+    int opApply(scope int delegate(Entity) dg)
+    {
+        int res = 0;
+        auto entities = entityManager.entities.data;
+        for(size_t i = 0; i < entities.length; i++)
+        {
+            auto e = entities[i];
+            if (cast(Light)e)
+            {
+                res = dg(e);
+                if (res)
+                    break;
+            }
+        }
+        return res;
+    }
+}

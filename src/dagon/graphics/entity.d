@@ -33,6 +33,7 @@ import dlib.math.vector;
 import dlib.math.matrix;
 import dlib.math.quaternion;
 import dlib.math.transformation;
+import dlib.math.utils;
 
 import dagon.core.bindings;
 import dagon.core.event;
@@ -196,6 +197,126 @@ class Entity: Owner, Updateable
             return position * parent.absoluteTransformation;
         else
             return position;
+    }
+    
+    void translate(Vector3f v)
+    {
+        position += v;
+    }
+
+    void translate(float vx, float vy, float vz)
+    {
+        position += Vector3f(vx, vy, vz);
+    }
+
+    void move(float speed)
+    {
+        position += transformation.forward * speed;
+    }
+
+    void moveToPoint(Vector3f p, float speed)
+    {
+        Vector3f dir = (p - position).normalized;
+        float d = distance(p, position);
+        if (d > speed)
+            position += dir * speed;
+        else
+            position += dir * d;
+    }
+
+    void strafe(float speed)
+    {
+        position += transformation.right * speed;
+    }
+
+    void lift(float speed)
+    {
+        position += transformation.up * speed;
+    }
+
+    /*
+    void rotate(Vector3f angles)
+    {
+        this.angles += angles;
+    }
+
+    void rotate(float pitch, float turn, float roll)
+    {
+        this.angles += Vector3f(pitch, turn, roll);
+    }
+    */
+
+    void pitch(float angle)
+    {
+        //angles.x += angle;
+        rotation *= rotationQuaternion!float(Axis.x, degtorad(angle));
+    }
+
+    void turn(float angle)
+    {
+        //angles.y += angle;
+        rotation *= rotationQuaternion!float(Axis.y, degtorad(angle));
+    }
+
+    void roll(float angle)
+    {
+        //angles.z += angle;
+        rotation *= rotationQuaternion!float(Axis.z, degtorad(angle));
+    }
+    
+    void scale(float s)
+    {
+        scaling += Vector3f(s, s, s);
+    }
+    
+    void scale(Vector3f s)
+    {
+        scaling += s;
+    }
+    
+    void scaleX(float s)
+    {
+        scaling.x += s;
+    }
+    
+    void scaleY(float s)
+    {
+        scaling.y += s;
+    }
+    
+    void scaleZ(float s)
+    {
+        scaling.z += s;
+    }
+
+    Vector3f direction() @property
+    {
+        return transformation.forward;
+    }
+
+    Vector3f right() @property
+    {
+        return transformation.right;
+    }
+
+    Vector3f up() @property
+    {
+        return transformation.up;
+    }
+    
+    Vector3f directionAbsolute() @property
+    {
+        return absoluteTransformation.forward;
+    }
+
+    Vector3f rightAbsolute() @property
+    {
+        return absoluteTransformation.right;
+    }
+
+    Vector3f upAbsolute() @property
+    {
+        return absoluteTransformation.up;
     }
     
     ~this()

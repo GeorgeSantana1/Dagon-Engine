@@ -52,6 +52,7 @@ public
     import dagon.graphics.entity;
     import dagon.graphics.environment;
     import dagon.graphics.heightmap;
+    import dagon.graphics.light;
     import dagon.graphics.material;
     import dagon.graphics.mesh;
     import dagon.graphics.opensimplex;
@@ -73,6 +74,7 @@ public
     import dagon.render.shaders.environment;
     import dagon.render.shaders.fallback;
     import dagon.render.shaders.geometry;
+    import dagon.render.shaders.sunlight;
     
     import dagon.resource.asset;
     import dagon.resource.binary;

@@ -75,6 +75,9 @@ class Editor: Scene
         freeview.zoom(-100);
         game.renderer.activeCamera = camera;
         
+        auto sun = addLight(LightType.Sun);
+        sun.pitch(-45.0f);
+        
         eTerrain = addEntity();
         eTerrain.position = Vector3f(-256, 0, -256);
         eTerrain.material = New!Material(null, assetManager);
@@ -154,7 +157,7 @@ class Editor: Scene
         updateUserInterface(t);
         
         environment.backgroundColor = envColor;
-        environment.ambientColor = envColor;
+        environment.ambientColor = envColor * 0.5f;
         environment.fogColor = envColor;
     }
 

@@ -40,6 +40,7 @@ class DeferredRenderer: Renderer
 {
     DeferredGeometryStage stageGeom;
     DeferredEnvironmentStage stageEnvironment;
+    DeferredLightStage stageLight;
     DeferredDebugOutputStage stageDebug;
     
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
@@ -54,6 +55,9 @@ class DeferredRenderer: Renderer
         stageEnvironment = New!DeferredEnvironmentStage(pipeline, stageGeom);
         stageEnvironment.view = view;
         
+        stageLight = New!DeferredLightStage(pipeline, stageGeom);
+        stageLight.view = view;
+        
         stageDebug = New!DeferredDebugOutputStage(pipeline, stageGeom);
         stageDebug.view = view;
         stageDebug.active = false;
@@ -62,8 +66,11 @@ class DeferredRenderer: Renderer
     override void scene(Scene s)
     {
         stageGeom.group = s.spatialOpaque;
+        stageLight.group = s.lights;
+        
         stageGeom.state.environment = s.environment;
         stageEnvironment.state.environment = s.environment;
+        stageLight.state.environment = s.environment;
         stageDebug.state.environment = s.environment;
     }
     

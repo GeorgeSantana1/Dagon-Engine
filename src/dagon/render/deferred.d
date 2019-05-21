@@ -37,11 +37,13 @@ import dagon.core.bindings;
 import dagon.core.event;
 import dagon.graphics.entity;
 import dagon.graphics.screensurface;
+import dagon.graphics.light;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.gbuffer;
 import dagon.render.shaders.geometry;
 import dagon.render.shaders.environment;
+import dagon.render.shaders.sunlight;
 import dagon.render.shaders.debugoutput;
 
 class DeferredGeometryStage: RenderStage
@@ -144,6 +146,53 @@ class DeferredEnvironmentStage: RenderStage
             environmentShader.bind(&state);
             screenSurface.render(&state);
             environmentShader.unbind(&state);
+        }
+    }
+}
+
+class DeferredLightStage: RenderStage
+{
+    DeferredGeometryStage geometryStage;
+    ScreenSurface screenSurface;
+    SunLightShader sunLightShader;
+    
+    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    {
+        super(pipeline);
+        this.geometryStage = geometryStage;
+        screenSurface = New!ScreenSurface(this);
+        sunLightShader = New!SunLightShader(this);
+    }
+    
+    override void render()
+    {
+        if (group && view && geometryStage)
+        {
+            state.colorTexture = geometryStage.gbuffer.colorTexture;
+            state.depthTexture = geometryStage.gbuffer.depthTexture;
+            state.normalTexture = geometryStage.gbuffer.normalTexture;
+            
+            glScissor(view.x, view.y, view.width, view.height);
+            glViewport(view.x, view.y, view.width, view.height);
+            
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            
+            foreach(entity; group)
+            {
+                Light light = cast(Light)entity;
+                state.light = light;            
+                
+                if (light.type == LightType.Sun)
+                {
+                    sunLightShader.bind(&state);
+                    screenSurface.render(&state);
+                    sunLightShader.unbind(&state);
+                }
+                // TODO: other light types
+            }
+            
+            glDisable(GL_BLEND);
         }
     }
 }
