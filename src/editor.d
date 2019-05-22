@@ -107,7 +107,7 @@ class Editor: Scene
         font.prepareVAO();
         text = addEntityHUD();
         infoText = New!TextLine(font, "Hello, World!", assetManager);
-        infoText.color = Color4f(0.27f, 0.27f, 0.27f, 1.0f);
+        infoText.color = Color4f(0.6f, 0.6f, 0.6f, 1.0f);
         text.drawable = infoText;
         text.position.x = 10;
         text.position.y = eventManager.windowHeight - 10;
