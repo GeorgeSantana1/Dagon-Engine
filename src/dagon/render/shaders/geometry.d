@@ -39,6 +39,7 @@ import dlib.math.interpolation;
 import dlib.image.color;
 
 import dagon.core.bindings;
+import dagon.graphics.material;
 import dagon.graphics.shader;
 import dagon.graphics.state;
 
@@ -56,7 +57,10 @@ class GeometryShader: Shader
     override void bind(State* state)
     {
         auto idiffuse = "diffuse" in state.material.inputs;
+        auto inormal = "normal" in state.material.inputs;
+        auto iheight = "height" in state.material.inputs;
         auto itextureScale = "textureScale" in state.material.inputs;
+        auto iparallax = "parallax" in state.material.inputs;
         
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
@@ -65,6 +69,12 @@ class GeometryShader: Shader
         setParameter("invViewMatrix", state.invViewMatrix);
         
         setParameter("textureScale", itextureScale.asVector2f);
+        
+        int parallaxMethod = iparallax.asInteger;
+        if (parallaxMethod > ParallaxOcclusionMapping)
+            parallaxMethod = ParallaxOcclusionMapping;
+        if (parallaxMethod < 0)
+            parallaxMethod = 0;
         
         // Diffuse
         if (idiffuse.texture)
@@ -80,6 +90,73 @@ class GeometryShader: Shader
             setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseColorValue");
         }
         
+        // Normal/height
+        bool haveHeightMap = inormal.texture !is null;
+        if (haveHeightMap)
+            haveHeightMap = inormal.texture.image.channels == 4;
+
+        if (!haveHeightMap)
+        {
+            if (inormal.texture is null)
+            {
+                if (iheight.texture !is null) // we have height map, but no normal map
+                {
+                    Color4f color = Color4f(0.5f, 0.5f, 1.0f, 0.0f); // default normal pointing upwards
+                    inormal.texture = state.material.makeTexture(color, iheight.texture);
+                    haveHeightMap = true;
+                }
+            }
+            else
+            {
+                if (iheight.texture !is null) // we have both normal and height maps
+                {
+                    inormal.texture = state.material.makeTexture(inormal.texture, iheight.texture);
+                    haveHeightMap = true;
+                }
+            }
+        }
+
+        if (inormal.texture)
+        {
+            setParameter("normalTexture", 1);
+            setParameterSubroutine("normal", ShaderType.Fragment, "normalMap");
+
+            glActiveTexture(GL_TEXTURE1);
+            inormal.texture.bind();
+        }
+        else
+        {
+            setParameter("normalVector", state.material.normal.asVector3f);
+            setParameterSubroutine("normal", ShaderType.Fragment, "normalValue");
+        }
+
+        // Height and parallax
+
+        // TODO: make these material properties
+        float parallaxScale = 0.03f;
+        float parallaxBias = -0.01f;
+        setParameter("parallaxScale", parallaxScale);
+        setParameter("parallaxBias", parallaxBias);
+
+        if (haveHeightMap)
+        {
+            setParameterSubroutine("height", ShaderType.Fragment, "heightMap");
+        }
+        else
+        {
+            float h = 0.0f; //-parallaxBias / parallaxScale;
+            setParameter("heightScalar", h);
+            setParameterSubroutine("height", ShaderType.Fragment, "heightValue");
+            parallaxMethod = ParallaxNone;
+        }
+
+        if (parallaxMethod == ParallaxSimple)
+            setParameterSubroutine("parallax", ShaderType.Fragment, "parallaxSimple");
+        else if (parallaxMethod == ParallaxOcclusionMapping)
+            setParameterSubroutine("parallax", ShaderType.Fragment, "parallaxOcclusionMapping");
+        else
+            setParameterSubroutine("parallax", ShaderType.Fragment, "parallaxNone");
+        
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -88,5 +165,13 @@ class GeometryShader: Shader
     override void unbind(State* state)
     {
         super.unbind(state);
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glActiveTexture(GL_TEXTURE0);
     }
 }

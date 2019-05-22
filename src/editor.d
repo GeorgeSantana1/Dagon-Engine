@@ -36,7 +36,8 @@ class Editor: Scene
     
     OBJAsset aSuzanne;
     ImageAsset aHeightmap;
-    TextureAsset aTexGrass;
+    TextureAsset aTexDesert;
+    TextureAsset aTexDesertNormal;
     
     Camera camera;
     FreeviewComponent freeview;
@@ -66,7 +67,8 @@ class Editor: Scene
     {
         aSuzanne = addOBJAsset("data/suzanne.obj");
         aHeightmap = addImageAsset("data/heightmap.png");
-        aTexGrass = addTextureAsset("data/grass.png");
+        aTexDesert = addTextureAsset("data/desert-albedo.png");
+        aTexDesertNormal = addTextureAsset("data/desert-normal.png");
     }
 
     override void onLoad(Time t, float progress)
@@ -85,8 +87,9 @@ class Editor: Scene
         eTerrain = addEntity();
         eTerrain.position = Vector3f(-256, 0, -256);
         eTerrain.material = New!Material(null, assetManager);
-        eTerrain.material.diffuse = aTexGrass.texture;
         eTerrain.material.textureScale = Vector2f(10.0f, 10.0f);
+        eTerrain.material.diffuse = aTexDesert.texture;
+        eTerrain.material.normal = aTexDesertNormal.texture;
 
         auto heightmap = New!ImageHeightmap(aHeightmap.image, 30.0f, assetManager);
         auto terrain = New!Terrain(512, 64, heightmap, assetManager);
