@@ -106,7 +106,7 @@ class CascadedShadowMap: ShadowMap
     
     float projectionSize1 = 5.0f;
     float projectionSize2 = 30.0f;
-    float projectionSize3 = 400.0f;
+    float projectionSize3 = 200.0f;
     float zStart = -300.0f;
     float zEnd = 300.0f;
     
