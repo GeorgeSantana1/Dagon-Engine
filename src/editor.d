@@ -90,6 +90,7 @@ class Editor: Scene
         
         sun = addLight(LightType.Sun);
         sun.position.y = 50.0f;
+        sun.shadowEnabled = true;
         
         eTerrain = addEntity();
         eTerrain.position = Vector3f(-64, 0, -64);

@@ -86,7 +86,7 @@ class Light: Entity
     
     ShadowMap shadowMap()
     {
-        if (_shadowMap is null)
+        if (_shadowMap is null && shadowEnabled)
         {
             //if (type == LightType.Sun)
             _shadowMap = New!CascadedShadowMap(this, this);

@@ -138,11 +138,14 @@ class ShadowStage: RenderStage
                 Light light = cast(Light)entity;
                 if (light && camera)
                 {
-                    CascadedShadowMap csm = cast(CascadedShadowMap)light.shadowMap;
-                    
-                    if (csm)
-                        csm.camera = camera;
-                    light.shadowMap.update(t);
+                    if (light.shadowEnabled)
+                    {
+                        CascadedShadowMap csm = cast(CascadedShadowMap)light.shadowMap;
+                        
+                        if (csm)
+                            csm.camera = camera;
+                        light.shadowMap.update(t);
+                    }
                 }
             }
         }
@@ -157,11 +160,14 @@ class ShadowStage: RenderStage
                 Light light = cast(Light)entity;
                 if (light)
                 {
-                    state.light = light;
-                    CascadedShadowMap csm = cast(CascadedShadowMap)light.shadowMap;
-                    
-                    if (light.type == LightType.Sun && csm)
-                        renderCSM(csm);
+                    if (light.shadowEnabled)
+                    {
+                        state.light = light;
+                        CascadedShadowMap csm = cast(CascadedShadowMap)light.shadowMap;
+                        
+                        if (light.type == LightType.Sun && csm)
+                            renderCSM(csm);
+                    }
                 }
             }
         }
@@ -170,6 +176,7 @@ class ShadowStage: RenderStage
     void renderEntities()
     {
         foreach(entity; group)
+        if (entity.castShadow)
         {
             state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
             state.normalMatrix = state.modelViewMatrix.inverse.transposed;
