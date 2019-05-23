@@ -58,6 +58,7 @@ class Editor: Scene
     float sunPitch = -45.0f;
     float sunTurn = 0.0f;
     
+    Color4f diffuseColor;
     float roughness = 0.5f;
     float metallic = 0.0f;
     
@@ -106,6 +107,7 @@ class Editor: Scene
         eModel.scaling = Vector3f(10.0f, 10.0f, 10.0f);
         eModel.drawable = aSuzanne.mesh;
         eModel.material = New!Material(null, assetManager);
+        diffuseColor = Color4f(0.5f, 0.5f, 0.5f, 1.0f);
         
         gui = New!NuklearGUI(eventManager, assetManager);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
@@ -142,7 +144,8 @@ class Editor: Scene
         sun.rotation = 
             rotationQuaternion!float(Axis.y, degtorad(sunTurn)) *
             rotationQuaternion!float(Axis.x, degtorad(sunPitch));
-        
+            
+        eModel.material.diffuse = diffuseColor;
         eModel.material.roughness = roughness;
         eModel.material.metallic = metallic;
     }
@@ -243,9 +246,9 @@ class Editor: Scene
                 gui.treePop();
             }
             
-            if (gui.treePush(NK_TREE_NODE, "Environment", NK_MAXIMIZED))
+            if (gui.treePush(NK_TREE_NODE, "Environment", NK_MINIMIZED))
             {
-                gui.layoutRowDynamic(150, 1); 
+                gui.layoutRowDynamic(180, 1); 
                 envColor = gui.colorPicker(envColor, NK_RGB);
                 gui.layoutRowDynamic(25, 1);
                 envColor.r = gui.property("#R:", 0f, envColor.r, 1.0f, 0.01f, 0.005f);
@@ -264,6 +267,13 @@ class Editor: Scene
             
             if (gui.treePush(NK_TREE_NODE, "Material", NK_MAXIMIZED))
             {
+                gui.layoutRowDynamic(180, 1); 
+                diffuseColor = gui.colorPicker(diffuseColor, NK_RGB);
+                gui.layoutRowDynamic(25, 1);
+                diffuseColor.r = gui.property("#R:", 0f, diffuseColor.r, 1.0f, 0.01f, 0.005f);
+                diffuseColor.g = gui.property("#G:", 0f, diffuseColor.g, 1.0f, 0.01f, 0.005f);
+                diffuseColor.b = gui.property("#B:", 0f, diffuseColor.b, 1.0f, 0.01f, 0.005f);
+                
                 gui.layoutRowDynamic(30, 2);
                 gui.label("Roughness:", NK_TEXT_LEFT);
                 gui.slider(0.0f, &roughness, 1.0f, 0.01f);
