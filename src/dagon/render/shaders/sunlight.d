@@ -41,16 +41,20 @@ import dlib.image.color;
 import dagon.core.bindings;
 import dagon.graphics.shader;
 import dagon.graphics.state;
+import dagon.graphics.csm;
 
 class SunLightShader: Shader
 {
     string vs = import("SunLight.vert.glsl");
     string fs = import("SunLight.frag.glsl");
+    
+    Matrix4x4f defaultShadowMatrix;
 
     this(Owner owner)
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        defaultShadowMatrix = Matrix4x4f.identity;
     }
 
     override void bind(State* state)
@@ -119,6 +123,28 @@ class SunLightShader: Shader
         glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
         setParameter("pbrBuffer", 3);
         
+        // Texture 4 - shadow map
+        if (state.light)
+        {
+            CascadedShadowMap csm = cast(CascadedShadowMap)state.light.shadowMap;
+            if (csm)
+            {
+                glActiveTexture(GL_TEXTURE4);
+                glBindTexture(GL_TEXTURE_2D_ARRAY, csm.depthTexture);
+                setParameter("shadowTextureArray", 4);
+                setParameter("shadowResolution", cast(float)csm.resolution);
+                setParameter("shadowMatrix1", csm.area1.shadowMatrix);
+                setParameter("shadowMatrix2", csm.area2.shadowMatrix);
+                setParameter("shadowMatrix3", csm.area3.shadowMatrix);
+                setParameterSubroutine("shadowMap", ShaderType.Fragment, "shadowMapCascaded");
+            }
+            else
+            {
+                setParameter("shadowMatrix", defaultShadowMatrix);
+                setParameterSubroutine("shadowMap", ShaderType.Fragment, "shadowMapNone");
+            }
+        }
+        
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -139,6 +165,9 @@ class SunLightShader: Shader
         
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
         
         glActiveTexture(GL_TEXTURE0);
     }

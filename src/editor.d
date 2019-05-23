@@ -89,9 +89,10 @@ class Editor: Scene
         game.renderer.activeCamera = camera;
         
         sun = addLight(LightType.Sun);
+        sun.position.y = 50.0f;
         
         eTerrain = addEntity();
-        eTerrain.position = Vector3f(-256, 0, -256);
+        eTerrain.position = Vector3f(-64, 0, -64);
         eTerrain.material = New!Material(null, assetManager);
         eTerrain.material.textureScale = Vector2f(10.0f, 10.0f);
         eTerrain.material.diffuse = aTexDesertAlbedo.texture;
@@ -101,10 +102,11 @@ class Editor: Scene
         auto heightmap = New!ImageHeightmap(aHeightmap.image, 30.0f, assetManager);
         auto terrain = New!Terrain(512, 64, heightmap, assetManager);
         eTerrain.drawable = terrain;
+        eTerrain.scaling = Vector3f(0.25f, 0.25f, 0.25f);
         
         eModel = addEntity();
-        eModel.position.y = 33.0f;
-        eModel.scaling = Vector3f(10.0f, 10.0f, 10.0f);
+        eModel.position.y = 7.0f;
+        eModel.scaling = Vector3f(1.0f, 1.0f, 1.0f);
         eModel.drawable = aSuzanne.mesh;
         eModel.material = New!Material(null, assetManager);
         diffuseColor = Color4f(0.5f, 0.5f, 0.5f, 1.0f);
@@ -174,6 +176,8 @@ class Editor: Scene
     {
         gui.inputButtonDown(button);
         freeview.active = !gui.itemIsAnyActive();
+        freeview.prevMouseX = eventManager.mouseX;
+        freeview.prevMouseY = eventManager.mouseY;
     }
     
     override void onMouseButtonUp(int button)

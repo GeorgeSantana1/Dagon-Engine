@@ -458,9 +458,13 @@ class Material: Owner
             glBlendFunci(2, GL_SRC_ALPHA, GL_ONE);
         }
 
-        if (iculling.asBool)
+        if (iculling.asBool && state.culling)
         {
             glEnable(GL_CULL_FACE);
+        }
+        else
+        {
+            glDisable(GL_CULL_FACE);
         }
 
         if (!icolorWrite.asBool || !state.colorMask)

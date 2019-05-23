@@ -193,10 +193,15 @@ class Entity: Owner, Updateable
     
     Vector3f positionAbsolute()
     {
+        return absoluteTransformation.translation;
+    }
+    
+    Quaternionf rotationAbsolute()
+    {
         if (parent)
-            return position * parent.absoluteTransformation;
+            return parent.rotationAbsolute * rotation;
         else
-            return position;
+            return rotation;
     }
     
     void translate(Vector3f v)
@@ -248,19 +253,16 @@ class Entity: Owner, Updateable
 
     void pitch(float angle)
     {
-        //angles.x += angle;
         rotation *= rotationQuaternion!float(Axis.x, degtorad(angle));
     }
 
     void turn(float angle)
     {
-        //angles.y += angle;
         rotation *= rotationQuaternion!float(Axis.y, degtorad(angle));
     }
 
     void roll(float angle)
     {
-        //angles.z += angle;
         rotation *= rotationQuaternion!float(Axis.z, degtorad(angle));
     }
     

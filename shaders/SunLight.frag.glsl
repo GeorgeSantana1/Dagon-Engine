@@ -23,6 +23,12 @@ uniform vec3 lightDirection;
 uniform vec4 lightColor;
 uniform float lightEnergy;
 
+uniform sampler2DArrayShadow shadowTextureArray;
+uniform float shadowResolution;
+uniform mat4 shadowMatrix1;
+uniform mat4 shadowMatrix2;
+uniform mat4 shadowMatrix3;
+
 in vec2 texCoord;
 
 layout(location = 0) out vec4 fragColor;
@@ -85,6 +91,69 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
+float shadowLookup(in sampler2DArrayShadow depths, in float layer, in vec4 coord, in vec2 offset)
+{
+    float texelSize = 1.0 / shadowResolution;
+    vec2 v = offset * texelSize * coord.w;
+    vec4 c = (coord + vec4(v.x, v.y, 0.0, 0.0)) / coord.w;
+    c.w = c.z;
+    c.z = layer;
+    float s = texture(depths, c);
+    return s;
+}
+
+float shadowLookupPCF(in sampler2DArrayShadow depths, in float layer, in vec4 coord, in float radius)
+{
+    float s = 0.0;
+    float x, y;
+    for (y = -radius ; y < radius ; y += 1.0)
+    for (x = -radius ; x < radius ; x += 1.0)
+    {
+        s += shadowLookup(depths, layer, coord, vec2(x, y));
+    }
+    s /= radius * radius * 4.0;
+    return s;
+}
+
+float weight(in vec4 tc, in float coef)
+{
+    vec2 proj = vec2(tc.x / tc.w, tc.y / tc.w);
+    proj = (1.0 - abs(proj * 2.0 - 1.0)) * coef;
+    proj = clamp(proj, 0.0, 1.0);
+    return min(proj.x, proj.y);
+}
+
+subroutine float srtShadow(in vec3 pos, in vec3 N);
+
+subroutine(srtShadow) float shadowMapNone(in vec3 pos, in vec3 N)
+{
+    return 1.0;
+}
+
+const float eyeSpaceNormalShift = 0.008;
+subroutine(srtShadow) float shadowMapCascaded(in vec3 pos, in vec3 N)
+{
+    vec3 posShifted = pos + N * eyeSpaceNormalShift;
+    vec4 shadowCoord1 = shadowMatrix1 * vec4(posShifted, 1.0);
+    vec4 shadowCoord2 = shadowMatrix2 * vec4(posShifted, 1.0);
+    vec4 shadowCoord3 = shadowMatrix3 * vec4(posShifted, 1.0);
+    
+    float s1 = shadowLookupPCF(shadowTextureArray, 0.0, shadowCoord1, 2.0);
+    float s2 = shadowLookup(shadowTextureArray, 1.0, shadowCoord2, vec2(0.0, 0.0));
+    float s3 = shadowLookup(shadowTextureArray, 2.0, shadowCoord3, vec2(0.0, 0.0));
+    
+    float w1 = weight(shadowCoord1, 8.0);
+    float w2 = weight(shadowCoord2, 8.0);
+    float w3 = weight(shadowCoord3, 8.0);
+    s3 = mix(1.0, s3, w3); 
+    s2 = mix(s3, s2, w2);
+    s1 = mix(s2, s1, w1);
+    
+    return s1;
+}
+
+subroutine uniform srtShadow shadowMap;
+
 void main()
 {
     vec4 col = texture(colorBuffer, texCoord);
@@ -111,7 +180,7 @@ void main()
 
     vec3 radiance = vec3(0.0, 0.0, 0.0);
 
-    float shadow = 1.0;
+    float shadow = shadowMap(eyePos, N);
 
     // Sun light
     {

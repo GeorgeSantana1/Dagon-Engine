@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019 Timur Gafarov
+Copyright (c) 2017-2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -25,59 +25,30 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.game.renderer;
+module dagon.graphics.shadowmap;
 
-import dlib.core.memory;
 import dlib.core.ownership;
 
-import dagon.core.event;
+import dagon.core.bindings;
 import dagon.core.time;
-import dagon.graphics.camera;
-import dagon.render.view;
-import dagon.render.pipeline;
-import dagon.render.stage;
-import dagon.resource.scene;
+import dagon.graphics.light;
+import dagon.graphics.shader;
 
-class Renderer: Owner
+abstract class ShadowMap: Owner
 {
-    RenderView view;
-    RenderPipeline pipeline;
-    
-    void activeCamera(Camera camera)
-    {
-        view.camera = camera;
-    }
-    
-    Camera activeCamera()
-    {
-        return view.camera;
-    }
-    
-    this(EventManager eventManager, Owner owner)
+    uint resolution;
+    Light light;
+
+    this(Owner owner)
     {
         super(owner);
-        view = New!RenderView(0, 0, eventManager.windowWidth, eventManager.windowHeight, this);
-        pipeline = New!RenderPipeline(eventManager, this);
-    }
-    
-    // Override me
-    void scene(Scene s)
-    {
-    }
-    
-    void update(Time t)
-    {
-        pipeline.update(t);
-    }
-    
-    void render()
-    {
-        pipeline.render();
     }
 
-    void setViewport(uint x, uint y, uint w, uint h)
+    bool enabled() @property
     {
-        view.setPosition(x, y);
-        view.resize(w, h);
+        return light.shadowEnabled;
     }
+    
+    void resize(uint res);
+    void update(Time t);
 }

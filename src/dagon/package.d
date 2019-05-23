@@ -48,6 +48,7 @@ public
     import dagon.game.renderer;
 
     import dagon.graphics.camera;
+    import dagon.graphics.csm;
     import dagon.graphics.drawable;
     import dagon.graphics.entity;
     import dagon.graphics.environment;
@@ -59,6 +60,7 @@ public
     import dagon.graphics.screensurface;
     import dagon.graphics.shader;
     import dagon.graphics.shaderloader;
+    import dagon.graphics.shadowmap;
     import dagon.graphics.shapes;
     import dagon.graphics.state;
     import dagon.graphics.terrain;
@@ -74,6 +76,7 @@ public
     import dagon.render.shaders.environment;
     import dagon.render.shaders.fallback;
     import dagon.render.shaders.geometry;
+    import dagon.render.shaders.shadow;
     import dagon.render.shaders.sunlight;
     
     import dagon.resource.asset;

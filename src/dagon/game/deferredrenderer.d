@@ -38,6 +38,7 @@ import dagon.game.renderer;
 
 class DeferredRenderer: Renderer
 {
+    ShadowStage stageShadow;
     DeferredGeometryStage stageGeom;
     DeferredEnvironmentStage stageEnvironment;
     DeferredLightStage stageLight;
@@ -48,6 +49,8 @@ class DeferredRenderer: Renderer
     this(EventManager eventManager, Owner owner)
     {
         super(eventManager, owner);
+        
+        stageShadow = New!ShadowStage(pipeline);
         
         stageGeom = New!DeferredGeometryStage(pipeline);
         stageGeom.view = view;
@@ -65,6 +68,8 @@ class DeferredRenderer: Renderer
     
     override void scene(Scene s)
     {
+        stageShadow.group = s.spatial;
+        stageShadow.lightGroup = s.lights;
         stageGeom.group = s.spatialOpaque;
         stageLight.group = s.lights;
         
@@ -75,7 +80,8 @@ class DeferredRenderer: Renderer
     }
     
     override void update(Time t)
-    {
+    {        
+        stageShadow.camera = activeCamera;
         stageDebug.active = (outputMode != DebugOutputMode.Radiance);
         stageDebug.outputMode = outputMode;
         super.update(t);

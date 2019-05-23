@@ -65,6 +65,8 @@ struct State
     bool colorMask;
     bool depthMask;
     
+    bool culling;
+    
     GLuint colorTexture;
     GLuint depthTexture;
     GLuint normalTexture;
@@ -98,6 +100,8 @@ struct State
         
         colorMask = true;
         depthMask = true;
+        
+        culling = true;
         
         colorTexture = 0;
         depthTexture = 0;

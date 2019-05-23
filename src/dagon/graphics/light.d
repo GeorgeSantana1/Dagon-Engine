@@ -44,6 +44,8 @@ import dlib.image.color;
 import dagon.core.bindings;
 import dagon.graphics.state;
 import dagon.graphics.entity;
+import dagon.graphics.shadowmap;
+import dagon.graphics.csm;
 
 enum LightType
 {
@@ -65,6 +67,7 @@ class Light: Entity
     float spotInnerCutoff;
     LightType type;
     bool shadowEnabled;
+    ShadowMap _shadowMap;
 
     this(EntityManager manager)
     {
@@ -79,5 +82,16 @@ class Light: Entity
         energy = 1.0f;
         type = LightType.AreaSphere;
         shadowEnabled = false;
+    }
+    
+    ShadowMap shadowMap()
+    {
+        if (_shadowMap is null)
+        {
+            //if (type == LightType.Sun)
+            _shadowMap = New!CascadedShadowMap(this, this);
+        }
+        
+        return _shadowMap;
     }
 }

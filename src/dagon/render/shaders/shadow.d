@@ -25,59 +25,47 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.game.renderer;
+module dagon.render.shaders.shadow;
+
+import std.stdio;
+import std.math;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.math.vector;
+import dlib.math.matrix;
+import dlib.math.transformation;
+import dlib.math.interpolation;
+import dlib.image.color;
 
-import dagon.core.event;
-import dagon.core.time;
-import dagon.graphics.camera;
-import dagon.render.view;
-import dagon.render.pipeline;
-import dagon.render.stage;
-import dagon.resource.scene;
+import dagon.core.bindings;
+import dagon.graphics.shader;
+import dagon.graphics.state;
 
-class Renderer: Owner
+class ShadowShader: Shader
 {
-    RenderView view;
-    RenderPipeline pipeline;
-    
-    void activeCamera(Camera camera)
+    string vs = import("Shadow.vert.glsl");
+    string fs = import("Shadow.frag.glsl");
+
+    this(Owner owner)
     {
-        view.camera = camera;
-    }
-    
-    Camera activeCamera()
-    {
-        return view.camera;
-    }
-    
-    this(EventManager eventManager, Owner owner)
-    {
-        super(owner);
-        view = New!RenderView(0, 0, eventManager.windowWidth, eventManager.windowHeight, this);
-        pipeline = New!RenderPipeline(eventManager, this);
-    }
-    
-    // Override me
-    void scene(Scene s)
-    {
-    }
-    
-    void update(Time t)
-    {
-        pipeline.update(t);
-    }
-    
-    void render()
-    {
-        pipeline.render();
+        auto myProgram = New!ShaderProgram(vs, fs, this);
+        super(myProgram, owner);
     }
 
-    void setViewport(uint x, uint y, uint w, uint h)
+    override void bind(State* state)
     {
-        view.setPosition(x, y);
-        view.resize(w, h);
+        setParameter("modelViewMatrix", state.modelViewMatrix);
+        setParameter("projectionMatrix", state.projectionMatrix);
+        setParameter("normalMatrix", state.normalMatrix);
+        setParameter("viewMatrix", state.viewMatrix);
+        setParameter("invViewMatrix", state.invViewMatrix);
+
+        super.bind(state);
+    }
+
+    override void unbind(State* state)
+    {
+        super.unbind(state);
     }
 }
