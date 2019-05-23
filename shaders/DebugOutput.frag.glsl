@@ -3,6 +3,7 @@
 uniform sampler2D colorBuffer;
 uniform sampler2D depthBuffer;
 uniform sampler2D normalBuffer;
+uniform sampler2D pbrBuffer;
 
 uniform vec2 resolution;
 uniform mat4 viewMatrix;
@@ -11,10 +12,12 @@ uniform mat4 invProjectionMatrix;
 uniform float zNear;
 uniform float zFar;
 
-// 0 - color
-// 1 - normal
-// 2 - position
-// 3 - radiance
+// 0 - radiance
+// 1 - color
+// 2 - normal
+// 3 - position
+// 4 - roughness
+// 5 - metallic
 uniform int outputMode;
 
 in vec2 texCoord;
@@ -45,11 +48,21 @@ void main()
     vec3 worldPos = (invViewMatrix * vec4(eyePos, 1.0)).xyz;
     vec3 N = normalize(texture(normalBuffer, texCoord).rgb);
     
-    float colorWeight = float(outputMode == 0);
-    float normalWeight = float(outputMode == 1);
-    float posWeight = float(outputMode == 2);
+    float roughness = texture(pbrBuffer, texCoord).r;
+    float metallic = texture(pbrBuffer, texCoord).g;
+    
+    float colorWeight = float(outputMode == 1);
+    float normalWeight = float(outputMode == 2);
+    float posWeight = float(outputMode == 3);
+    float roughWeight = float(outputMode == 4);
+    float metWeight = float(outputMode == 5);
 
-    vec3 output = albedo * colorWeight + N * normalWeight + eyePos * posWeight;
+    vec3 output = 
+        albedo * colorWeight + 
+        N * normalWeight + 
+        eyePos * posWeight +
+        vec3(roughness) * roughWeight +
+        vec3(metallic) * metWeight;
     
     fragColor = vec4(output, 1.0);
 }

@@ -45,8 +45,8 @@ import dagon.graphics.state;
 
 class GeometryShader: Shader
 {
-    string vs = import("Geometry.vs");
-    string fs = import("Geometry.fs");
+    string vs = import("Geometry.vert.glsl");
+    string fs = import("Geometry.frag.glsl");
 
     this(Owner owner)
     {
@@ -59,6 +59,9 @@ class GeometryShader: Shader
         auto idiffuse = "diffuse" in state.material.inputs;
         auto inormal = "normal" in state.material.inputs;
         auto iheight = "height" in state.material.inputs;
+        auto ipbr = "pbr" in state.material.inputs;
+        auto iroughness = "roughness" in state.material.inputs;
+        auto imetallic = "metallic" in state.material.inputs;
         auto itextureScale = "textureScale" in state.material.inputs;
         auto iparallax = "parallax" in state.material.inputs;
         
@@ -131,7 +134,6 @@ class GeometryShader: Shader
         }
 
         // Height and parallax
-
         // TODO: make these material properties
         float parallaxScale = 0.03f;
         float parallaxBias = -0.01f;
@@ -157,6 +159,64 @@ class GeometryShader: Shader
         else
             setParameterSubroutine("parallax", ShaderType.Fragment, "parallaxNone");
         
+        // PBR
+        if (ipbr is null)
+        {
+            state.material.setInput("pbr", 0.0f);
+            ipbr = "pbr" in state.material.inputs;
+        }
+        if (ipbr.texture is null)
+        {
+            ipbr.texture = state.material.makeTexture(*iroughness, *imetallic, materialInput(0.0f), materialInput(0.0f));
+        }
+        glActiveTexture(GL_TEXTURE2);
+        ipbr.texture.bind();
+        setParameter("pbrTexture", 2);
+        
+        if (iroughness.texture is null)
+        {
+            setParameterSubroutine("roughness", ShaderType.Fragment, "roughnessValue");
+            
+            if (iroughness.type == MaterialInputType.Float)
+                setParameter("roughnessScalar", iroughness.asFloat);
+            else if (iroughness.type == MaterialInputType.Bool)
+                setParameter("roughnessScalar", cast(float)iroughness.asBool);
+            else if (iroughness.type == MaterialInputType.Integer)
+                setParameter("roughnessScalar", cast(float)iroughness.asInteger);
+            else if (iroughness.type == MaterialInputType.Vec2)
+                setParameter("roughnessScalar", iroughness.asVector2f.r);
+            else if (iroughness.type == MaterialInputType.Vec3)
+                setParameter("roughnessScalar", iroughness.asVector3f.r);
+            else if (iroughness.type == MaterialInputType.Vec4)
+                setParameter("roughnessScalar", iroughness.asVector4f.r);
+        }
+        else
+        {
+            setParameterSubroutine("roughness", ShaderType.Fragment, "roughnessMap");
+        }
+        
+        if (imetallic.texture is null)
+        {
+            setParameterSubroutine("metallic", ShaderType.Fragment, "metallicValue");
+            
+            if (imetallic.type == MaterialInputType.Float)
+                setParameter("metallicScalar", imetallic.asFloat);
+            else if (imetallic.type == MaterialInputType.Bool)
+                setParameter("metallicScalar", cast(float)imetallic.asBool);
+            else if (imetallic.type == MaterialInputType.Integer)
+                setParameter("metallicScalar", cast(float)imetallic.asInteger);
+            else if (imetallic.type == MaterialInputType.Vec2)
+                setParameter("metallicScalar", imetallic.asVector2f.r);
+            else if (imetallic.type == MaterialInputType.Vec3)
+                setParameter("metallicScalar", imetallic.asVector3f.r);
+            else if (imetallic.type == MaterialInputType.Vec4)
+                setParameter("metallicScalar", imetallic.asVector4f.r);
+        }
+        else
+        {
+            setParameterSubroutine("metallic", ShaderType.Fragment, "metallicMap");
+        }
+        
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -170,6 +230,9 @@ class GeometryShader: Shader
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE0);

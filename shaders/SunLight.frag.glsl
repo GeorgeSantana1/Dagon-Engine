@@ -6,6 +6,7 @@ const float PI2 = PI * 2.0;
 uniform sampler2D colorBuffer;
 uniform sampler2D depthBuffer;
 uniform sampler2D normalBuffer;
+uniform sampler2D pbrBuffer;
 
 uniform vec2 resolution;
 uniform mat4 viewMatrix;
@@ -100,10 +101,12 @@ void main()
     vec3 E = normalize(-eyePos);
     vec3 R = reflect(E, N);
     
+    float roughness = texture(pbrBuffer, texCoord).r;
+    float metallic = texture(pbrBuffer, texCoord).g;
+    
     // TODO: read from buffer
-    float roughness = 0.5;
-    float metallic = 0.0;
     float occlusion = 1.0;
+    
     vec3 f0 = mix(vec3(0.04), albedo, metallic);
 
     vec3 radiance = vec3(0.0, 0.0, 0.0);

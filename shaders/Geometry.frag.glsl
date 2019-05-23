@@ -6,8 +6,7 @@ in vec2 texCoord;
 
 
 /*
- * Diffuse color subroutines.
- * Used to switch color/texture.
+ * Diffuse color
  */
 subroutine vec4 srtColor(in vec2 uv);
 
@@ -27,7 +26,7 @@ subroutine uniform srtColor diffuse;
 
 
 /*
- * Normal mapping subroutines.
+ * Normal mapping
  */
 subroutine vec3 srtNormal(in vec2 uv, in float ysign, in mat3 tangentToEye);
 
@@ -65,7 +64,7 @@ subroutine uniform srtNormal normal;
 
 
 /*
- * Height mapping subroutines.
+ * Height mapping
  */
 subroutine float srtHeight(in vec2 uv);
 
@@ -132,8 +131,49 @@ subroutine(srtParallax) vec2 parallaxOcclusionMapping(in vec3 E, in vec2 uv, in 
 subroutine uniform srtParallax parallax;
 
 
+/*
+ * Roughness
+ */
+uniform sampler2D pbrTexture;
+
+subroutine float srtRoughness();
+
+uniform float roughnessScalar;
+subroutine(srtRoughness) float roughnessValue()
+{
+    return roughnessScalar;
+}
+
+subroutine(srtRoughness) float roughnessMap()
+{
+    return texture(pbrTexture, texCoord).r;
+}
+
+subroutine uniform srtRoughness roughness;
+
+
+/*
+ * Metallic
+ */
+subroutine float srtMetallic();
+
+uniform float metallicScalar;
+subroutine(srtMetallic) float metallicValue()
+{
+    return metallicScalar;
+}
+
+subroutine(srtMetallic) float metallicMap()
+{
+    return texture(pbrTexture, texCoord).g;
+}
+
+subroutine uniform srtMetallic metallic;
+
+
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragNormal;
+layout(location = 2) out vec4 fragPBR;
 
 void main()
 {
@@ -147,11 +187,11 @@ void main()
 
     N = normal(shiftedTexCoord, -1.0, tangentToEye);
     
-    vec4 diff = diffuse(shiftedTexCoord);
-    
-    if (diff.a < 1.0)
+    vec4 fragDiffuse = diffuse(shiftedTexCoord);
+    if (fragDiffuse.a < 1.0)
         discard;
     
-    fragColor = vec4(diff.rgb, 1.0);
+    fragColor = vec4(fragDiffuse.rgb, 1.0);
     fragNormal = vec4(N, 0.0);
+    fragPBR = vec4(roughness(), metallic(), 0.0, 0.0);
 }

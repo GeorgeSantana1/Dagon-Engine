@@ -44,8 +44,8 @@ import dagon.graphics.state;
 
 class SunLightShader: Shader
 {
-    string vs = import("SunLight.vs");
-    string fs = import("SunLight.fs");
+    string vs = import("SunLight.vert.glsl");
+    string fs = import("SunLight.frag.glsl");
 
     this(Owner owner)
     {
@@ -114,6 +114,11 @@ class SunLightShader: Shader
         glBindTexture(GL_TEXTURE_2D, state.normalTexture);
         setParameter("normalBuffer", 2);
         
+        // Texture 3 - pbr buffer
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
+        setParameter("pbrBuffer", 3);
+        
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -130,6 +135,9 @@ class SunLightShader: Shader
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
         
         glActiveTexture(GL_TEXTURE0);

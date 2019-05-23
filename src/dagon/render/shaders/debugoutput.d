@@ -45,8 +45,8 @@ import dagon.render.deferred;
 
 class DebugOutputShader: Shader
 {
-    string vs = import("DebugOutput.vs");
-    string fs = import("DebugOutput.fs");
+    string vs = import("DebugOutput.vert.glsl");
+    string fs = import("DebugOutput.frag.glsl");
     
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
 
@@ -84,6 +84,11 @@ class DebugOutputShader: Shader
         glBindTexture(GL_TEXTURE_2D, state.normalTexture);
         setParameter("normalBuffer", 2);
         
+        // Texture 3 - pbr buffer
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
+        setParameter("pbrBuffer", 3);
+        
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -100,6 +105,9 @@ class DebugOutputShader: Shader
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
         
         glActiveTexture(GL_TEXTURE0);

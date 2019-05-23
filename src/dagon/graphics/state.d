@@ -68,6 +68,7 @@ struct State
     GLuint colorTexture;
     GLuint depthTexture;
     GLuint normalTexture;
+    GLuint pbrTexture;
     
     void reset()
     {
@@ -101,5 +102,6 @@ struct State
         colorTexture = 0;
         depthTexture = 0;
         normalTexture = 0;
+        pbrTexture = 0;
     }
 }

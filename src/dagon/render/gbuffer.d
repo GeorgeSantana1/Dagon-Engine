@@ -43,6 +43,7 @@ class GBuffer: Owner
     GLuint colorTexture = 0;
     GLuint depthTexture = 0;
     GLuint normalTexture = 0;
+    GLuint pbrTexture = 0;
     
     this(uint w, uint h, Owner owner)
     {
@@ -86,14 +87,24 @@ class GBuffer: Owner
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, null);
         glBindTexture(GL_TEXTURE_2D, 0);
         
+        glGenTextures(1, &pbrTexture);
+        glBindTexture(GL_TEXTURE_2D, pbrTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
         glGenFramebuffers(1, &framebuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, pbrTexture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
         
-        GLenum[2] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1];
-        glDrawBuffers(2, drawBuffers.ptr);
+        GLenum[3] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
+        glDrawBuffers(drawBuffers.length, drawBuffers.ptr);
 
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -115,6 +126,9 @@ class GBuffer: Owner
             
         if (glIsTexture(normalTexture))
             glDeleteTextures(1, &normalTexture);
+            
+        if (glIsTexture(pbrTexture))
+            glDeleteTextures(1, &pbrTexture);
     }
     
     ~this()

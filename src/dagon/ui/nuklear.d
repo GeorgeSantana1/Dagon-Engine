@@ -183,8 +183,8 @@ class NuklearGUI : Owner, Updateable, Drawable
     GLint textureLoc;
     GLint projectionMatrixLoc;
 
-    string vs = import("Nuklear.vs");
-    string fs = import("Nuklear.fs");
+    string vs = import("Nuklear.vert.glsl");
+    string fs = import("Nuklear.frag.glsl");
 
     EventManager eventManager; // Needed for mouse position
 

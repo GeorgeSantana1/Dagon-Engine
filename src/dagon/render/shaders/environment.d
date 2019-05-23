@@ -44,8 +44,8 @@ import dagon.graphics.state;
 
 class EnvironmentShader: Shader
 {
-    string vs = import("Environment.vs");
-    string fs = import("Environment.fs");
+    string vs = import("Environment.vert.glsl");
+    string fs = import("Environment.frag.glsl");
 
     this(Owner owner)
     {
@@ -94,6 +94,11 @@ class EnvironmentShader: Shader
         glBindTexture(GL_TEXTURE_2D, state.normalTexture);
         setParameter("normalBuffer", 2);
         
+        // Texture 3 - pbr buffer
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
+        setParameter("pbrBuffer", 3);
+        
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -110,6 +115,9 @@ class EnvironmentShader: Shader
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
         
         glActiveTexture(GL_TEXTURE0);

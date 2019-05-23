@@ -36,8 +36,9 @@ class Editor: Scene
     
     OBJAsset aSuzanne;
     ImageAsset aHeightmap;
-    TextureAsset aTexDesert;
+    TextureAsset aTexDesertAlbedo;
     TextureAsset aTexDesertNormal;
+    TextureAsset aTexDesertRoughness;
     
     Camera camera;
     FreeviewComponent freeview;
@@ -57,6 +58,9 @@ class Editor: Scene
     float sunPitch = -45.0f;
     float sunTurn = 0.0f;
     
+    float roughness = 0.5f;
+    float metallic = 0.0f;
+    
     this(Game game)
     {
         super(game);
@@ -67,8 +71,9 @@ class Editor: Scene
     {
         aSuzanne = addOBJAsset("data/suzanne.obj");
         aHeightmap = addImageAsset("data/heightmap.png");
-        aTexDesert = addTextureAsset("data/desert-albedo.png");
+        aTexDesertAlbedo = addTextureAsset("data/desert-albedo.png");
         aTexDesertNormal = addTextureAsset("data/desert-normal.png");
+        aTexDesertRoughness = addTextureAsset("data/desert-roughness.png");
     }
 
     override void onLoad(Time t, float progress)
@@ -88,8 +93,9 @@ class Editor: Scene
         eTerrain.position = Vector3f(-256, 0, -256);
         eTerrain.material = New!Material(null, assetManager);
         eTerrain.material.textureScale = Vector2f(10.0f, 10.0f);
-        eTerrain.material.diffuse = aTexDesert.texture;
+        eTerrain.material.diffuse = aTexDesertAlbedo.texture;
         eTerrain.material.normal = aTexDesertNormal.texture;
+        eTerrain.material.roughness = aTexDesertRoughness.texture;
 
         auto heightmap = New!ImageHeightmap(aHeightmap.image, 30.0f, assetManager);
         auto terrain = New!Terrain(512, 64, heightmap, assetManager);
@@ -99,6 +105,7 @@ class Editor: Scene
         eModel.position.y = 33.0f;
         eModel.scaling = Vector3f(10.0f, 10.0f, 10.0f);
         eModel.drawable = aSuzanne.mesh;
+        eModel.material = New!Material(null, assetManager);
         
         gui = New!NuklearGUI(eventManager, assetManager);
         gui.addFont("data/font/DroidSans.ttf", 18, gui.localeGlyphRanges);
@@ -135,6 +142,9 @@ class Editor: Scene
         sun.rotation = 
             rotationQuaternion!float(Axis.y, degtorad(sunTurn)) *
             rotationQuaternion!float(Axis.x, degtorad(sunPitch));
+        
+        eModel.material.roughness = roughness;
+        eModel.material.metallic = metallic;
     }
 
     override void onKeyDown(int key)
@@ -226,7 +236,9 @@ class Editor: Scene
                 gui.layoutRowDynamic(30, 1);
                 
                 game.renderer.outputMode = 
-                    cast(DebugOutputMode)gui.comboString("Color\0Normal\0Position\0Radiance\0", game.renderer.outputMode, 4, 25, NKVec2(260, 200));
+                    cast(DebugOutputMode)gui.comboString(
+                        "Radiance\0Albedo\0Normal\0Position\0Roughness\0Metallic", 
+                        game.renderer.outputMode, 6, 25, NKVec2(260, 200));
                     
                 gui.treePop();
             }
@@ -250,13 +262,24 @@ class Editor: Scene
                 gui.treePop();
             }
             
+            if (gui.treePush(NK_TREE_NODE, "Material", NK_MAXIMIZED))
+            {
+                gui.layoutRowDynamic(30, 2);
+                gui.label("Roughness:", NK_TEXT_LEFT);
+                gui.slider(0.0f, &roughness, 1.0f, 0.01f);
+                
+                gui.layoutRowDynamic(30, 2);
+                gui.label("Metallic:", NK_TEXT_LEFT);
+                gui.slider(0.0f, &metallic, 1.0f, 0.01f);
+                gui.treePop();
+            }
+            
             /*
             if (gui.treePush(NK_TREE_NODE, "Options", NK_MINIMIZED))
             {
                 gui.layoutRowDynamic(30, 2);
                 if (gui.optionLabel("on", option == true)) option = true;
                 if (gui.optionLabel("off", option == false)) option = false;
-                gui.slider(0.0f, &angle, 365.0f, 1.0f);
                 gui.treePop();
             }
                 

@@ -128,6 +128,7 @@ class DeferredEnvironmentStage: RenderStage
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
+            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
             
             Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
             if (state.environment)
@@ -171,6 +172,7 @@ class DeferredLightStage: RenderStage
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
+            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
             
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
@@ -199,10 +201,12 @@ class DeferredLightStage: RenderStage
 
 enum DebugOutputMode: int
 {
-    Color = 0,
-    Normal = 1,
-    Position = 2,
-    Radiance = 3
+    Radiance = 0,
+    Albedo = 1,
+    Normal = 2,
+    Position = 3,
+    Roughness = 4,
+    Metallic = 5
 }
 
 class DeferredDebugOutputStage: RenderStage
@@ -227,6 +231,7 @@ class DeferredDebugOutputStage: RenderStage
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
+            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
             
             Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
             if (state.environment)
