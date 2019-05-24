@@ -40,6 +40,7 @@ import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.graphics.shader;
+import dagon.graphics.cubemap;
 import dagon.graphics.state;
 
 class EnvironmentShader: Shader
@@ -95,18 +96,15 @@ class EnvironmentShader: Shader
             {
                 glActiveTexture(GL_TEXTURE4);
                 state.environment.ambientMap.bind();
-                /*
-                //TODO
-                if (cast(Cubemap)rc3d.environment.environmentMap)
+                if (cast(Cubemap)state.environment.ambientMap)
                 {
-                    setParameter("envTextureCube", 4);
-                    setParameterSubroutine("environment", ShaderType.Fragment, "environmentCubemap");
+                    setParameter("ambientTextureCube", 4);
+                    setParameterSubroutine("ambient", ShaderType.Fragment, "ambientCubemap");
                 }
                 else
-                */
                 {
                     setParameter("ambientTexture", 4);
-                    setParameterSubroutine("ambient", ShaderType.Fragment, "ambientMap");
+                    setParameterSubroutine("ambient", ShaderType.Fragment, "ambientEquirectangularMap");
                 }
             }
             else
@@ -148,7 +146,7 @@ class EnvironmentShader: Shader
         
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, 0);
-        //glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         
         glActiveTexture(GL_TEXTURE0);
     }

@@ -65,12 +65,21 @@ subroutine(srtAmbient) vec3 ambientColor(in vec3 wN, in float roughness)
 }
 
 uniform sampler2D ambientTexture;
-subroutine(srtAmbient) vec3 ambientMap(in vec3 wN, in float roughness)
+subroutine(srtAmbient) vec3 ambientEquirectangularMap(in vec3 wN, in float roughness)
 {
     ivec2 envMapSize = textureSize(ambientTexture, 0);
     float maxLod = log2(float(max(envMapSize.x, envMapSize.y)));
     float lod = maxLod * roughness;
     return textureLod(ambientTexture, envMapEquirect(wN), lod).rgb * ambientEnergy;
+}
+
+uniform samplerCube ambientTextureCube;
+subroutine(srtAmbient) vec3 ambientCubemap(in vec3 wN, in float roughness)
+{
+    ivec2 envMapSize = textureSize(ambientTextureCube, 0);
+    float maxLod = log2(float(max(envMapSize.x, envMapSize.y)));
+    float lod = maxLod * roughness;
+    return textureLod(ambientTextureCube, wN, lod).rgb * ambientEnergy;
 }
 
 subroutine uniform srtAmbient ambient;
@@ -108,7 +117,7 @@ void main()
     vec3 radiance = vec3(0.0, 0.0, 0.0);
 
     // Ambient light
-    vec3 ambientDiffuse = ambient(worldN, 0.9);
+    vec3 ambientDiffuse = ambient(worldN, 0.99);
     vec3 ambientSpecular = ambient(worldR, roughness);
     vec3 F = fresnelRoughness(max(dot(N, E), 0.0), f0, roughness);
     vec3 kS = F;

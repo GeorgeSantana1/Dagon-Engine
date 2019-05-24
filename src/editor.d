@@ -85,7 +85,9 @@ class Editor: Scene
     
     override void afterLoad()
     {
-        environment.ambientMap = aEnvmap.texture;
+        auto envCubemap = New!Cubemap(1024, assetManager);
+        envCubemap.fromEquirectangularMap(aEnvmap.texture);
+        environment.ambientMap = envCubemap;
     
         camera = addCamera();
         freeview = New!FreeviewComponent(eventManager, camera);
