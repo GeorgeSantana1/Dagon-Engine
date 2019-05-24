@@ -12,7 +12,7 @@ Status:
 * [x] Scene menegement
 * [x] Asset management
 * [ ] Forward renderer
-* [ ] Deferred renderer
+* [x] Deferred renderer
 * [x] Entities
 * [ ] Tweens
 * [x] Built-in shapes
@@ -23,8 +23,9 @@ Status:
 * [x] Images
 * [x] Textures
 * [x] Materials, shaders
-* [ ] Environment maps
-* [x] Lights
+* [x] Environment maps
+* [x] Sun lights
+* [ ] Area lights
 * [x] Shadows
 * [x] Terrain
 * [ ] Sky
