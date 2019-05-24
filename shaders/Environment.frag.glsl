@@ -1,5 +1,8 @@
 #version 400 core
 
+#define PI 3.14159265359
+const float PI2 = PI * 2.0;
+
 uniform sampler2D colorBuffer;
 uniform sampler2D depthBuffer;
 uniform sampler2D normalBuffer;
@@ -12,7 +15,6 @@ uniform mat4 invProjectionMatrix;
 uniform float zNear;
 uniform float zFar;
 
-uniform vec4 ambientColor;
 uniform vec4 fogColor;
 uniform float fogStart;
 uniform float fogEnd;
@@ -44,6 +46,36 @@ vec3 fresnelRoughness(float cosTheta, vec3 f0, float roughness)
     return f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(1.0 - cosTheta, 5.0);
 }
 
+vec2 envMapEquirect(in vec3 dir)
+{
+    float phi = acos(dir.y);
+    float theta = atan(dir.x, dir.z) + PI;
+    return vec2(theta / PI2, phi / PI);
+}
+
+
+uniform float ambientEnergy;
+
+subroutine vec3 srtAmbient(in vec3 wN, in float roughness);
+
+uniform vec4 ambientVector;
+subroutine(srtAmbient) vec3 ambientColor(in vec3 wN, in float roughness)
+{
+    return toLinear(ambientVector.rgb) * ambientEnergy;
+}
+
+uniform sampler2D ambientTexture;
+subroutine(srtAmbient) vec3 ambientMap(in vec3 wN, in float roughness)
+{
+    ivec2 envMapSize = textureSize(ambientTexture, 0);
+    float maxLod = log2(float(max(envMapSize.x, envMapSize.y)));
+    float lod = maxLod * roughness;
+    return textureLod(ambientTexture, envMapEquirect(wN), lod).rgb * ambientEnergy;
+}
+
+subroutine uniform srtAmbient ambient;
+
+
 void main()
 {
     vec4 col = texture(colorBuffer, texCoord);
@@ -60,6 +92,11 @@ void main()
     vec3 E = normalize(-eyePos);
     vec3 R = reflect(E, N);
     
+    vec3 worldCamPos = (invViewMatrix[3]).xyz;
+    vec3 worldE = normalize(worldPos - worldCamPos);
+    vec3 worldN = normalize(N * mat3(viewMatrix));
+    vec3 worldR = reflect(worldE, worldN);
+    
     float roughness = texture(pbrBuffer, texCoord).r;
     float metallic = texture(pbrBuffer, texCoord).g;
     
@@ -71,15 +108,13 @@ void main()
     vec3 radiance = vec3(0.0, 0.0, 0.0);
 
     // Ambient light
-    {
-        vec3 ambientDiffuse = toLinear(ambientColor.rgb);
-        vec3 ambientSpecular = toLinear(ambientColor.rgb);
-        vec3 F = fresnelRoughness(max(dot(N, E), 0.0), f0, roughness);
-        vec3 kS = F;
-        vec3 kD = 1.0 - kS;
-        kD *= 1.0 - metallic;
-        radiance += (kD * ambientDiffuse * albedo * occlusion + F * ambientSpecular);
-    }
+    vec3 ambientDiffuse = ambient(worldN, 0.9);
+    vec3 ambientSpecular = ambient(worldR, roughness);
+    vec3 F = fresnelRoughness(max(dot(N, E), 0.0), f0, roughness);
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+    radiance += (kD * ambientDiffuse * albedo * occlusion + F * ambientSpecular);
     
     // Fog
     float linearDepth = abs(eyePos.z);

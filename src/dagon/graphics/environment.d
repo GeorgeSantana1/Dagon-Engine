@@ -38,6 +38,7 @@ class Environment: Owner
     
     Color4f ambientColor = Color4f(0.8f, 0.8f, 1.0f, 1.0f);
     Texture ambientMap;
+    float ambientEnergy = 1.0f;
     
     Color4f fogColor = Color4f(0.8f, 0.8f, 1.0f, 1.0f);
     float fogStart = 0.0f;

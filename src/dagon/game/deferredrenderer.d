@@ -34,6 +34,7 @@ import dagon.core.event;
 import dagon.core.time;
 import dagon.resource.scene;
 import dagon.render.deferred;
+import dagon.render.shadowstage;
 import dagon.game.renderer;
 
 class DeferredRenderer: Renderer

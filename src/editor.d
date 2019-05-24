@@ -39,6 +39,7 @@ class Editor: Scene
     TextureAsset aTexDesertAlbedo;
     TextureAsset aTexDesertNormal;
     TextureAsset aTexDesertRoughness;
+    TextureAsset aEnvmap;
     
     Camera camera;
     FreeviewComponent freeview;
@@ -75,6 +76,7 @@ class Editor: Scene
         aTexDesertAlbedo = addTextureAsset("data/desert-albedo.png");
         aTexDesertNormal = addTextureAsset("data/desert-normal.png");
         aTexDesertRoughness = addTextureAsset("data/desert-roughness.png");
+        aEnvmap = addTextureAsset("data/the_sky_is_on_fire_1k.hdr");
     }
 
     override void onLoad(Time t, float progress)
@@ -83,6 +85,8 @@ class Editor: Scene
     
     override void afterLoad()
     {
+        environment.ambientMap = aEnvmap.texture;
+    
         camera = addCamera();
         freeview = New!FreeviewComponent(eventManager, camera);
         freeview.zoom(-100);
