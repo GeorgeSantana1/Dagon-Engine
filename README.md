@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/gecko0307/dagon.svg?branch=master)](https://travis-ci.org/gecko0307/dagon)
+[![License](http://img.shields.io/badge/license-boost-blue.svg)](http://www.boost.org/LICENSE_1_0.txt)
+[![Patreon button](https://img.shields.io/badge/patreon-donate-yellow.svg)](http://patreon.com/gecko0307 "Become a Patron!")
+
 Dagon NG
 ========
 This is current development branch of [Dagon game engine](https://github.com/gecko0307/dagon). Goals are:
