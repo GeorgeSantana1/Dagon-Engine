@@ -19,8 +19,8 @@
 
     "dependencies": {
         "dlib": "~>0.16.0",
-        "bindbc-opengl": "~>0.7.1",
-        "bindbc-sdl": "~>0.7.0"
+        "bindbc-opengl": "~>0.8.0",
+        "bindbc-sdl": "~>0.8.0"
     },
 
     "versions": [
@@ -40,8 +40,8 @@
             "name": "application",
             "targetType": "executable",
             "dependencies": {
-                "bindbc-freetype": "~>0.1.0",
-                "bindbc-nuklear": "~>0.1.1"
+                "bindbc-freetype": "~>0.5.0",
+                "bindbc-nuklear": {"version": "~master", "path": "bindbc-nuklear"}
             }
         },
         {
@@ -53,7 +53,7 @@
             "name": "NoFreetype",
             "targetType": "executable",
             "dependencies": {
-                "bindbc-nuklear": "~>0.1.1"
+                "bindbc-nuklear": {"version": "~master", "path": "bindbc-nuklear"}
             },
             "versions": ["NoFreetype"]
         },
@@ -61,7 +61,7 @@
             "name": "NoNuklear",
             "targetType": "executable",
             "dependencies": {
-                "bindbc-freetype": "~>0.1.0"
+                "bindbc-freetype": "~>0.5.0"
             },
             "versions": ["NoNuklear"]
         },

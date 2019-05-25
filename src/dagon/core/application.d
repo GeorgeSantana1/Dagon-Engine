@@ -117,7 +117,7 @@ class Application: EventListener
         }
         else
         {
-            FTSupport ftsup = loadFreetype();
+            FTSupport ftsup = loadFreeType();
             if (ftsup != ftSupport)
             {
                 if (ftsup == FTSupport.badLibrary)
