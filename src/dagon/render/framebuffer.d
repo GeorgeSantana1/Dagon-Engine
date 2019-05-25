@@ -29,25 +29,29 @@ module dagon.render.framebuffer;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.image.color;
 
 import dagon.core.bindings;
 
-class Framebuffer: Owner
+abstract class Framebuffer: Owner
 {
-    this(Owner owner)
+    uint width;
+    uint height;
+    
+    this(uint w, uint h, Owner owner)
     {
         super(owner);
-        
-        // TODO
+        width = w;
+        height = h;
     }
     
-    ~this()
-    {
-        // TODO
-    }
-    
-    void resize(uint width, uint height)
-    {
-        // TODO
-    }
+    GLuint colorTexture();
+    GLuint depthTexture();
+    void clearColor(Color4f color);
+    void clearDepth(float value);
+    void bind();
+    void unbind();
+    void resize(uint width, uint height);
+    void blitColor(Framebuffer target);
+    void blitDepth(Framebuffer target);
 }

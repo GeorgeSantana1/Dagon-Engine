@@ -70,6 +70,7 @@ public
     
     import dagon.render.deferred;
     import dagon.render.framebuffer;
+    import dagon.render.framebuffer_rgba8;
     import dagon.render.gbuffer;
     import dagon.render.pipeline;
     import dagon.render.shadowstage;
