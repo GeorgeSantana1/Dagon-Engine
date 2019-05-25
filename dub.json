@@ -14,8 +14,6 @@
     "importPaths": ["src"],
     "sourcePaths": ["src"],
     "stringImportPaths": ["shaders", "data/__internal"],
-    
-    "mainSourceFile": "src/main.d",
 
     "dependencies": {
         "dlib": "~>0.16.0",
@@ -37,8 +35,8 @@
     
     "configurations": [
         {
-            "name": "application",
-            "targetType": "executable",
+            "name": "library",
+            "targetType": "library",
             "dependencies": {
                 "bindbc-freetype": "~>0.5.0",
                 "bindbc-nuklear": {"version": "~master", "path": "bindbc-nuklear"}
@@ -46,12 +44,12 @@
         },
         {
             "name": "Minimal",
-            "targetType": "executable",
+            "targetType": "library",
             "versions": ["NoFreetype", "NoNuklear"]
         },
         {
             "name": "NoFreetype",
-            "targetType": "executable",
+            "targetType": "library",
             "dependencies": {
                 "bindbc-nuklear": {"version": "~master", "path": "bindbc-nuklear"}
             },
@@ -59,7 +57,7 @@
         },
         {
             "name": "NoNuklear",
-            "targetType": "executable",
+            "targetType": "library",
             "dependencies": {
                 "bindbc-freetype": "~>0.5.0"
             },
@@ -68,5 +66,6 @@
     ],
     
     "copyFiles-windows-x86": ["lib/x86/*.dll"],
-    "copyFiles-windows-x86_64": ["lib/x64/*.dll"]
+    "copyFiles-windows-x86_64": ["lib/x64/*.dll"],
+    "copyFiles": ["data", "gamecontrollerdb.txt"]
 }
