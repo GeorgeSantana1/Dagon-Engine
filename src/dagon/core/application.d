@@ -117,10 +117,10 @@ class Application: EventListener
         }
         else
         {
-            FreetypeSupport ftsup = loadFreetype();
-            if (ftsup != freetypeSupport)
+            FTSupport ftsup = loadFreetype();
+            if (ftsup != ftSupport)
             {
-                if (ftsup == FreetypeSupport.badLibrary)
+                if (ftsup == FTSupport.badLibrary)
                     writeln("Warning: failed to load some Freetype functions. It seems that you have an old version of Freetype. Dagon will try to use it, but it is recommended to install Freetype 2.8.1 or higher");
                 else
                     exitWithError("Error: Freetype library is not found. Please, install Freetype 2.8.1");
