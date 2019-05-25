@@ -75,11 +75,7 @@ public
     import dagon.render.shadowstage;
     import dagon.render.stage;
     import dagon.render.view;
-    import dagon.render.shaders.environment;
-    import dagon.render.shaders.fallback;
-    import dagon.render.shaders.geometry;
-    import dagon.render.shaders.shadow;
-    import dagon.render.shaders.sunlight;
+    import dagon.render.shaders;
     
     import dagon.resource.asset;
     import dagon.resource.binary;
