@@ -25,69 +25,49 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.deferred.environmentstage;
+module dagon.postproc.presentstage;
 
 import std.stdio;
 
 import dlib.core.memory;
 import dlib.core.ownership;
-import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.graphics.screensurface;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
-import dagon.render.shaders.environment;
-import dagon.render.deferred.geometrystage;
+import dagon.postproc.shaders.present;
 
-class DeferredEnvironmentStage: RenderStage
+class PresentStage: RenderStage
 {
-    DeferredGeometryStage geometryStage;
+    Framebuffer inputBuffer;
     ScreenSurface screenSurface;
-    EnvironmentShader environmentShader;
-    Framebuffer outputBuffer;
+    PresentShader presentShader;
     
-    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    this(RenderPipeline pipeline)
     {
         super(pipeline);
-        this.geometryStage = geometryStage;
         screenSurface = New!ScreenSurface(this);
-        environmentShader = New!EnvironmentShader(this);
+        presentShader = New!PresentShader(this);
     }
     
     override void render()
     {
-        if (view && geometryStage)
+        if (inputBuffer && view)
         {
-            if (outputBuffer)
-                outputBuffer.bind();
-            
-            state.colorTexture = geometryStage.gbuffer.colorTexture;
-            state.depthTexture = geometryStage.gbuffer.depthTexture;
-            state.normalTexture = geometryStage.gbuffer.normalTexture;
-            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
-            
-            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
-            if (state.environment)
-                backgroundColor = state.environment.backgroundColor;
+            state.colorTexture = inputBuffer.colorTexture;
+            state.depthTexture = inputBuffer.depthTexture;
             
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
             
-            glClearColor(
-                backgroundColor.r, 
-                backgroundColor.g,
-                backgroundColor.b,
-                backgroundColor.a);
+            glClearColor(0.0, 0.0, 0.0, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
-            environmentShader.bind(&state);
+            presentShader.bind(&state);
             screenSurface.render(&state);
-            environmentShader.unbind(&state);
-            
-            if (outputBuffer)
-                outputBuffer.unbind();
+            presentShader.unbind(&state);
         }
     }
 }

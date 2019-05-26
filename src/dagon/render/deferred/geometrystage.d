@@ -77,6 +77,7 @@ class DeferredGeometryStage: RenderStage
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
             foreach(entity; group)
+            if (entity.visible)
             {
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;

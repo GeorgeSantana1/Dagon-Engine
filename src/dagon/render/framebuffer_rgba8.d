@@ -113,38 +113,34 @@ class FramebufferRGBA8: Framebuffer
         return _depthTexture;
     }
     
-    override void clearColor(Color4f color)
-    {
-        // TODO
-    }
-    
-    override void clearDepth(float value)
-    {
-        // TODO
-    }
-    
     override void bind()
     {
-        // TODO
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
     }
     
     override void unbind()
     {
-        // TODO
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
     
-    override void resize(uint width, uint height)
+    override void resize(uint w, uint h)
     {
-        // TODO
+        width = w;
+        height = h;
+        createFramebuffer();
     }
     
-    override void blitColor(Framebuffer target)
+    override void blitColorBuffer()
     {
-        // TODO
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     }
     
-    override void blitDepth(Framebuffer target)
+    override void blitDepthBuffer()
     {
-        // TODO
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     }
 }

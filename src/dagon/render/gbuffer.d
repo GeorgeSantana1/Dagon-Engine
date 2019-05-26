@@ -138,12 +138,12 @@ class GBuffer: Owner
     
     void bind()
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
     }
 
     void unbind()
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
     
     void resize(uint w, uint h)

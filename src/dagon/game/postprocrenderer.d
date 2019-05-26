@@ -25,70 +25,32 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.game.game;
+module dagon.game.postprocrenderer;
 
 import dlib.core.memory;
 import dlib.core.ownership;
 
 import dagon.core.event;
 import dagon.core.time;
-import dagon.core.application;
 import dagon.resource.scene;
+import dagon.render.stage;
+import dagon.render.deferred;
+import dagon.postproc.presentstage;
 import dagon.game.renderer;
-import dagon.game.deferredrenderer;
-import dagon.game.postprocrenderer;
-import dagon.game.hudrenderer;
 
-class Game: Application
+class PostProcRenderer: Renderer
 {
-    // TODO: scene manager
-    Scene currentScene;
-    Cadencer cadencer;
+    PresentStage stagePresent;
     
-    Renderer renderer;
-    DeferredRenderer deferredRenderer;
-    PostProcRenderer postProcRenderer;
-    HUDRenderer hudRenderer;
-    
-    this(uint w, uint h, bool fullscreen, string title, string[] args)
+    this(EventManager eventManager, Owner owner)
     {
-        super(w, h, fullscreen, title, args);
+        super(eventManager, owner);
         
-        cadencer = New!Cadencer(&fixedUpdate, 60, this);
-        
-        deferredRenderer = New!DeferredRenderer(eventManager, this);
-        renderer = deferredRenderer;
-        
-        postProcRenderer = New!PostProcRenderer(eventManager, this);
-        postProcRenderer.stagePresent.inputBuffer = deferredRenderer.outputBuffer;
-        
-        hudRenderer = New!HUDRenderer(eventManager, this);
-        
-        maximizeWindow();
+        stagePresent = New!PresentStage(pipeline);
+        stagePresent.view = view;
     }
     
-    void fixedUpdate(Time t)
+    override void scene(Scene s)
     {
-        if (currentScene)
-        {
-            currentScene.update(t);
-            deferredRenderer.scene = currentScene;
-            hudRenderer.scene = currentScene;
-        }
-        deferredRenderer.update(t);
-        postProcRenderer.update(t);
-        hudRenderer.update(t);
-    }
-    
-    override void onUpdate(Time t)
-    {
-        cadencer.update(t);
-    }
-    
-    override void onRender()
-    {
-        deferredRenderer.render();
-        postProcRenderer.render();
-        hudRenderer.render();
     }
 }

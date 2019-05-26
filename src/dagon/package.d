@@ -45,6 +45,7 @@ public
     import dagon.game.deferredrenderer;
     import dagon.game.game;
     import dagon.game.hudrenderer;
+    import dagon.game.postprocrenderer;
     import dagon.game.renderer;
 
     import dagon.graphics.camera;
@@ -67,6 +68,9 @@ public
     import dagon.graphics.terrain;
     import dagon.graphics.texture;
     import dagon.graphics.updateable;
+    
+    import dagon.postproc.presentstage;
+    import dagon.postproc.shaders.present;
     
     import dagon.render.deferred;
     import dagon.render.framebuffer;

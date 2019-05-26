@@ -107,6 +107,7 @@ class RenderStage: EventListener
             }
         
             foreach(entity; group)
+            if (entity.visible)
             {
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;

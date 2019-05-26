@@ -36,12 +36,14 @@ import dagon.graphics.camera;
 import dagon.render.view;
 import dagon.render.pipeline;
 import dagon.render.stage;
+import dagon.render.framebuffer;
 import dagon.resource.scene;
 
 class Renderer: Owner
 {
     RenderView view;
     RenderPipeline pipeline;
+    Framebuffer outputBuffer;
     
     void activeCamera(Camera camera)
     {
@@ -72,7 +74,13 @@ class Renderer: Owner
     
     void render()
     {
+        if (outputBuffer)
+            outputBuffer.bind();
+        
         pipeline.render();
+        
+        if (outputBuffer)
+            outputBuffer.unbind();
     }
 
     void setViewport(uint x, uint y, uint w, uint h)

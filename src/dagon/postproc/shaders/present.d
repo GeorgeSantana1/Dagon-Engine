@@ -25,31 +25,59 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.framebuffer;
+module dagon.postproc.shaders.present;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.math.vector;
+import dlib.math.matrix;
+import dlib.math.transformation;
+import dlib.math.interpolation;
 import dlib.image.color;
 
 import dagon.core.bindings;
+import dagon.graphics.shader;
+import dagon.graphics.state;
+import dagon.render.deferred;
 
-abstract class Framebuffer: Owner
+class PresentShader: Shader
 {
-    uint width;
-    uint height;
-    
-    this(uint w, uint h, Owner owner)
+    string vs = import("Present.vert.glsl");
+    string fs = import("Present.frag.glsl");
+
+    this(Owner owner)
     {
-        super(owner);
-        width = w;
-        height = h;
+        auto myProgram = New!ShaderProgram(vs, fs, this);
+        super(myProgram, owner);
     }
-    
-    GLuint colorTexture();
-    GLuint depthTexture();
-    void bind();
-    void unbind();
-    void resize(uint width, uint height);
-    void blitColorBuffer();
-    void blitDepthBuffer();
+
+    override void bind(State* state)
+    {
+        // Texture 0 - color buffer
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, state.colorTexture);
+        setParameter("colorBuffer", 0);
+        
+        // Texture 1 - depth buffer
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, state.depthTexture);
+        setParameter("depthBuffer", 1);
+        
+        glActiveTexture(GL_TEXTURE0);
+
+        super.bind(state);
+    }
+
+    override void unbind(State* state)
+    {
+        super.unbind(state);
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE0);
+    }
 }

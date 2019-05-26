@@ -37,6 +37,7 @@ import dagon.core.bindings;
 import dagon.graphics.screensurface;
 import dagon.render.pipeline;
 import dagon.render.stage;
+import dagon.render.framebuffer;
 import dagon.render.shaders.debugoutput;
 import dagon.render.deferred.geometrystage;
 
@@ -56,6 +57,7 @@ class DeferredDebugOutputStage: RenderStage
     ScreenSurface screenSurface;
     DebugOutputShader debugOutputShader;
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
+    Framebuffer outputBuffer;
     
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
@@ -69,6 +71,9 @@ class DeferredDebugOutputStage: RenderStage
     {
         if (view && geometryStage)
         {
+            if (outputBuffer)
+                outputBuffer.bind();
+            
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
@@ -92,6 +97,9 @@ class DeferredDebugOutputStage: RenderStage
             debugOutputShader.bind(&state);
             screenSurface.render(&state);
             debugOutputShader.unbind(&state);
+            
+            if (outputBuffer)
+                outputBuffer.unbind();
         }
     }
 }

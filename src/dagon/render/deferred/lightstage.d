@@ -37,6 +37,7 @@ import dagon.graphics.screensurface;
 import dagon.graphics.light;
 import dagon.render.pipeline;
 import dagon.render.stage;
+import dagon.render.framebuffer;
 import dagon.render.shaders.sunlight;
 import dagon.render.deferred.geometrystage;
 
@@ -45,6 +46,7 @@ class DeferredLightStage: RenderStage
     DeferredGeometryStage geometryStage;
     ScreenSurface screenSurface;
     SunLightShader sunLightShader;
+    Framebuffer outputBuffer;
     
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
@@ -58,6 +60,9 @@ class DeferredLightStage: RenderStage
     {
         if (group && view && geometryStage)
         {
+            if (outputBuffer)
+                outputBuffer.bind();
+                
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
@@ -74,19 +79,25 @@ class DeferredLightStage: RenderStage
                 Light light = cast(Light)entity;
                 if (light)
                 {
-                    state.light = light;
-                    
-                    if (light.type == LightType.Sun)
+                    if (light.shining)
                     {
-                        sunLightShader.bind(&state);
-                        screenSurface.render(&state);
-                        sunLightShader.unbind(&state);
+                        state.light = light;
+                        
+                        if (light.type == LightType.Sun)
+                        {
+                            sunLightShader.bind(&state);
+                            screenSurface.render(&state);
+                            sunLightShader.unbind(&state);
+                        }
+                        // TODO: other light types
                     }
-                    // TODO: other light types
                 }
             }
             
             glDisable(GL_BLEND);
+            
+            if (outputBuffer)
+                outputBuffer.unbind();
         }
     }
 }
