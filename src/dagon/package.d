@@ -74,10 +74,12 @@ public
     import dagon.postproc.presentstage;
     import dagon.postproc.shaders.fxaa;
     import dagon.postproc.shaders.present;
+    import dagon.postproc.shaders.tonemap;
     
     import dagon.render.deferred;
     import dagon.render.framebuffer;
     import dagon.render.framebuffer_rgba8;
+    import dagon.render.framebuffer_rgba16f;
     import dagon.render.gbuffer;
     import dagon.render.pipeline;
     import dagon.render.shadowstage;

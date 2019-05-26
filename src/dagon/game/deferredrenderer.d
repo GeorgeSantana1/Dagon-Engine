@@ -36,7 +36,7 @@ import dagon.resource.scene;
 import dagon.render.deferred;
 import dagon.render.framebuffer;
 import dagon.render.shadowstage;
-import dagon.render.framebuffer_rgba8;
+import dagon.render.framebuffer_rgba16f;
 import dagon.game.renderer;
 
 class DeferredRenderer: Renderer
@@ -68,7 +68,7 @@ class DeferredRenderer: Renderer
         stageDebug.view = view;
         stageDebug.active = false;
         
-        outputBuffer = New!FramebufferRGBA8(eventManager.windowWidth, eventManager.windowHeight, this);
+        outputBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
         stageEnvironment.outputBuffer = outputBuffer;
         stageLight.outputBuffer = outputBuffer;
         stageDebug.outputBuffer = outputBuffer;

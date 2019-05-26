@@ -208,5 +208,5 @@ void main()
     float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
     radiance *= fogFactor;
     
-    fragColor = vec4(toGamma(radiance), 1.0);
+    fragColor = vec4(radiance, 1.0);
 }

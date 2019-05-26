@@ -39,6 +39,7 @@ import dagon.render.framebuffer;
 import dagon.render.framebuffer_rgba8;
 import dagon.postproc.filterstage;
 import dagon.postproc.presentstage;
+import dagon.postproc.shaders.tonemap;
 import dagon.postproc.shaders.fxaa;
 import dagon.game.renderer;
 
@@ -51,6 +52,12 @@ class PostProcRenderer: Renderer
     Framebuffer pingPongBuffer1;
     Framebuffer pingPongBuffer2;
     
+    TonemapShader tonemapShader;
+    FXAAShader fxaaShader;
+    
+    Tonemapper tonemapper = Tonemapper.ACES;
+    float exposure = 1.0f;
+    
     this(EventManager eventManager, Framebuffer inputBuffer, Owner owner)
     {
         super(eventManager, owner);
@@ -60,13 +67,27 @@ class PostProcRenderer: Renderer
         pingPongBuffer1 = New!FramebufferRGBA8(view.width, view.height, this);
         pingPongBuffer2 = New!FramebufferRGBA8(view.width, view.height, this);
         
-        auto fxaaShader = New!FXAAShader(this);
+        tonemapShader = New!TonemapShader(this);
+        auto stageTonemap = New!FilterStage(pipeline, tonemapShader);
+        stageTonemap.view = view;
+        stageTonemap.inputBuffer = inputBuffer;
+        stageTonemap.outputBuffer = pingPongBuffer1;
+        
+        fxaaShader = New!FXAAShader(this);
         auto stageFXAA = New!FilterStage(pipeline, fxaaShader);
         stageFXAA.view = view;
-        stageFXAA.inputBuffer = inputBuffer;
-        stageFXAA.outputBuffer = pingPongBuffer1;
+        stageFXAA.inputBuffer = pingPongBuffer1;
+        stageFXAA.outputBuffer = pingPongBuffer2;
         
-        outputBuffer = pingPongBuffer1;
+        outputBuffer = pingPongBuffer2;
+    }
+    
+    override void update(Time t)
+    {
+        super.update(t);
+        
+        tonemapShader.tonemapper = tonemapper;
+        tonemapShader.exposure = exposure;
     }
     
     override void setViewport(uint x, uint y, uint w, uint h)
