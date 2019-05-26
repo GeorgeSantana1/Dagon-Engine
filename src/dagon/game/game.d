@@ -37,6 +37,7 @@ import dagon.resource.scene;
 import dagon.game.renderer;
 import dagon.game.deferredrenderer;
 import dagon.game.postprocrenderer;
+import dagon.game.presentrenderer;
 import dagon.game.hudrenderer;
 
 class Game: Application
@@ -48,6 +49,7 @@ class Game: Application
     Renderer renderer;
     DeferredRenderer deferredRenderer;
     PostProcRenderer postProcRenderer;
+    PresentRenderer presentRenderer;
     HUDRenderer hudRenderer;
     
     this(uint w, uint h, bool fullscreen, string title, string[] args)
@@ -58,10 +60,8 @@ class Game: Application
         
         deferredRenderer = New!DeferredRenderer(eventManager, this);
         renderer = deferredRenderer;
-        
-        postProcRenderer = New!PostProcRenderer(eventManager, this);
-        postProcRenderer.stagePresent.inputBuffer = deferredRenderer.outputBuffer;
-        
+        postProcRenderer = New!PostProcRenderer(eventManager, deferredRenderer.outputBuffer, this);
+        presentRenderer = New!PresentRenderer(eventManager, postProcRenderer.outputBuffer, this);
         hudRenderer = New!HUDRenderer(eventManager, this);
         
         maximizeWindow();
@@ -77,6 +77,7 @@ class Game: Application
         }
         deferredRenderer.update(t);
         postProcRenderer.update(t);
+        presentRenderer.update(t);
         hudRenderer.update(t);
     }
     
@@ -89,6 +90,7 @@ class Game: Application
     {
         deferredRenderer.render();
         postProcRenderer.render();
+        presentRenderer.render();
         hudRenderer.render();
     }
 }

@@ -25,55 +25,58 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.game.postprocrenderer;
+module dagon.postproc.filterstage;
+
+import std.stdio;
 
 import dlib.core.memory;
 import dlib.core.ownership;
 
-import dagon.core.event;
-import dagon.core.time;
-import dagon.resource.scene;
+import dagon.core.bindings;
+import dagon.graphics.screensurface;
+import dagon.graphics.shader;
+import dagon.render.pipeline;
 import dagon.render.stage;
-import dagon.render.deferred;
 import dagon.render.framebuffer;
-import dagon.render.framebuffer_rgba8;
-import dagon.postproc.filterstage;
-import dagon.postproc.presentstage;
-import dagon.postproc.shaders.fxaa;
-import dagon.game.renderer;
 
-class PostProcRenderer: Renderer
+class FilterStage: RenderStage
 {
     Framebuffer inputBuffer;
     Framebuffer outputBuffer;
-    PresentStage stagePresent;
+    ScreenSurface screenSurface;
+    Shader shader;
     
-    Framebuffer pingPongBuffer1;
-    Framebuffer pingPongBuffer2;
-    
-    this(EventManager eventManager, Framebuffer inputBuffer, Owner owner)
+    this(RenderPipeline pipeline, Shader shader)
     {
-        super(eventManager, owner);
-        
-        this.inputBuffer = inputBuffer;
-        
-        pingPongBuffer1 = New!FramebufferRGBA8(view.width, view.height, this);
-        pingPongBuffer2 = New!FramebufferRGBA8(view.width, view.height, this);
-        
-        auto fxaaShader = New!FXAAShader(this);
-        auto stageFXAA = New!FilterStage(pipeline, fxaaShader);
-        stageFXAA.view = view;
-        stageFXAA.inputBuffer = inputBuffer;
-        stageFXAA.outputBuffer = pingPongBuffer1;
-        
-        outputBuffer = pingPongBuffer1;
+        super(pipeline);
+        screenSurface = New!ScreenSurface(this);
+        this.shader = shader;
     }
     
-    override void setViewport(uint x, uint y, uint w, uint h)
+    override void render()
     {
-        super.setViewport(x, y, w, h);
-        
-        pingPongBuffer1.resize(view.width, view.height);
-        pingPongBuffer2.resize(view.width, view.height);
+        if (inputBuffer && view)
+        {
+            if (outputBuffer)
+                outputBuffer.bind();
+            
+            state.colorTexture = inputBuffer.colorTexture;
+            state.depthTexture = inputBuffer.depthTexture;
+            
+            glScissor(view.x, view.y, view.width, view.height);
+            glViewport(view.x, view.y, view.width, view.height);
+            
+            //glClearColor(0.0, 0.0, 0.0, 1.0);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            glDisable(GL_DEPTH_TEST);
+            shader.bind(&state);
+            screenSurface.render(&state);
+            shader.unbind(&state);
+            glEnable(GL_DEPTH_TEST);
+            
+            if (outputBuffer)
+                outputBuffer.unbind();
+        }
     }
 }

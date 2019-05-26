@@ -25,7 +25,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.game.postprocrenderer;
+module dagon.game.presentrenderer;
 
 import dlib.core.memory;
 import dlib.core.ownership;
@@ -36,44 +36,21 @@ import dagon.resource.scene;
 import dagon.render.stage;
 import dagon.render.deferred;
 import dagon.render.framebuffer;
-import dagon.render.framebuffer_rgba8;
-import dagon.postproc.filterstage;
 import dagon.postproc.presentstage;
-import dagon.postproc.shaders.fxaa;
 import dagon.game.renderer;
 
-class PostProcRenderer: Renderer
+class PresentRenderer: Renderer
 {
     Framebuffer inputBuffer;
-    Framebuffer outputBuffer;
     PresentStage stagePresent;
-    
-    Framebuffer pingPongBuffer1;
-    Framebuffer pingPongBuffer2;
     
     this(EventManager eventManager, Framebuffer inputBuffer, Owner owner)
     {
         super(eventManager, owner);
         
         this.inputBuffer = inputBuffer;
-        
-        pingPongBuffer1 = New!FramebufferRGBA8(view.width, view.height, this);
-        pingPongBuffer2 = New!FramebufferRGBA8(view.width, view.height, this);
-        
-        auto fxaaShader = New!FXAAShader(this);
-        auto stageFXAA = New!FilterStage(pipeline, fxaaShader);
-        stageFXAA.view = view;
-        stageFXAA.inputBuffer = inputBuffer;
-        stageFXAA.outputBuffer = pingPongBuffer1;
-        
-        outputBuffer = pingPongBuffer1;
-    }
-    
-    override void setViewport(uint x, uint y, uint w, uint h)
-    {
-        super.setViewport(x, y, w, h);
-        
-        pingPongBuffer1.resize(view.width, view.height);
-        pingPongBuffer2.resize(view.width, view.height);
+        stagePresent = New!PresentStage(pipeline);
+        stagePresent.view = view;
+        stagePresent.inputBuffer = inputBuffer;
     }
 }

@@ -25,55 +25,64 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.game.postprocrenderer;
+module dagon.postproc.shaders.fxaa;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.math.vector;
+import dlib.math.matrix;
+import dlib.math.transformation;
+import dlib.math.interpolation;
+import dlib.image.color;
 
-import dagon.core.event;
-import dagon.core.time;
-import dagon.resource.scene;
-import dagon.render.stage;
+import dagon.core.bindings;
+import dagon.graphics.shader;
+import dagon.graphics.state;
 import dagon.render.deferred;
-import dagon.render.framebuffer;
-import dagon.render.framebuffer_rgba8;
-import dagon.postproc.filterstage;
-import dagon.postproc.presentstage;
-import dagon.postproc.shaders.fxaa;
-import dagon.game.renderer;
 
-class PostProcRenderer: Renderer
+class FXAAShader: Shader
 {
-    Framebuffer inputBuffer;
-    Framebuffer outputBuffer;
-    PresentStage stagePresent;
+    string vs = import("FXAA.vert.glsl");
+    string fs = import("FXAA.frag.glsl");
     
-    Framebuffer pingPongBuffer1;
-    Framebuffer pingPongBuffer2;
-    
-    this(EventManager eventManager, Framebuffer inputBuffer, Owner owner)
+    bool enabled = true;
+
+    this(Owner owner)
     {
-        super(eventManager, owner);
-        
-        this.inputBuffer = inputBuffer;
-        
-        pingPongBuffer1 = New!FramebufferRGBA8(view.width, view.height, this);
-        pingPongBuffer2 = New!FramebufferRGBA8(view.width, view.height, this);
-        
-        auto fxaaShader = New!FXAAShader(this);
-        auto stageFXAA = New!FilterStage(pipeline, fxaaShader);
-        stageFXAA.view = view;
-        stageFXAA.inputBuffer = inputBuffer;
-        stageFXAA.outputBuffer = pingPongBuffer1;
-        
-        outputBuffer = pingPongBuffer1;
+        auto myProgram = New!ShaderProgram(vs, fs, this);
+        super(myProgram, owner);
     }
-    
-    override void setViewport(uint x, uint y, uint w, uint h)
+
+    override void bind(State* state)
     {
-        super.setViewport(x, y, w, h);
+        setParameter("viewSize", state.resolution);
+        setParameter("enabled", enabled);
         
-        pingPongBuffer1.resize(view.width, view.height);
-        pingPongBuffer2.resize(view.width, view.height);
+        // Texture 0 - color buffer
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, state.colorTexture);
+        setParameter("colorBuffer", 0);
+        
+        // Texture 1 - depth buffer
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, state.depthTexture);
+        setParameter("depthBuffer", 1);
+        
+        glActiveTexture(GL_TEXTURE0);
+
+        super.bind(state);
+    }
+
+    override void unbind(State* state)
+    {
+        super.unbind(state);
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE0);
     }
 }
