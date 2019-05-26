@@ -70,9 +70,13 @@ public
     import dagon.graphics.texture;
     import dagon.graphics.updateable;
     
+    import dagon.postproc.blurstage;
     import dagon.postproc.filterstage;
     import dagon.postproc.presentstage;
+    import dagon.postproc.shaders.blur;
+    import dagon.postproc.shaders.brightpass;
     import dagon.postproc.shaders.fxaa;
+    import dagon.postproc.shaders.glow;
     import dagon.postproc.shaders.present;
     import dagon.postproc.shaders.tonemap;
     

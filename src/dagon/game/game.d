@@ -63,8 +63,6 @@ class Game: Application
         postProcRenderer = New!PostProcRenderer(eventManager, deferredRenderer.outputBuffer, this);
         presentRenderer = New!PresentRenderer(eventManager, postProcRenderer.outputBuffer, this);
         hudRenderer = New!HUDRenderer(eventManager, this);
-        
-        maximizeWindow();
     }
     
     void fixedUpdate(Time t)

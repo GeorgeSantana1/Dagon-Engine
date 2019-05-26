@@ -37,8 +37,12 @@ import dagon.render.stage;
 import dagon.render.deferred;
 import dagon.render.framebuffer;
 import dagon.render.framebuffer_rgba8;
+import dagon.render.framebuffer_rgba16f;
 import dagon.postproc.filterstage;
+import dagon.postproc.blurstage;
 import dagon.postproc.presentstage;
+import dagon.postproc.shaders.brightpass;
+import dagon.postproc.shaders.glow;
 import dagon.postproc.shaders.tonemap;
 import dagon.postproc.shaders.fxaa;
 import dagon.game.renderer;
@@ -49,12 +53,22 @@ class PostProcRenderer: Renderer
     Framebuffer outputBuffer;
     PresentStage stagePresent;
     
-    Framebuffer pingPongBuffer1;
-    Framebuffer pingPongBuffer2;
+    Framebuffer ldrBuffer1;
+    Framebuffer ldrBuffer2;
     
+    Framebuffer hdrBuffer1;
+    Framebuffer hdrBuffer2;
+    
+    BlurStage stageBlur;
+    
+    BrightPassShader brightPassShader;
+    GlowShader glowShader;
     TonemapShader tonemapShader;
     FXAAShader fxaaShader;
     
+    float glowThreshold = 1.0f;
+    float glowIntensity = 1.0f;
+    int glowRadius = 7;
     Tonemapper tonemapper = Tonemapper.ACES;
     float exposure = 1.0f;
     
@@ -64,28 +78,56 @@ class PostProcRenderer: Renderer
         
         this.inputBuffer = inputBuffer;
         
-        pingPongBuffer1 = New!FramebufferRGBA8(view.width, view.height, this);
-        pingPongBuffer2 = New!FramebufferRGBA8(view.width, view.height, this);
+        ldrBuffer1 = New!FramebufferRGBA8(view.width, view.height, this);
+        ldrBuffer2 = New!FramebufferRGBA8(view.width, view.height, this);
+        
+        hdrBuffer1 = New!FramebufferRGBA16f(view.width, view.height, this);
+        hdrBuffer2 = New!FramebufferRGBA16f(view.width, view.height, this);
+        
+        brightPassShader = New!BrightPassShader(this);
+        brightPassShader.luminanceThreshold = glowThreshold;
+        auto stageBrightPass = New!FilterStage(pipeline, brightPassShader);
+        stageBrightPass.view = view;
+        stageBrightPass.inputBuffer = inputBuffer;
+        stageBrightPass.outputBuffer = hdrBuffer1;
+        
+        stageBlur = New!BlurStage(pipeline);
+        stageBlur.view = view;
+        stageBlur.inputBuffer = stageBrightPass.outputBuffer;
+        stageBlur.outputBuffer = hdrBuffer1;
+        stageBlur.outputBuffer2 = hdrBuffer2;
+        stageBlur.radius = glowRadius;
+        
+        glowShader = New!GlowShader(this);
+        glowShader.blurredBuffer = stageBlur.outputBuffer;
+        glowShader.intensity = glowIntensity;
+        auto stageGlow = New!FilterStage(pipeline, glowShader);
+        stageGlow.view = view;
+        stageGlow.inputBuffer = inputBuffer;
+        stageGlow.outputBuffer = hdrBuffer2;
         
         tonemapShader = New!TonemapShader(this);
         auto stageTonemap = New!FilterStage(pipeline, tonemapShader);
         stageTonemap.view = view;
-        stageTonemap.inputBuffer = inputBuffer;
-        stageTonemap.outputBuffer = pingPongBuffer1;
+        stageTonemap.inputBuffer = stageGlow.outputBuffer;
+        stageTonemap.outputBuffer = ldrBuffer1;
         
         fxaaShader = New!FXAAShader(this);
         auto stageFXAA = New!FilterStage(pipeline, fxaaShader);
         stageFXAA.view = view;
-        stageFXAA.inputBuffer = pingPongBuffer1;
-        stageFXAA.outputBuffer = pingPongBuffer2;
+        stageFXAA.inputBuffer = ldrBuffer1;
+        stageFXAA.outputBuffer = ldrBuffer2;
         
-        outputBuffer = pingPongBuffer2;
+        outputBuffer = ldrBuffer2;
     }
     
     override void update(Time t)
     {
         super.update(t);
         
+        brightPassShader.luminanceThreshold = glowThreshold;
+        glowShader.intensity = glowIntensity;
+        stageBlur.radius = glowRadius;
         tonemapShader.tonemapper = tonemapper;
         tonemapShader.exposure = exposure;
     }
@@ -94,7 +136,10 @@ class PostProcRenderer: Renderer
     {
         super.setViewport(x, y, w, h);
         
-        pingPongBuffer1.resize(view.width, view.height);
-        pingPongBuffer2.resize(view.width, view.height);
+        ldrBuffer1.resize(view.width, view.height);
+        ldrBuffer2.resize(view.width, view.height);
+        
+        hdrBuffer1.resize(view.width, view.height);
+        hdrBuffer2.resize(view.width, view.height);
     }
 }
