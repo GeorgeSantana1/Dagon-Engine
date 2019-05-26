@@ -35,6 +35,7 @@ import dagon.core.time;
 import dagon.resource.scene;
 import dagon.render.stage;
 import dagon.render.deferred;
+import dagon.render.view;
 import dagon.render.framebuffer;
 import dagon.render.framebuffer_rgba8;
 import dagon.render.framebuffer_rgba16f;
@@ -58,13 +59,17 @@ class PostProcRenderer: Renderer
     
     Framebuffer hdrBuffer1;
     Framebuffer hdrBuffer2;
+    Framebuffer hdrBuffer3;
     
+    RenderView viewHalf;
     BlurStage stageBlur;
     
     BrightPassShader brightPassShader;
     GlowShader glowShader;
     TonemapShader tonemapShader;
     FXAAShader fxaaShader;
+    
+    float glowViewScale = 0.33f;
     
     float glowThreshold = 1.0f;
     float glowIntensity = 1.0f;
@@ -78,21 +83,24 @@ class PostProcRenderer: Renderer
         
         this.inputBuffer = inputBuffer;
         
+        viewHalf = New!RenderView(0, 0, cast(uint)(view.width * glowViewScale), cast(uint)(view.height * glowViewScale), this);
+        
         ldrBuffer1 = New!FramebufferRGBA8(view.width, view.height, this);
         ldrBuffer2 = New!FramebufferRGBA8(view.width, view.height, this);
         
-        hdrBuffer1 = New!FramebufferRGBA16f(view.width, view.height, this);
-        hdrBuffer2 = New!FramebufferRGBA16f(view.width, view.height, this);
+        hdrBuffer1 = New!FramebufferRGBA16f(viewHalf.width, viewHalf.height, this);
+        hdrBuffer2 = New!FramebufferRGBA16f(viewHalf.width, viewHalf.height, this);
+        hdrBuffer3 = New!FramebufferRGBA16f(view.width, view.height, this);
         
         brightPassShader = New!BrightPassShader(this);
         brightPassShader.luminanceThreshold = glowThreshold;
         auto stageBrightPass = New!FilterStage(pipeline, brightPassShader);
-        stageBrightPass.view = view;
+        stageBrightPass.view = viewHalf;
         stageBrightPass.inputBuffer = inputBuffer;
         stageBrightPass.outputBuffer = hdrBuffer1;
         
         stageBlur = New!BlurStage(pipeline);
-        stageBlur.view = view;
+        stageBlur.view = viewHalf;
         stageBlur.inputBuffer = stageBrightPass.outputBuffer;
         stageBlur.outputBuffer = hdrBuffer1;
         stageBlur.outputBuffer2 = hdrBuffer2;
@@ -104,7 +112,7 @@ class PostProcRenderer: Renderer
         auto stageGlow = New!FilterStage(pipeline, glowShader);
         stageGlow.view = view;
         stageGlow.inputBuffer = inputBuffer;
-        stageGlow.outputBuffer = hdrBuffer2;
+        stageGlow.outputBuffer = hdrBuffer3;
         
         tonemapShader = New!TonemapShader(this);
         auto stageTonemap = New!FilterStage(pipeline, tonemapShader);
@@ -136,10 +144,13 @@ class PostProcRenderer: Renderer
     {
         super.setViewport(x, y, w, h);
         
+        viewHalf.resize(cast(uint)(view.width * glowViewScale), cast(uint)(view.height * glowViewScale));
+        
         ldrBuffer1.resize(view.width, view.height);
         ldrBuffer2.resize(view.width, view.height);
         
-        hdrBuffer1.resize(view.width, view.height);
-        hdrBuffer2.resize(view.width, view.height);
+        hdrBuffer1.resize(viewHalf.width, viewHalf.height);
+        hdrBuffer2.resize(viewHalf.width, viewHalf.height);
+        hdrBuffer3.resize(view.width, view.height);
     }
 }
