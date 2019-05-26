@@ -71,9 +71,9 @@ class PostProcRenderer: Renderer
     
     float glowViewScale = 0.33f;
     
-    float glowThreshold = 1.0f;
-    float glowIntensity = 1.0f;
-    int glowRadius = 7;
+    float glowThreshold = 0.8f;
+    float glowIntensity = 0.6f;
+    int glowRadius = 5;
     Tonemapper tonemapper = Tonemapper.ACES;
     float exposure = 1.0f;
     
