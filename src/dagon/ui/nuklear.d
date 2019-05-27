@@ -44,7 +44,7 @@ import dagon.graphics.drawable;
 import dagon.graphics.updateable;
 import dagon.graphics.shaderloader;
 import dagon.graphics.texture;
-//import dagon.resource.fontasset;
+import dagon.resource.font;
 
 version(NoNuklear)
 {
@@ -464,21 +464,18 @@ class NuklearGUI : Owner, Updateable, Drawable
             return fontDefaultGlyphRanges;
     }
 
-    /*
-    //TODO
     NKFont* addFont(FontAsset font, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)
     {
         return addFont(font.buffer.ptr, font.buffer.length, height, range);
     }
-    */
-
+/*
     NKFont* addFont(string filename, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)
     {
         import std.file;
         ubyte[] buffer = cast(ubyte[])std.file.read(filename);
         return addFont(buffer.ptr, buffer.length, height, range);
     }
-
+*/
     NKFont* addFont(ubyte* buffer, ulong len, float height = 13, const(NKRune[]) range = fontDefaultGlyphRanges)
     {
         nk_font_config cfg = nk_font_config_(0);
