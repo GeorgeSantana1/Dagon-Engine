@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.postproc.shaders.present;
 
+import std.stdio;
+
 import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
@@ -49,6 +51,8 @@ class PresentShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        
+        debug writeln("PresentShader: program ", program.program);
     }
 
     override void bind(State* state)

@@ -55,6 +55,9 @@ class SunLightShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        
+        debug writeln("SunLightShader: program ", program.program);
+        
         defaultShadowMatrix = Matrix4x4f.identity;
         
         glGenTextures(1, &defaultShadowTexture);

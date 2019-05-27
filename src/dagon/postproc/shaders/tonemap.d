@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.postproc.shaders.tonemap;
 
+import std.stdio;
+
 import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
@@ -61,6 +63,8 @@ class TonemapShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        
+        debug writeln("TonemapShader: program ", program.program);
     }
 
     override void bind(State* state)

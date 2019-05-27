@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.postproc.shaders.blur;
 
+import std.stdio;
+
 import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
@@ -53,6 +55,8 @@ class BlurShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        
+        debug writeln("BlurShader: program ", program.program);
         
         direction = Vector2f(1.0f, 0.0f);
     }

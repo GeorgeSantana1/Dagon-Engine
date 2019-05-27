@@ -196,6 +196,8 @@ final class FreeTypeFont: Font
         if (vert != 0 && frag != 0)
             shaderProgram = linkShaders(vert, frag);
 
+        debug writeln("GlyphShader: program ", shaderProgram);
+
         if (shaderProgram != 0)
         {
             modelViewMatrixLoc = glGetUniformLocation(shaderProgram, "modelViewMatrix");

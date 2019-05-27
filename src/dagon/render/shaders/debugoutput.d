@@ -54,6 +54,8 @@ class DebugOutputShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        
+        writeln("DebugOutputShader: program ", program.program);
     }
 
     override void bind(State* state)

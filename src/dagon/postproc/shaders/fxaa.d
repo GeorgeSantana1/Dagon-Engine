@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.postproc.shaders.fxaa;
 
+import std.stdio;
+
 import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
@@ -51,6 +53,8 @@ class FXAAShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        
+        debug writeln("FXAAShader: program ", program.program);
     }
 
     override void bind(State* state)

@@ -51,6 +51,8 @@ class ShadowShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+        
+        debug writeln("ShadowShader: program ", program.program);
     }
 
     override void bind(State* state)

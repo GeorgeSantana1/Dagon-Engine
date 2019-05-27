@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.ui.nuklear;
 
+import std.stdio;
 import core.stdc.stdarg;
 
 import dlib.core.ownership;
@@ -238,6 +239,8 @@ class NuklearGUI : Owner, Updateable, Drawable
         fragmentShader = compileShader(fs, ShaderStage.fragment);
         if (vertexShader != 0 && fragmentShader != 0)
             shaderProgram = linkShaders(vertexShader, fragmentShader);
+
+        debug writeln("NuklearShader: program ", shaderProgram);
 
         if (shaderProgram != 0)
         {
