@@ -42,13 +42,6 @@ import dagon.core.bindings;
 import dagon.core.event;
 import dagon.core.time;
 
-debug
-{
-    version = DagonDebug;
-}
-
-version = DagonDebug;
-
 void exitWithError(string message)
 {
     writeln(message);
@@ -97,9 +90,9 @@ class Application: EventListener
     SDL_Window* window = null;
     SDL_GLContext glcontext;
     string libdir;
-    
+
     private EventManager _eventManager;
-    
+
     private double elapsedTime = 0.0;
 
     /++
@@ -204,11 +197,11 @@ class Application: EventListener
         glEnable(GL_POLYGON_OFFSET_FILL);
         glCullFace(GL_BACK);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-        
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         SDL_GL_SwapWindow(window);
-        
-        version(DagonDebug)
+
+        debug
         {
             if (hasKHRDebug)
             {
@@ -221,7 +214,7 @@ class Application: EventListener
             }
         }
     }
-    
+
     void maximizeWindow()
     {
         SDL_MaximizeWindow(window);
@@ -262,19 +255,16 @@ class Application: EventListener
         {
             eventManager.update();
             processEvents();
-            
+
             t.delta = eventManager.deltaTime;
             t.elapsed = elapsedTime;
             elapsedTime += t.elapsed;
-            
+
             onUpdate(t);
             onRender();
-            
-            version(DagonDebug)
-            {
-                checkGLError();
-            }
-            
+
+            debug checkGLError();
+
             SDL_GL_SwapWindow(window);
         }
     }
