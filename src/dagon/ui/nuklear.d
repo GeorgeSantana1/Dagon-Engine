@@ -75,6 +75,16 @@ alias nk_handle NKHandle;
 alias nk_window NKWindow;
 alias nk_panel NKPanel;
 
+NKColor toNKColor(Color4f col)
+{
+    auto c = col.convert(8);
+    return NKColor(
+        cast(ubyte)c.r,
+        cast(ubyte)c.g,
+        cast(ubyte)c.b,
+        cast(ubyte)c.a);
+}
+
 NKImage toNKImage(Texture texture)
 {
     NKImage img;
@@ -89,7 +99,7 @@ NKImage toNKImage(Texture texture)
 private extern(C) void clipboardPaste(nk_handle usr, nk_text_edit* edit)
 {
     char* text = SDL_GetClipboardText();
-    if (text) 
+    if (text)
     {
         // Determine how many codepoints do we have
         uint numCharacters = 0;
@@ -103,7 +113,7 @@ private extern(C) void clipboardPaste(nk_handle usr, nk_text_edit* edit)
             offset += dec.index;
             numCharacters++;
         }
-    
+
         nk_textedit_paste(edit, text, numCharacters); //nk_strlen(text)
         SDL_free(text);
     }
@@ -116,7 +126,7 @@ private extern(C) void clipboardCopy(nk_handle usr, const(char)* text, int len)
     import core.stdc.stdlib;
     char *str = null;
     if (!len) return;
-    
+
     // Decode len codepoints and determine byte length
     size_t byteLen = 0;
     for(int pos = 0; pos < len; pos++)
@@ -125,7 +135,7 @@ private extern(C) void clipboardCopy(nk_handle usr, const(char)* text, int len)
         dec.decodeNext();
         byteLen += dec.index;
     }
-    
+
     str = cast(char*)malloc(byteLen+1);
     if (!str) return;
     memcpy(str, text, byteLen);
@@ -245,7 +255,7 @@ class NuklearGUI : Owner, Updateable, Drawable
         if (shaderProgram != 0)
         {
             textureLoc = glGetUniformLocation(shaderProgram, "Texture");
-            projectionMatrixLoc = glGetUniformLocation(shaderProgram, "ProjMtx");      
+            projectionMatrixLoc = glGetUniformLocation(shaderProgram, "ProjMtx");
             positionLoc = glGetAttribLocation(shaderProgram, "va_Vertex");
             texcoordLoc = glGetAttribLocation(shaderProgram, "va_Texcoord");
             colorLoc = glGetAttribLocation(shaderProgram, "va_Color");
@@ -341,9 +351,9 @@ class NuklearGUI : Owner, Updateable, Drawable
         vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         elements = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
         {
-            // fill convert configuration 
+            // fill convert configuration
             nk_convert_config config;
-            nk_draw_vertex_layout_element[] vertex_layout = 
+            nk_draw_vertex_layout_element[] vertex_layout =
             [
                 { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, 0 },
                     { NK_VERTEX_TEXCOORD,  NK_FORMAT_FLOAT, 8 },
@@ -399,13 +409,13 @@ class NuklearGUI : Owner, Updateable, Drawable
     static const(NKRune[]) fontArabicGlyphRanges = [ 0x0020, 0x00FF, 0x0600, 0x06FF, 0 ];
     static const(NKRune[]) fontArmenianGlyphRanges = [ 0x0020, 0x00FF, 0x0530, 0x058F, 0 ];
     static const(NKRune[]) fontGeorgianGlyphRanges = [ 0x0020, 0x00FF, 0x10A0, 0x10FF, 0 ];
-    
+
     static const(NKRune[]) localeGlyphRanges(string locale = systemLocale())
     {
         if (locale == "ru_RU" || // Russian
             locale == "tt_RU")   // Tatar
             return fontCyrillicGlyphRanges;
-            
+
         else if (locale == "fr_FR" || // French
                  locale == "de_DE" || // German
                  locale == "is_IS" || // Icelandic
@@ -419,22 +429,22 @@ class NuklearGUI : Owner, Updateable, Drawable
                  locale == "tr_TR" || // Turkish
                  locale == "cy_GB")   // Welsh
             return fontLatinExtendedAGlyphRanges;
-            
+
         else if (locale == "el_GR") // Greek
             return fontGreekGlyphRanges;
-            
+
         else if (locale == "zh_CN") // Chinese
             return fontChineseGlyphRanges;
-            
+
         else if (locale == "ja_JP") // Japanese
             return fontJapaneseGlyphRanges;
-            
+
         else if (locale == "ko_KR") // Korean
             return fontKoreanGlyphRanges;
-            
+
         else if (locale == "he_IL") // Hebrew
             return fontHebrewGlyphRanges;
-            
+
         else if (locale == "ar_AE" || // Arabic (United Arab Emirates)
                  locale == "ar_DZ" || // Arabic (Algeria)
                  locale == "ar_BH" || // Arabic (Bahrain)
@@ -453,13 +463,13 @@ class NuklearGUI : Owner, Updateable, Drawable
                  locale == "ar_TN" || // Arabic (Tunisia)
                  locale == "ar_YE")   // Arabic (Yemen)
             return fontArabicGlyphRanges;
-            
-        else if (locale == "hy_AM") // Armenian 
+
+        else if (locale == "hy_AM") // Armenian
             return fontArmenianGlyphRanges;
-            
-        else if (locale == "ka_GE") // Georgian 
+
+        else if (locale == "ka_GE") // Georgian
             return fontArmenianGlyphRanges;
-            
+
         else // Assume English
             return fontDefaultGlyphRanges;
     }
@@ -1127,9 +1137,14 @@ class NuklearGUI : Owner, Updateable, Drawable
         return nk_button_label(&ctx, title);
     }
 
+    int buttonColor(Color4f color)
+    {
+        return nk_button_color(&ctx, color.toNKColor);
+    }
+
     int buttonColor(NKColor color)
     {
-        return nk_button_color(&ctx,  color);
+        return nk_button_color(&ctx, color);
     }
 
     int buttonSymbol(nk_symbol_type type)
@@ -1373,7 +1388,7 @@ class NuklearGUI : Owner, Updateable, Drawable
     }
 
     Color4f colorPicker(Color4f color, nk_color_format format)
-    {   
+    {
         nk_colorf tmp = nk_colorf(color.r, color.g, color.b, color.a);
         tmp = nk_color_picker(&ctx, tmp, format);
         return Color4f(tmp.r, tmp.g, tmp.b, tmp.a);
@@ -1574,7 +1589,7 @@ class NuklearGUI : Owner, Updateable, Drawable
     {
     nk_combobox_callback(&ctx);
     }*/
-    
+
     int comboBeginText(const(char)* selected, int len, NKVec2 size)
     {
         return nk_combo_begin_text(&ctx, selected, len, size);
@@ -1716,7 +1731,7 @@ class NuklearGUI : Owner, Updateable, Drawable
         va_start(args, format);
         nk_tooltipfv(&ctx, format, args);
     }
-    
+
     int tooltipBegin(float width)
     {
         return nk_tooltip_begin(&ctx, width);
@@ -1831,7 +1846,7 @@ class NuklearGUI : Owner, Updateable, Drawable
     {
         nk_style_load_cursor(&ctx, cursor, c);
     }
-    
+
     void styleLoadAllCursors(NKCursor* cursor)
     {
         nk_style_load_all_cursors(&ctx, cursor);
@@ -1896,7 +1911,7 @@ class NuklearGUI : Owner, Updateable, Drawable
     {
         return nk_style_push_color(&ctx, address, value);
     }
-    
+
     int stylePopFont()
     {
         return nk_style_pop_font(&ctx);
