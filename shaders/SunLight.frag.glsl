@@ -2,6 +2,7 @@
 
 #define PI 3.14159265359
 const float PI2 = PI * 2.0;
+const float invPI = 1.0 / PI;
 
 uniform sampler2D colorBuffer;
 uniform sampler2D depthBuffer;
@@ -200,7 +201,7 @@ void main()
         float denominator = 4.0 * max(dot(N, E), 0.0) * NL;
         vec3 specular = numerator / max(denominator, 0.001);
 
-        radiance += (kD * albedo / PI + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
+        radiance += (kD * albedo * invPI + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
     }
     
     // Fog
