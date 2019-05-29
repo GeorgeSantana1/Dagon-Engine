@@ -68,8 +68,9 @@ uniform sampler2D ambientTexture;
 subroutine(srtAmbient) vec3 ambientEquirectangularMap(in vec3 wN, in float roughness)
 {
     ivec2 envMapSize = textureSize(ambientTexture, 0);
-    float maxLod = log2(float(max(envMapSize.x, envMapSize.y)));
-    float lod = sqrt(roughness) * maxLod;
+    float size = float(max(envMapSize.x, envMapSize.y));
+    float glossyExponent = 2.0 / pow(roughness, 4.0) - 2.0;
+    float lod = log2(size * sqrt(3.0)) - 0.5 * log2(glossyExponent + 1.0);
     return textureLod(ambientTexture, envMapEquirect(wN), lod).rgb * ambientEnergy;
 }
 
@@ -77,8 +78,9 @@ uniform samplerCube ambientTextureCube;
 subroutine(srtAmbient) vec3 ambientCubemap(in vec3 wN, in float roughness)
 {
     ivec2 envMapSize = textureSize(ambientTextureCube, 0);
-    float maxLod = log2(float(max(envMapSize.x, envMapSize.y)));
-    float lod = sqrt(roughness) * maxLod;
+    float size = float(max(envMapSize.x, envMapSize.y));
+    float glossyExponent = 2.0 / pow(roughness, 4.0) - 2.0;
+    float lod = log2(size * sqrt(3.0)) - 0.5 * log2(glossyExponent + 1.0);
     return textureLod(ambientTextureCube, wN, lod).rgb * ambientEnergy;
 }
 
