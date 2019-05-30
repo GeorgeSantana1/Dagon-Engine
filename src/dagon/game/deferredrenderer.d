@@ -52,9 +52,13 @@ class DeferredRenderer: Renderer
     
     RenderView viewHalf;
     FramebufferR8 occlusionBuffer;
-    float occlusionViewScale = 0.5f;
+    float occlusionViewScale = 1.0f;
     
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
+    
+    int ssaoSamples = 16;
+    float ssaoRadius = 0.2f;
+    float ssaoPower = 4.0f;
     
     this(EventManager eventManager, Owner owner)
     {
@@ -109,6 +113,11 @@ class DeferredRenderer: Renderer
         stageShadow.camera = activeCamera;
         stageDebug.active = (outputMode != DebugOutputMode.Radiance);
         stageDebug.outputMode = outputMode;
+        
+        stageOcclusion.ssaoShader.samples = ssaoSamples;
+        stageOcclusion.ssaoShader.radius = ssaoRadius;
+        stageOcclusion.ssaoShader.power = ssaoPower;
+        
         super.update(t);
     }
     
