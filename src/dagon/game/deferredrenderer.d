@@ -34,18 +34,25 @@ import dagon.core.event;
 import dagon.core.time;
 import dagon.resource.scene;
 import dagon.render.deferred;
+import dagon.render.view;
 import dagon.render.framebuffer;
 import dagon.render.shadowstage;
 import dagon.render.framebuffer_rgba16f;
+import dagon.render.framebuffer_r8;
 import dagon.game.renderer;
 
 class DeferredRenderer: Renderer
 {
     ShadowStage stageShadow;
     DeferredGeometryStage stageGeom;
+    DeferredOcclusionStage stageOcclusion;
     DeferredEnvironmentStage stageEnvironment;
     DeferredLightStage stageLight;
     DeferredDebugOutputStage stageDebug;
+    
+    RenderView viewHalf;
+    FramebufferR8 occlusionBuffer;
+    float occlusionViewScale = 0.5f;
     
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
     
@@ -53,10 +60,16 @@ class DeferredRenderer: Renderer
     {
         super(eventManager, owner);
         
+        viewHalf = New!RenderView(0, 0, cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale), this);
+        occlusionBuffer = New!FramebufferR8(viewHalf.width, viewHalf.height, this);
+        
         stageShadow = New!ShadowStage(pipeline);
         
         stageGeom = New!DeferredGeometryStage(pipeline);
         stageGeom.view = view;
+        
+        stageOcclusion = New!DeferredOcclusionStage(pipeline, stageGeom);
+        stageOcclusion.view = viewHalf;
         
         stageEnvironment = New!DeferredEnvironmentStage(pipeline, stageGeom);
         stageEnvironment.view = view;
@@ -70,8 +83,12 @@ class DeferredRenderer: Renderer
         
         outputBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
         stageEnvironment.outputBuffer = outputBuffer;
+        stageEnvironment.occlusionBuffer = occlusionBuffer;
         stageLight.outputBuffer = outputBuffer;
+        stageLight.occlusionBuffer = occlusionBuffer;
         stageDebug.outputBuffer = outputBuffer;
+        stageOcclusion.outputBuffer = occlusionBuffer;
+        stageDebug.occlusionBuffer = occlusionBuffer;
     }
     
     override void scene(Scene s)
@@ -100,5 +117,8 @@ class DeferredRenderer: Renderer
         super.setViewport(x, y, w, h);
         
         outputBuffer.resize(view.width, view.height);
+        
+        viewHalf.resize(cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale));
+        occlusionBuffer.resize(viewHalf.width, viewHalf.height);
     }
 }

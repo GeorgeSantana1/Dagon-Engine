@@ -169,6 +169,19 @@ class SunLightShader: Shader
             }
         }
         
+        // Texture 5 - occlusion buffer
+        if (glIsTexture(state.occlusionTexture))
+        {
+            glActiveTexture(GL_TEXTURE5);
+            glBindTexture(GL_TEXTURE_2D, state.occlusionTexture);
+            setParameter("occlusionBuffer", 5);
+            setParameter("haveOcclusionBuffer", true);
+        }
+        else
+        {
+            setParameter("haveOcclusionBuffer", false);
+        }
+        
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -192,6 +205,9 @@ class SunLightShader: Shader
         
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+        
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, 0);
         
         glActiveTexture(GL_TEXTURE0);
     }

@@ -33,4 +33,5 @@ public
     import dagon.render.deferred.environmentstage;
     import dagon.render.deferred.geometrystage;
     import dagon.render.deferred.lightstage;
+    import dagon.render.deferred.occlusionstage;
 }

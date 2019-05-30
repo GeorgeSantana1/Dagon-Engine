@@ -4,6 +4,8 @@ uniform sampler2D colorBuffer;
 uniform sampler2D depthBuffer;
 uniform sampler2D normalBuffer;
 uniform sampler2D pbrBuffer;
+uniform sampler2D occlusionBuffer;
+uniform bool haveOcclusionBuffer;
 
 uniform vec2 resolution;
 uniform mat4 viewMatrix;
@@ -18,6 +20,7 @@ uniform float zFar;
 // 3 - position
 // 4 - roughness
 // 5 - metallic
+// 6 - occlusion
 uniform int outputMode;
 
 in vec2 texCoord;
@@ -51,18 +54,22 @@ void main()
     float roughness = texture(pbrBuffer, texCoord).r;
     float metallic = texture(pbrBuffer, texCoord).g;
     
+    float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
+    
     float colorWeight = float(outputMode == 1);
     float normalWeight = float(outputMode == 2);
     float posWeight = float(outputMode == 3);
     float roughWeight = float(outputMode == 4);
     float metWeight = float(outputMode == 5);
+    float occWeight = float(outputMode == 6);
 
     vec3 output = 
         albedo * colorWeight + 
         N * normalWeight + 
         eyePos * posWeight +
         vec3(roughness) * roughWeight +
-        vec3(metallic) * metWeight;
+        vec3(metallic) * metWeight +
+        vec3(occlusion) * occWeight;
     
     fragColor = vec4(output, 1.0);
 }

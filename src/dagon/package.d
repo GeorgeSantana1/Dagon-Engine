@@ -82,6 +82,7 @@ public
     
     import dagon.render.deferred;
     import dagon.render.framebuffer;
+    import dagon.render.framebuffer_r8;
     import dagon.render.framebuffer_rgba8;
     import dagon.render.framebuffer_rgba16f;
     import dagon.render.gbuffer;

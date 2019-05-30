@@ -48,12 +48,14 @@ enum DebugOutputMode: int
     Normal = 2,
     Position = 3,
     Roughness = 4,
-    Metallic = 5
+    Metallic = 5,
+    Occlusion = 6
 }
 
 class DeferredDebugOutputStage: RenderStage
 {
     DeferredGeometryStage geometryStage;
+    Framebuffer occlusionBuffer;
     ScreenSurface screenSurface;
     DebugOutputShader debugOutputShader;
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
@@ -78,7 +80,11 @@ class DeferredDebugOutputStage: RenderStage
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
             state.pbrTexture = geometryStage.gbuffer.pbrTexture;
-            
+            if (occlusionBuffer)
+                state.occlusionTexture = occlusionBuffer.colorTexture;
+            else
+                state.occlusionTexture = 0;
+
             Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
             if (state.environment)
                 backgroundColor = state.environment.backgroundColor;

@@ -47,6 +47,7 @@ class DeferredLightStage: RenderStage
     ScreenSurface screenSurface;
     SunLightShader sunLightShader;
     Framebuffer outputBuffer;
+    Framebuffer occlusionBuffer;
     
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
@@ -67,6 +68,10 @@ class DeferredLightStage: RenderStage
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
             state.pbrTexture = geometryStage.gbuffer.pbrTexture;
+            if (occlusionBuffer)
+                state.occlusionTexture = occlusionBuffer.colorTexture;
+            else
+                state.occlusionTexture = 0;
             
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);

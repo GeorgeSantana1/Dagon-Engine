@@ -25,7 +25,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.deferred.environmentstage;
+module dagon.render.deferred.occlusionstage;
 
 import std.stdio;
 
@@ -38,23 +38,22 @@ import dagon.graphics.screensurface;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
-import dagon.render.shaders.environment;
+import dagon.render.shaders.ssao;
 import dagon.render.deferred.geometrystage;
 
-class DeferredEnvironmentStage: RenderStage
+class DeferredOcclusionStage: RenderStage
 {
     DeferredGeometryStage geometryStage;
     ScreenSurface screenSurface;
-    EnvironmentShader environmentShader;
+    SSAOShader ssaoShader;
     Framebuffer outputBuffer;
-    Framebuffer occlusionBuffer;
     
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
         super(pipeline);
         this.geometryStage = geometryStage;
         screenSurface = New!ScreenSurface(this);
-        environmentShader = New!EnvironmentShader(this);
+        ssaoShader = New!SSAOShader(this);
     }
     
     override void render()
@@ -68,28 +67,13 @@ class DeferredEnvironmentStage: RenderStage
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
             state.pbrTexture = geometryStage.gbuffer.pbrTexture;
-            if (occlusionBuffer)
-                state.occlusionTexture = occlusionBuffer.colorTexture;
-            else
-                state.occlusionTexture = 0;
-            
-            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
-            if (state.environment)
-                backgroundColor = state.environment.backgroundColor;
             
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
             
-            glClearColor(
-                backgroundColor.r, 
-                backgroundColor.g,
-                backgroundColor.b,
-                backgroundColor.a);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
-            environmentShader.bind(&state);
+            ssaoShader.bind(&state);
             screenSurface.render(&state);
-            environmentShader.unbind(&state);
+            ssaoShader.unbind(&state);
             
             if (outputBuffer)
                 outputBuffer.unbind();

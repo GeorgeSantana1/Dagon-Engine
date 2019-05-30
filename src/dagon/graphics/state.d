@@ -71,6 +71,7 @@ struct State
     GLuint depthTexture;
     GLuint normalTexture;
     GLuint pbrTexture;
+    GLuint occlusionTexture;
     
     void reset()
     {
@@ -107,5 +108,6 @@ struct State
         depthTexture = 0;
         normalTexture = 0;
         pbrTexture = 0;
+        occlusionTexture = 0;
     }
 }

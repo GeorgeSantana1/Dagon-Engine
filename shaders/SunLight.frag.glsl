@@ -8,6 +8,8 @@ uniform sampler2D colorBuffer;
 uniform sampler2D depthBuffer;
 uniform sampler2D normalBuffer;
 uniform sampler2D pbrBuffer;
+uniform sampler2D occlusionBuffer;
+uniform bool haveOcclusionBuffer;
 
 uniform vec2 resolution;
 uniform mat4 viewMatrix;
@@ -174,8 +176,7 @@ void main()
     float roughness = texture(pbrBuffer, texCoord).r;
     float metallic = texture(pbrBuffer, texCoord).g;
     
-    // TODO: read from buffer
-    float occlusion = 1.0;
+    float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
     
     vec3 f0 = mix(vec3(0.04), albedo, metallic);
 
@@ -201,7 +202,7 @@ void main()
         float denominator = 4.0 * max(dot(N, E), 0.0) * NL;
         vec3 specular = numerator / max(denominator, 0.001);
 
-        radiance += (kD * albedo * invPI + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
+        radiance += (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
     }
     
     // Fog

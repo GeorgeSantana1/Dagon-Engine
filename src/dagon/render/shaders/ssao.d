@@ -25,7 +25,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.shaders.debugoutput;
+module dagon.render.shaders.ssao;
 
 import std.stdio;
 import std.math;
@@ -41,35 +41,33 @@ import dlib.image.color;
 import dagon.core.bindings;
 import dagon.graphics.shader;
 import dagon.graphics.state;
-import dagon.render.deferred;
 
-class DebugOutputShader: Shader
+class SSAOShader: Shader
 {
-    string vs = import("DebugOutput.vert.glsl");
-    string fs = import("DebugOutput.frag.glsl");
+    string vs = import("SSAO.vert.glsl");
+    string fs = import("SSAO.frag.glsl");
     
-    DebugOutputMode outputMode = DebugOutputMode.Radiance;
+    int samples = 16;
+    float radius = 0.2f;
+    float power = 4.0f;
 
     this(Owner owner)
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
         
-        debug writeln("DebugOutputShader: program ", program.program);
+        debug writeln("SSAOShader: program ", program.program);
     }
 
     override void bind(State* state)
     {
-        setParameter("projectionMatrix", state.projectionMatrix);
-        
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
+        setParameter("projectionMatrix", state.projectionMatrix);
         setParameter("invProjectionMatrix", state.invProjectionMatrix);
         setParameter("resolution", state.resolution);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
-        
-        setParameter("outputMode", cast(int)outputMode);
         
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
@@ -86,23 +84,9 @@ class DebugOutputShader: Shader
         glBindTexture(GL_TEXTURE_2D, state.normalTexture);
         setParameter("normalBuffer", 2);
         
-        // Texture 3 - pbr buffer
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
-        setParameter("pbrBuffer", 3);
-        
-        // Texture 4 - occlusion buffer
-        if (glIsTexture(state.occlusionTexture))
-        {
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_2D, state.occlusionTexture);
-            setParameter("occlusionBuffer", 4);
-            setParameter("haveOcclusionBuffer", true);
-        }
-        else
-        {
-            setParameter("haveOcclusionBuffer", false);
-        }
+        setParameter("ssaoSamples", samples);
+        setParameter("ssaoRadius", radius);
+        setParameter("ssaoPower", power);
         
         glActiveTexture(GL_TEXTURE0);
 
@@ -120,12 +104,6 @@ class DebugOutputShader: Shader
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        
-        glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, 0);
         
         glActiveTexture(GL_TEXTURE0);
