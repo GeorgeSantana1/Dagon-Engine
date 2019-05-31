@@ -56,7 +56,7 @@ class TextLine: Owner, Drawable
         this.color = Color4f(1, 1, 1, 1);
     }
 
-    override void render(State* state)
+    override void render(GraphicsState* state)
     {
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);

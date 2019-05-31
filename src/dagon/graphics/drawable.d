@@ -31,5 +31,5 @@ public import dagon.graphics.state;
 
 interface Drawable
 {
-    void render(State* state);
+    void render(GraphicsState* state);
 }

@@ -57,7 +57,7 @@ class BrightPassShader: Shader
         debug writeln("BrightPassShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         setParameter("viewSize", state.resolution);
         setParameter("enabled", enabled);
@@ -73,7 +73,7 @@ class BrightPassShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

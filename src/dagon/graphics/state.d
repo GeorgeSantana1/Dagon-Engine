@@ -36,7 +36,7 @@ import dagon.graphics.shader;
 import dagon.graphics.environment;
 import dagon.graphics.light;
 
-struct State
+struct GraphicsState
 {   
     Vector2f resolution;
     float zNear;

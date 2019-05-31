@@ -59,7 +59,7 @@ class SSAOShader: Shader
         debug writeln("SSAOShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
@@ -93,7 +93,7 @@ class SSAOShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

@@ -55,7 +55,7 @@ class PresentShader: Shader
         debug writeln("PresentShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
@@ -72,7 +72,7 @@ class PresentShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

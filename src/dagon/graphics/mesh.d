@@ -181,7 +181,7 @@ class Mesh: Owner, Drawable
         canRender = true;
     }
     
-    void render(State* state)
+    void render(GraphicsState* state)
     {
         if (canRender)
         {

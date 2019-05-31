@@ -93,13 +93,16 @@ class Entity: Owner, Updateable
     Matrix4x4f prevTransformation;
     Matrix4x4f prevAbsoluteTransformation;
     
-    this(EntityManager manager, int layer = 0)
+    this(Owner owner)
     {
-        super(manager);
-        this.manager = manager;
-        manager.addEntity(this);
+        super(owner);
         
-        this.layer = layer;
+        EntityManager mngr = cast(EntityManager)owner;
+        if (mngr)
+        {
+            manager = mngr;
+            manager.addEntity(this);
+        }
         
         position = Vector3f(0, 0, 0);
         rotation = Quaternionf.identity;
@@ -352,7 +355,7 @@ class EntityComponent: EventListener, Updateable, Drawable
     }
     
     // Override me
-    void render(State* state)
+    void render(GraphicsState* state)
     {
     }
 }

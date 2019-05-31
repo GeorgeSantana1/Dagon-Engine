@@ -115,7 +115,7 @@ class Terrain: Owner, Drawable
 
     }
 
-    void render(State* state)
+    void render(GraphicsState* state)
     {
         mesh.render(state);
     }

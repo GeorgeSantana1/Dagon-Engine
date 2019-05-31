@@ -61,7 +61,7 @@ class BlurShader: Shader
         direction = Vector2f(1.0f, 0.0f);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         setParameter("viewSize", state.resolution);
         setParameter("enabled", enabled);
@@ -77,7 +77,7 @@ class BlurShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

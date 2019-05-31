@@ -55,7 +55,7 @@ class ShadowShader: Shader
         debug writeln("ShadowShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
@@ -66,7 +66,7 @@ class ShadowShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
     }

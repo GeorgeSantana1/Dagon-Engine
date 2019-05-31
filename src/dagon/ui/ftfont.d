@@ -356,7 +356,7 @@ final class FreeTypeFont: Font
         return cast(int)(glyph.advanceX >> 6);
     }
 
-    override void render(State* state, Color4f color, string str)
+    override void render(GraphicsState* state, Color4f color, string str)
     {
         if (!canRender)
             return;

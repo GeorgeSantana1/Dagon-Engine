@@ -157,7 +157,7 @@ class ShapeQuad: Owner, Drawable
         glDeleteBuffers(1, &eao);
     }
     
-    void render(State* state)
+    void render(GraphicsState* state)
     {        
         glDepthMask(0);
         glBindVertexArray(vao);

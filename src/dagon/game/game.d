@@ -30,9 +30,12 @@ module dagon.game.game;
 import dlib.core.memory;
 import dlib.core.ownership;
 
+import dagon.core.bindings;
 import dagon.core.event;
 import dagon.core.time;
 import dagon.core.application;
+import dagon.graphics.state;
+import dagon.graphics.entity;
 import dagon.resource.scene;
 import dagon.game.renderer;
 import dagon.game.deferredrenderer;
@@ -72,11 +75,11 @@ class Game: Application
             currentScene.update(t);
             deferredRenderer.scene = currentScene;
             hudRenderer.scene = currentScene;
+            deferredRenderer.update(t);
+            postProcRenderer.update(t);
+            presentRenderer.update(t);
+            hudRenderer.update(t);
         }
-        deferredRenderer.update(t);
-        postProcRenderer.update(t);
-        presentRenderer.update(t);
-        hudRenderer.update(t);
     }
     
     override void onUpdate(Time t)
@@ -86,9 +89,36 @@ class Game: Application
     
     override void onRender()
     {
-        deferredRenderer.render();
-        postProcRenderer.render();
-        presentRenderer.render();
-        hudRenderer.render();
+        if (currentScene)
+        {
+            if (currentScene.canRender)
+            {
+                deferredRenderer.render();
+                postProcRenderer.render();
+                presentRenderer.render();
+                hudRenderer.render();
+            }
+        }
+    }
+    
+    void renderEntity(Entity e, GraphicsState* state)
+    {
+        glScissor(0, 0, eventManager.windowWidth, eventManager.windowHeight);
+        glViewport(0, 0, eventManager.windowWidth, eventManager.windowHeight);
+        
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        state.modelViewMatrix = state.viewMatrix * e.absoluteTransformation;
+        state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+        
+        if (e.material)
+            e.material.bind(state);
+        
+        if (e.drawable)
+            e.drawable.render(state);
+        
+        if (e.material)
+            e.material.unbind(state);
     }
 }

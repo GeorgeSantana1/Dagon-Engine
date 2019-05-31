@@ -57,7 +57,7 @@ class FXAAShader: Shader
         debug writeln("FXAAShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         setParameter("viewSize", state.resolution);
         setParameter("enabled", enabled);
@@ -77,7 +77,7 @@ class FXAAShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

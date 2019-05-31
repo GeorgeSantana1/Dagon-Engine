@@ -48,7 +48,7 @@ class RenderStage: EventListener
     RenderPipeline pipeline;
     RenderView view;
     EntityGroup group;
-    State state;
+    GraphicsState state;
     Material defaultMaterial;
     FallbackShader defaultShader;
     bool active = true;

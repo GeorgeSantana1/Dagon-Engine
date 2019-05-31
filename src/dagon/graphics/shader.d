@@ -405,7 +405,7 @@ class Shader: Owner
         }
     }
 
-    void bind(State* state)
+    void bind(GraphicsState* state)
     {
         program.bind();
 
@@ -431,7 +431,7 @@ class Shader: Owner
             glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, cast(uint)fragmentSubroutineIndices.length, fragmentSubroutineIndices.ptr);
     }
 
-    void unbind(State* state)
+    void unbind(GraphicsState* state)
     {
         foreach(v; parameters.data)
         {

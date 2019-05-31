@@ -317,7 +317,7 @@ class NuklearGUI : Owner, Updateable, Drawable
         nk_input_end(&ctx);
     }
 
-    override void render(State* state)
+    override void render(GraphicsState* state)
     {
         const(int) maxVertexBuffer = 512 * 1024;
         const(int) maxElementBuffer = 128 * 1024;

@@ -58,7 +58,7 @@ class DebugOutputShader: Shader
         debug writeln("DebugOutputShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         setParameter("projectionMatrix", state.projectionMatrix);
         
@@ -109,7 +109,7 @@ class DebugOutputShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

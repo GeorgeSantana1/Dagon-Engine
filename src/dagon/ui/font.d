@@ -42,6 +42,6 @@ abstract class Font: Owner
     }
     
     float width(string str);
-    void render(State* state, Color4f color, string str);
+    void render(GraphicsState* state, Color4f color, string str);
 }
 

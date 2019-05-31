@@ -56,7 +56,7 @@ class GeometryShader: Shader
         debug writeln("GeometryShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         auto idiffuse = "diffuse" in state.material.inputs;
         auto inormal = "normal" in state.material.inputs;
@@ -224,7 +224,7 @@ class GeometryShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

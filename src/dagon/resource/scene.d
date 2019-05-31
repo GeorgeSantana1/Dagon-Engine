@@ -59,6 +59,7 @@ class Scene: EventListener
     Environment environment;
     bool isLoading = false;
     bool loaded = false;
+    bool canRender = false;
     
     this(Application application)
     {
@@ -184,7 +185,8 @@ class Scene: EventListener
     
     Entity addEntityHUD(Entity parent = null)
     {
-        Entity e = New!Entity(entityManager, -1);
+        Entity e = New!Entity(entityManager);
+        e.layer = -1;
         if (parent)
             e.setParent(parent);
         return e;
@@ -220,7 +222,6 @@ class Scene: EventListener
     // Override me
     void afterLoad()
     {
-        
     }
     
     // Override me
@@ -231,7 +232,9 @@ class Scene: EventListener
     import std.stdio;
     
     void update(Time t)
-    {        
+    {
+        processEvents();
+        
         if (isLoading)
         {
             onLoad(t, assetManager.nextLoadingPercentage);
@@ -242,12 +245,14 @@ class Scene: EventListener
             if (!loaded)
             {
                 assetManager.loadThreadUnsafePart();
-                writeln("Loaded");
+                debug writeln("Scene loaded");
                 loaded = true;
                 afterLoad();
+                
+                onLoad(t, 1.0f);
+                
+                canRender = true;
             }
-            
-            processEvents();
             
             onUpdate(t);
             

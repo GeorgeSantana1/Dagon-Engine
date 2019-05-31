@@ -107,7 +107,7 @@ class ScreenSurface: Owner, Drawable
 	{
 	}
 	
-    void render(State* state)
+    void render(GraphicsState* state)
 	{
         glDisable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);

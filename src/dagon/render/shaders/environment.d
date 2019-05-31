@@ -56,7 +56,7 @@ class EnvironmentShader: Shader
         debug writeln("EnvironmentShader: program ", program.program);
     }
 
-    override void bind(State* state)
+    override void bind(GraphicsState* state)
     {
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
@@ -143,7 +143,7 @@ class EnvironmentShader: Shader
         super.bind(state);
     }
 
-    override void unbind(State* state)
+    override void unbind(GraphicsState* state)
     {
         super.unbind(state);
         

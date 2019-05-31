@@ -432,7 +432,7 @@ class Material: Owner
         return customShader;
     }
 
-    void bind(State* state)
+    void bind(GraphicsState* state)
     {
         auto iblending = "blending" in inputs;
         auto iculling = "culling" in inputs;
@@ -477,7 +477,7 @@ class Material: Owner
             glDepthMask(GL_FALSE);
         }
 
-        State stateLocal = *state;
+        GraphicsState stateLocal = *state;
         stateLocal.material = this;
 
         if (state.overrideShader)
@@ -490,12 +490,12 @@ class Material: Owner
         }
     }
 
-    void unbind(State* state)
+    void unbind(GraphicsState* state)
     {
         auto icolorWrite = "colorWrite" in inputs;
         auto idepthWrite = "depthWrite" in inputs;
 
-        State stateLocal = *state;
+        GraphicsState stateLocal = *state;
         stateLocal.material = this;
 
         if (state.overrideShader)
