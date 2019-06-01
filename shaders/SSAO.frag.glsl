@@ -36,7 +36,6 @@ uniform float ssaoPower;
 #define SSAO_SCALE 1.0
 #define SSAO_BIAS 0.05
 #define SSAO_MOD3 vec3(0.1031, 0.11369, 0.13787)
-//#define SSAO_MAX_DISTANCE 0.2
 
 float hash(vec2 p)
 {
@@ -47,7 +46,6 @@ float hash(vec2 p)
 
 float ssao(in vec2 tcoord, in vec2 uv, in vec3 p, in vec3 cnorm)
 {
-    //vec3 pos = texture(positionBuffer, tcoord + uv).xyz;
     float depth = texture(depthBuffer, tcoord + uv).x;
     vec3 pos = unproject(vec3(tcoord + uv, depth));
     
@@ -56,7 +54,6 @@ float ssao(in vec2 tcoord, in vec2 uv, in vec3 p, in vec3 cnorm)
     vec3 v = diff / l;
     float d = l * SSAO_SCALE;
     float ao = max(0.0, dot(cnorm, v) - SSAO_BIAS) * (1.0 / (1.0 + d));
-    //ao *= smoothstep(SSAO_MAX_DISTANCE, SSAO_MAX_DISTANCE * 0.5, l);
     return ao;
 }
 
