@@ -76,6 +76,7 @@ public
     import dagon.postproc.presentstage;
     import dagon.postproc.shaders.blur;
     import dagon.postproc.shaders.brightpass;
+    import dagon.postproc.shaders.denoise;
     import dagon.postproc.shaders.fxaa;
     import dagon.postproc.shaders.glow;
     import dagon.postproc.shaders.present;

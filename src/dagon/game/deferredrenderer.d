@@ -39,33 +39,43 @@ import dagon.render.framebuffer;
 import dagon.render.shadowstage;
 import dagon.render.framebuffer_rgba16f;
 import dagon.render.framebuffer_r8;
+import dagon.postproc.filterstage;
+import dagon.postproc.shaders.denoise;
 import dagon.game.renderer;
 
 class DeferredRenderer: Renderer
 {
+    DenoiseShader denoiseShader;
+    
     ShadowStage stageShadow;
     DeferredGeometryStage stageGeom;
     DeferredOcclusionStage stageOcclusion;
+    FilterStage stageOcclusionDenoise;
     DeferredEnvironmentStage stageEnvironment;
     DeferredLightStage stageLight;
     DeferredDebugOutputStage stageDebug;
     
-    RenderView viewHalf;
+    RenderView occlusionView;
+    FramebufferR8 occlusionNoisyBuffer;
     FramebufferR8 occlusionBuffer;
-    float occlusionViewScale = 1.0f;
+    float occlusionViewScale = 0.5f;
     
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
     
-    int ssaoSamples = 16;
+    int ssaoSamples = 10;
     float ssaoRadius = 0.2f;
-    float ssaoPower = 4.0f;
+    float ssaoPower = 5.0f;
+    float ssaoDenoise = 0.5f;
     
     this(EventManager eventManager, Owner owner)
     {
         super(eventManager, owner);
         
-        viewHalf = New!RenderView(0, 0, cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale), this);
-        occlusionBuffer = New!FramebufferR8(viewHalf.width, viewHalf.height, this);
+        occlusionView = New!RenderView(0, 0, cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale), this);
+        occlusionNoisyBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
+        occlusionBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
+        
+        outputBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
         
         stageShadow = New!ShadowStage(pipeline);
         
@@ -73,25 +83,29 @@ class DeferredRenderer: Renderer
         stageGeom.view = view;
         
         stageOcclusion = New!DeferredOcclusionStage(pipeline, stageGeom);
-        stageOcclusion.view = viewHalf;
+        stageOcclusion.view = occlusionView;
+        stageOcclusion.outputBuffer = occlusionNoisyBuffer;
+        
+        denoiseShader = New!DenoiseShader(this);
+        stageOcclusionDenoise = New!FilterStage(pipeline, denoiseShader);
+        stageOcclusionDenoise.view = occlusionView;
+        stageOcclusionDenoise.inputBuffer = occlusionNoisyBuffer;
+        stageOcclusionDenoise.outputBuffer = occlusionBuffer;
         
         stageEnvironment = New!DeferredEnvironmentStage(pipeline, stageGeom);
         stageEnvironment.view = view;
+        stageEnvironment.outputBuffer = outputBuffer;
+        stageEnvironment.occlusionBuffer = occlusionBuffer;
         
         stageLight = New!DeferredLightStage(pipeline, stageGeom);
         stageLight.view = view;
+        stageLight.outputBuffer = outputBuffer;
+        stageLight.occlusionBuffer = occlusionBuffer;
         
         stageDebug = New!DeferredDebugOutputStage(pipeline, stageGeom);
         stageDebug.view = view;
         stageDebug.active = false;
-        
-        outputBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
-        stageEnvironment.outputBuffer = outputBuffer;
-        stageEnvironment.occlusionBuffer = occlusionBuffer;
-        stageLight.outputBuffer = outputBuffer;
-        stageLight.occlusionBuffer = occlusionBuffer;
         stageDebug.outputBuffer = outputBuffer;
-        stageOcclusion.outputBuffer = occlusionBuffer;
         stageDebug.occlusionBuffer = occlusionBuffer;
     }
     
@@ -117,6 +131,7 @@ class DeferredRenderer: Renderer
         stageOcclusion.ssaoShader.samples = ssaoSamples;
         stageOcclusion.ssaoShader.radius = ssaoRadius;
         stageOcclusion.ssaoShader.power = ssaoPower;
+        denoiseShader.factor = ssaoDenoise;
         
         super.update(t);
     }
@@ -127,7 +142,8 @@ class DeferredRenderer: Renderer
         
         outputBuffer.resize(view.width, view.height);
         
-        viewHalf.resize(cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale));
-        occlusionBuffer.resize(viewHalf.width, viewHalf.height);
+        occlusionView.resize(cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale));
+        occlusionNoisyBuffer.resize(occlusionView.width, occlusionView.height);
+        occlusionBuffer.resize(occlusionView.width, occlusionView.height);
     }
 }
