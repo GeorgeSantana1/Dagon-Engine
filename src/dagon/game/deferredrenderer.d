@@ -64,8 +64,8 @@ class DeferredRenderer: Renderer
     
     int ssaoSamples = 10;
     float ssaoRadius = 0.2f;
-    float ssaoPower = 5.0f;
-    float ssaoDenoise = 0.5f;
+    float ssaoPower = 7.0f;
+    float ssaoDenoise = 1.0f;
     
     this(EventManager eventManager, Owner owner)
     {
