@@ -14,21 +14,20 @@ out vec4 fragColor;
 
 void main()
 {
-    vec3 center = texture(colorBuffer, texCoord).rgb;
-
-	vec3 res = vec3(0.0);
+    float center = texture(colorBuffer, texCoord).r;
+	float res = 0.0;
 	float total = 0.0;
 	for (int x = -radius; x <= radius; x += 1)
     {
 		for (int y = -radius; y <= radius; y += 1)
         {
-			vec3 s = texture(colorBuffer, texCoord + vec2(float(x), float(y)) / viewSize).rgb;
-			float weight = 1.0 - abs(dot(s - center, vec3(0.25)));
+			float s = texture(colorBuffer, texCoord + vec2(float(x), float(y)) / viewSize).r;
+			float weight = 1.0 - abs((s - center) * 0.25);
 			weight = pow(weight, exponent);
 			res += s * weight;
 			total += weight;
 		}
 	}
 
-    fragColor = vec4(mix(center, res / total, factor), 1.0); 
+    fragColor = vec4(vec3(mix(center, res / total, factor)), 1.0); 
 }

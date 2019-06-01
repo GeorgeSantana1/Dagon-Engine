@@ -58,7 +58,6 @@ class DeferredRenderer: Renderer
     RenderView occlusionView;
     FramebufferR8 occlusionNoisyBuffer;
     FramebufferR8 occlusionBuffer;
-    float occlusionViewScale = 0.5f;
     
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
     
@@ -71,7 +70,7 @@ class DeferredRenderer: Renderer
     {
         super(eventManager, owner);
         
-        occlusionView = New!RenderView(0, 0, cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale), this);
+        occlusionView = New!RenderView(0, 0, view.width / 2, view.height / 2, this);
         occlusionNoisyBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
         occlusionBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
         
@@ -142,7 +141,7 @@ class DeferredRenderer: Renderer
         
         outputBuffer.resize(view.width, view.height);
         
-        occlusionView.resize(cast(uint)(view.width * occlusionViewScale), cast(uint)(view.height * occlusionViewScale));
+        occlusionView.resize(view.width / 2, view.height / 2);
         occlusionNoisyBuffer.resize(occlusionView.width, occlusionView.height);
         occlusionBuffer.resize(occlusionView.width, occlusionView.height);
     }
