@@ -33,7 +33,8 @@ public
     import dagon.render.shaders.environment;
     import dagon.render.shaders.fallback;
     import dagon.render.shaders.geometry;
+    import dagon.render.shaders.hud;
     import dagon.render.shaders.shadow;
-    import dagon.render.shaders.sunlight;
     import dagon.render.shaders.ssao;
+    import dagon.render.shaders.sunlight;
 }

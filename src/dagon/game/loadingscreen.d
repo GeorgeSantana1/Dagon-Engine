@@ -42,6 +42,7 @@ import dagon.graphics.state;
 import dagon.graphics.entity;
 import dagon.graphics.shapes;
 import dagon.graphics.material;
+import dagon.render.shaders.hud;
 import dagon.game.game;
 
 class LoadingScreen: EventListener
@@ -49,6 +50,7 @@ class LoadingScreen: EventListener
     Game game;
     ShapeQuad loadingProgressBar;
     Entity eLoadingProgressBar;
+    HUDShader hudShader;
     
     this(Game game, Owner owner)
     {
@@ -57,8 +59,8 @@ class LoadingScreen: EventListener
         loadingProgressBar = New!ShapeQuad(this);
         eLoadingProgressBar = New!Entity(this);
         eLoadingProgressBar.drawable = loadingProgressBar;
-        // TODO: use specialized HUD shader to change color
-        eLoadingProgressBar.material = New!Material(game.hudRenderer.stageHUD.defaultShader, this);
+        hudShader = New!HUDShader(this);
+        eLoadingProgressBar.material = New!Material(hudShader, this);
         eLoadingProgressBar.material.diffuse = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
         eLoadingProgressBar.material.culling = false;
     }
@@ -78,6 +80,7 @@ class LoadingScreen: EventListener
     {
         GraphicsState state;
         state.reset();
+        state.modelViewMatrix = eLoadingProgressBar.absoluteTransformation;
         state.projectionMatrix = orthoMatrix(0.0f, eventManager.windowWidth, eventManager.windowHeight, 0.0f, 0.0f, 1000.0f);
         state.invProjectionMatrix = state.projectionMatrix.inverse;
         state.resolution = Vector2f(eventManager.windowWidth, eventManager.windowHeight);
