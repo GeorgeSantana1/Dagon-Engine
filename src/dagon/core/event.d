@@ -54,6 +54,7 @@ enum EventType
     FocusGain,
     Quit,
     FileChange,
+    DropFile,
     UserEvent
 }
 
@@ -402,6 +403,12 @@ class EventManager
                         addEvent(e);
                     }
                     break;
+                    
+                case SDL_DROPFILE:
+                    e = Event(EventType.DropFile);
+                    e.filename = to!string(event.drop.file);
+                    addEvent(e);
+                    break;
 
                 case SDL_QUIT:
                     exit();
@@ -552,6 +559,9 @@ abstract class EventListener: Owner
             case EventType.FileChange:
                 onFileChange(e.filename);
                 break;
+            case EventType.DropFile:
+                onDropFile(e.filename);
+                break;
             case EventType.UserEvent:
                 onUserEvent(e.userCode);
                 break;
@@ -574,5 +584,6 @@ abstract class EventListener: Owner
     void onFocusGain() {}
     void onQuit() {}
     void onFileChange(string filename) {}
+    void onDropFile(string filename) {}
     void onUserEvent(int code) {}
 }
