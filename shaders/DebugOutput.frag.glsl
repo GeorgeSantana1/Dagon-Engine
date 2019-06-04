@@ -40,10 +40,6 @@ void main()
     vec2 invResolution = 1.0 / resolution;
 
     vec4 col = texture(colorBuffer, texCoord);
-    
-    if (col.a < 1.0)
-        discard;
-
     vec3 albedo = col.rgb;
     
     float depth = texture(depthBuffer, texCoord).x;

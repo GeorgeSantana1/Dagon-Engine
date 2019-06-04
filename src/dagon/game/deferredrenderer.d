@@ -34,6 +34,7 @@ import dagon.core.event;
 import dagon.core.time;
 import dagon.resource.scene;
 import dagon.render.deferred;
+import dagon.render.gbuffer;
 import dagon.render.view;
 import dagon.render.framebuffer;
 import dagon.render.shadowstage;
@@ -45,6 +46,8 @@ import dagon.game.renderer;
 
 class DeferredRenderer: Renderer
 {
+    GBuffer gbuffer;
+
     DenoiseShader denoiseShader;
 
     ShadowStage stageShadow;
@@ -75,15 +78,19 @@ class DeferredRenderer: Renderer
         occlusionNoisyBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
         occlusionBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
 
+        gbuffer = New!GBuffer(view.width, view.height, this);
+
         outputBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
 
         stageShadow = New!ShadowStage(pipeline);
 
         stageBackground = New!DeferredBackgroundStage(pipeline);
         stageBackground.view = view;
+        stageBackground.gbuffer = gbuffer;
 
         stageGeom = New!DeferredGeometryStage(pipeline);
         stageGeom.view = view;
+        stageGeom.gbuffer = gbuffer;
 
         stageOcclusion = New!DeferredOcclusionStage(pipeline, stageGeom);
         stageOcclusion.view = occlusionView;
@@ -114,14 +121,13 @@ class DeferredRenderer: Renderer
 
     override void scene(Scene s)
     {
-        stageBackground.gbuffer = stageGeom.gbuffer;
-
         stageShadow.group = s.spatial;
         stageShadow.lightGroup = s.lights;
         stageBackground.group = s.background;
         stageGeom.group = s.spatialOpaque;
         stageLight.group = s.lights;
 
+        stageBackground.state.environment = s.environment;
         stageGeom.state.environment = s.environment;
         stageEnvironment.state.environment = s.environment;
         stageLight.state.environment = s.environment;
@@ -130,6 +136,8 @@ class DeferredRenderer: Renderer
 
     override void update(Time t)
     {
+        stageBackground.gbuffer = stageGeom.gbuffer;
+
         stageShadow.camera = activeCamera;
         stageDebug.active = (outputMode != DebugOutputMode.Radiance);
         stageDebug.outputMode = outputMode;
@@ -146,6 +154,7 @@ class DeferredRenderer: Renderer
     {
         super.setViewport(x, y, w, h);
 
+        gbuffer.resize(view.width, view.height);
         outputBuffer.resize(view.width, view.height);
 
         occlusionView.resize(view.width / 2, view.height / 2);

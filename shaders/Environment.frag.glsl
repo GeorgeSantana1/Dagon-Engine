@@ -93,45 +93,51 @@ void main()
 {
     vec4 col = texture(colorBuffer, texCoord);
     
-    if (col.a < 1.0)
-        discard;
-
-    vec3 albedo = toLinear(col.rgb);
-    
-    float depth = texture(depthBuffer, texCoord).x;
-    vec3 eyePos = unproject(vec3(texCoord, depth));
-    vec3 worldPos = (invViewMatrix * vec4(eyePos, 1.0)).xyz;
-    vec3 N = normalize(texture(normalBuffer, texCoord).rgb);
-    vec3 E = normalize(-eyePos);
-    vec3 R = reflect(E, N);
-    
-    vec3 worldCamPos = (invViewMatrix[3]).xyz;
-    vec3 worldE = normalize(worldPos - worldCamPos);
-    vec3 worldN = normalize(N * mat3(viewMatrix));
-    vec3 worldR = reflect(worldE, worldN);
-    
-    float roughness = texture(pbrBuffer, texCoord).r;
-    float metallic = texture(pbrBuffer, texCoord).g;
-    
-    float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
-    
-    vec3 f0 = mix(vec3(0.04), albedo, metallic);
-
     vec3 radiance = vec3(0.0, 0.0, 0.0);
-
-    // Ambient light
-    vec3 ambientDiffuse = ambient(worldN, 0.99);
-    vec3 ambientSpecular = ambient(worldR, roughness);
-    vec3 F = fresnelRoughness(max(dot(N, E), 0.0), f0, roughness);
-    vec3 kS = F;
-    vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;
-    radiance += (kD * ambientDiffuse * albedo * occlusion + F * ambientSpecular);
     
-    // Fog
-    float linearDepth = abs(eyePos.z);
-    float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
-    radiance = mix(toLinear(fogColor.rgb), radiance, fogFactor);
+    if (col.a > 0.0)
+    {
+        vec3 albedo = toLinear(col.rgb);
+        
+        float depth = texture(depthBuffer, texCoord).x;
+        vec3 eyePos = unproject(vec3(texCoord, depth));
+        vec3 worldPos = (invViewMatrix * vec4(eyePos, 1.0)).xyz;
+        vec3 N = normalize(texture(normalBuffer, texCoord).rgb);
+        vec3 E = normalize(-eyePos);
+        vec3 R = reflect(E, N);
+        
+        vec3 worldCamPos = (invViewMatrix[3]).xyz;
+        vec3 worldE = normalize(worldPos - worldCamPos);
+        vec3 worldN = normalize(N * mat3(viewMatrix));
+        vec3 worldR = reflect(worldE, worldN);
+        
+        float roughness = texture(pbrBuffer, texCoord).r;
+        float metallic = texture(pbrBuffer, texCoord).g;
+        
+        float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
+        
+        vec3 f0 = mix(vec3(0.04), albedo, metallic);
+
+        vec3 radiance = vec3(0.0, 0.0, 0.0);
+
+        // Ambient light
+        vec3 ambientDiffuse = ambient(worldN, 0.99);
+        vec3 ambientSpecular = ambient(worldR, roughness);
+        vec3 F = fresnelRoughness(max(dot(N, E), 0.0), f0, roughness);
+        vec3 kS = F;
+        vec3 kD = 1.0 - kS;
+        kD *= 1.0 - metallic;
+        radiance += (kD * ambientDiffuse * albedo * occlusion + F * ambientSpecular);
+        
+        // Fog
+        float linearDepth = abs(eyePos.z);
+        float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
+        radiance = mix(toLinear(fogColor.rgb), radiance, fogFactor);
+    }
+    else
+    {
+        radiance = col.rgb;
+    }
     
     fragColor = vec4(radiance, 1.0);
 }

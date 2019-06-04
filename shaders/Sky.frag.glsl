@@ -43,10 +43,6 @@ layout(location = 0) out vec4 fragColor;
 void main()
 {
     vec3 N = normalize(eyeNormal);
-    
-    vec4 fragDiffuse = diffuse(N);
-    if (fragDiffuse.a < 1.0)
-        discard;
-    
+    vec4 fragDiffuse = diffuse(N);    
     fragColor = vec4(fragDiffuse.rgb, 0.0);
 }

@@ -31,6 +31,7 @@ import std.stdio;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.graphics.entity;
@@ -68,12 +69,21 @@ class DeferredBackgroundStage: RenderStage
             glScissor(0, 0, gbuffer.width, gbuffer.height);
             glViewport(0, 0, gbuffer.width, gbuffer.height);
 
-            glClearColor(0.0, 0.0, 0.0, 0.0);
+            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
+            if (state.environment)
+                backgroundColor = state.environment.backgroundColor;
+
+            glClearColor(
+                backgroundColor.r,
+                backgroundColor.g,
+                backgroundColor.b,
+                backgroundColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             foreach(entity; group)
             if (entity.visible)
             {
+                state.layer = entity.layer;
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
 

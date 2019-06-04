@@ -48,7 +48,7 @@ class DeferredEnvironmentStage: RenderStage
     EnvironmentShader environmentShader;
     Framebuffer outputBuffer;
     Framebuffer occlusionBuffer;
-    
+
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
         super(pipeline);
@@ -56,14 +56,14 @@ class DeferredEnvironmentStage: RenderStage
         screenSurface = New!ScreenSurface(this);
         environmentShader = New!EnvironmentShader(this);
     }
-    
+
     override void render()
     {
         if (view && geometryStage)
         {
             if (outputBuffer)
                 outputBuffer.bind();
-            
+
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
@@ -72,25 +72,14 @@ class DeferredEnvironmentStage: RenderStage
                 state.occlusionTexture = occlusionBuffer.colorTexture;
             else
                 state.occlusionTexture = 0;
-            
-            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
-            if (state.environment)
-                backgroundColor = state.environment.backgroundColor;
-            
+
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
-            
-            glClearColor(
-                backgroundColor.r, 
-                backgroundColor.g,
-                backgroundColor.b,
-                backgroundColor.a);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
+
             environmentShader.bind(&state);
             screenSurface.render(&state);
             environmentShader.unbind(&state);
-            
+
             if (outputBuffer)
                 outputBuffer.unbind();
         }

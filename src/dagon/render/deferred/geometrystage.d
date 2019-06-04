@@ -43,59 +43,44 @@ class DeferredGeometryStage: RenderStage
 {
     GBuffer gbuffer;
     GeometryShader geometryShader;
-    
+
     this(RenderPipeline pipeline, EntityGroup group = null)
     {
         super(pipeline, group);
-        geometryShader = New!GeometryShader(this);        
+        geometryShader = New!GeometryShader(this);
         state.overrideShader = geometryShader;
     }
-    
-    override void onResize(int w, int h)
-    {
-        if (gbuffer && view)
-        {
-            gbuffer.resize(view.width, view.height);
-        }
-    }
-    
+
     override void render()
     {
-        if (!gbuffer && view)
-        {
-            gbuffer = New!GBuffer(view.width, view.height, this);
-        }
-        
-        if (group)
+        if (group && gbuffer)
         {
             gbuffer.bind();
-            
+
             glScissor(0, 0, gbuffer.width, gbuffer.height);
             glViewport(0, 0, gbuffer.width, gbuffer.height);
-             
-            glClearColor(0.0, 0.0, 0.0, 0.0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
+
             foreach(entity; group)
             if (entity.visible)
             {
+                state.layer = entity.layer;
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
-               
+
                 if (entity.material)
                     entity.material.bind(&state);
                 else
                     defaultMaterial.bind(&state);
-                
+
                 if (entity.drawable)
                     entity.drawable.render(&state);
-                    
+
                 if (entity.material)
                     entity.material.unbind(&state);
                 else
                     defaultMaterial.unbind(&state);
             }
-            
+
             gbuffer.unbind();
         }
     }
