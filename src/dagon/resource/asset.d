@@ -103,7 +103,6 @@ class AssetManager: Owner
     {
         Delete(assetsByFilename);
         Delete(fs);
-        Delete(stdfs);
         Delete(imageFactory);
         Delete(hdrImageFactory);
         Delete(loadingThread);
