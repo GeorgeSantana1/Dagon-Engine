@@ -48,7 +48,7 @@ class DeferredLightStage: RenderStage
     SunLightShader sunLightShader;
     Framebuffer outputBuffer;
     Framebuffer occlusionBuffer;
-    
+
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
         super(pipeline);
@@ -56,14 +56,13 @@ class DeferredLightStage: RenderStage
         screenSurface = New!ScreenSurface(this);
         sunLightShader = New!SunLightShader(this);
     }
-    
+
     override void render()
     {
-        if (group && view && geometryStage)
+        if (group && outputBuffer && geometryStage)
         {
-            if (outputBuffer)
-                outputBuffer.bind();
-                
+            outputBuffer.bind();
+
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
@@ -72,13 +71,13 @@ class DeferredLightStage: RenderStage
                 state.occlusionTexture = occlusionBuffer.colorTexture;
             else
                 state.occlusionTexture = 0;
-            
-            glScissor(view.x, view.y, view.width, view.height);
-            glViewport(view.x, view.y, view.width, view.height);
-            
+
+            glScissor(0, 0, outputBuffer.width, outputBuffer.height);
+            glViewport(0, 0, outputBuffer.width, outputBuffer.height);
+
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            
+
             foreach(entity; group)
             {
                 Light light = cast(Light)entity;
@@ -87,7 +86,7 @@ class DeferredLightStage: RenderStage
                     if (light.shining)
                     {
                         state.light = light;
-                        
+
                         if (light.type == LightType.Sun)
                         {
                             sunLightShader.bind(&state);
@@ -98,11 +97,10 @@ class DeferredLightStage: RenderStage
                     }
                 }
             }
-            
+
             glDisable(GL_BLEND);
-            
-            if (outputBuffer)
-                outputBuffer.unbind();
+
+            outputBuffer.unbind();
         }
     }
 }

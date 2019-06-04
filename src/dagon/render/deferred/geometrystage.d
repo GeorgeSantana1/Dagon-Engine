@@ -60,6 +60,9 @@ class DeferredGeometryStage: RenderStage
             glScissor(0, 0, gbuffer.width, gbuffer.height);
             glViewport(0, 0, gbuffer.width, gbuffer.height);
 
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             foreach(entity; group)
             if (entity.visible)
             {

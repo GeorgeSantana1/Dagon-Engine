@@ -3,8 +3,10 @@
 #define PI 3.14159265359
 const float PI2 = PI * 2.0;
 
-in vec3 eyeNormal;
+uniform mat4 invViewMatrix;
+
 in vec3 eyePosition;
+in vec3 worldNormal;
 
 vec2 envMapEquirect(in vec3 dir)
 {
@@ -16,33 +18,33 @@ vec2 envMapEquirect(in vec3 dir)
 /*
  * Diffuse color
  */
-subroutine vec4 srtColor(in vec3 dir);
+subroutine vec3 srtEnv(in vec3 dir);
 
-uniform vec4 diffuseVector;
-subroutine(srtColor) vec4 diffuseColor(in vec3 dir)
+uniform vec4 envColor;
+subroutine(srtEnv) vec3 environmentColor(in vec3 dir)
 {
-    return diffuseVector;
+    return envColor.rgb;
 }
 
-uniform samplerCube diffuseTextureCube;
-subroutine(srtColor) vec4 diffuseTextureCubemap(in vec3 dir)
+uniform sampler2D envTexture;
+subroutine(srtEnv) vec3 environmentTexture(in vec3 dir)
 {
-    return texture(diffuseTextureCube, dir);
+    return texture(envTexture, envMapEquirect(dir)).rgb;
 }
 
-uniform sampler2D diffuseTexture;
-subroutine(srtColor) vec4 diffuseTextureEquirectangularMap(in vec3 dir)
+uniform samplerCube envTextureCube;
+subroutine(srtEnv) vec3 environmentCubemap(in vec3 dir)
 {
-    return texture(diffuseTexture, envMapEquirect(dir));
+    return texture(envTextureCube, dir).rgb;
 }
 
-subroutine uniform srtColor diffuse;
+subroutine uniform srtEnv environment;
+
 
 layout(location = 0) out vec4 fragColor;
 
 void main()
 {
-    vec3 N = normalize(eyeNormal);
-    vec4 fragDiffuse = diffuse(N);    
-    fragColor = vec4(fragDiffuse.rgb, 0.0);
+    vec3 fragDiffuse = environment(normalize(worldNormal));    
+    fragColor = vec4(fragDiffuse, 0.0);
 }

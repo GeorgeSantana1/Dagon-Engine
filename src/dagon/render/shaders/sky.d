@@ -67,25 +67,30 @@ class SkyShader: Shader
         // Diffuse
         if (idiffuse.texture)
         {
-            glActiveTexture(GL_TEXTURE0);
-            idiffuse.texture.bind();
+            glActiveTexture(GL_TEXTURE4);
 
-            if (cast(Cubemap)idiffuse.texture)
+            auto cubemap = cast(Cubemap)idiffuse.texture;
+
+            if (cubemap)
             {
-                setParameter("diffuseTextureCube", cast(int)0);
-                setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseTextureCubemap");
+                cubemap.bind();
+                setParameter("envTextureCube", cast(int)4);
+                setParameterSubroutine("environment", ShaderType.Fragment, "environmentCubemap");
             }
             else
             {
-                setParameter("diffuseTexture", cast(int)0);
-                setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseTextureEquirectangularMap");
+                idiffuse.texture.bind();
+                setParameter("envTexture", cast(int)4);
+                setParameterSubroutine("environment", ShaderType.Fragment, "environmentTexture");
             }
         }
         else
         {
-            setParameter("diffuseVector", idiffuse.asVector4f);
-            setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseColor");
+            setParameter("envColor", idiffuse.asVector4f);
+            setParameterSubroutine("environment", ShaderType.Fragment, "environmentColor");
         }
+
+        glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
     }
@@ -94,8 +99,10 @@ class SkyShader: Shader
     {
         super.unbind(state);
 
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+        glActiveTexture(GL_TEXTURE0);
     }
 }

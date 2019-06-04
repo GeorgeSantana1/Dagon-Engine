@@ -37,13 +37,13 @@ import dagon.core.bindings;
 import dagon.graphics.entity;
 import dagon.render.pipeline;
 import dagon.render.stage;
-import dagon.render.gbuffer;
+import dagon.render.framebuffer;
 import dagon.render.shaders.sky;
 
 class DeferredBackgroundStage: RenderStage
 {
-    GBuffer gbuffer;
     SkyShader skyShader;
+    Framebuffer outputBuffer;
 
     this(RenderPipeline pipeline, EntityGroup group = null)
     {
@@ -52,24 +52,16 @@ class DeferredBackgroundStage: RenderStage
         state.overrideShader = skyShader;
     }
 
-    override void onResize(int w, int h)
-    {
-        if (gbuffer && view)
-        {
-            gbuffer.resize(view.width, view.height);
-        }
-    }
-
     override void render()
     {
-        if (group && gbuffer)
+        if (group && outputBuffer)
         {
-            gbuffer.bind();
+            outputBuffer.bind();
 
-            glScissor(0, 0, gbuffer.width, gbuffer.height);
-            glViewport(0, 0, gbuffer.width, gbuffer.height);
+            glScissor(0, 0, outputBuffer.width, outputBuffer.height);
+            glViewport(0, 0, outputBuffer.width, outputBuffer.height);
 
-            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
+            Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 0.0f);
             if (state.environment)
                 backgroundColor = state.environment.backgroundColor;
 
@@ -77,7 +69,7 @@ class DeferredBackgroundStage: RenderStage
                 backgroundColor.r,
                 backgroundColor.g,
                 backgroundColor.b,
-                backgroundColor.a);
+                0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             foreach(entity; group)
@@ -101,7 +93,7 @@ class DeferredBackgroundStage: RenderStage
                     defaultMaterial.unbind(&state);
             }
 
-            gbuffer.unbind();
+            outputBuffer.unbind();
         }
     }
 }

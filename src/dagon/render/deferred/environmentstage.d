@@ -59,10 +59,9 @@ class DeferredEnvironmentStage: RenderStage
 
     override void render()
     {
-        if (view && geometryStage)
+        if (outputBuffer && geometryStage)
         {
-            if (outputBuffer)
-                outputBuffer.bind();
+            outputBuffer.bind();
 
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
@@ -73,15 +72,14 @@ class DeferredEnvironmentStage: RenderStage
             else
                 state.occlusionTexture = 0;
 
-            glScissor(view.x, view.y, view.width, view.height);
-            glViewport(view.x, view.y, view.width, view.height);
+            glScissor(0, 0, outputBuffer.width, outputBuffer.height);
+            glViewport(0, 0, outputBuffer.width, outputBuffer.height);
 
             environmentShader.bind(&state);
             screenSurface.render(&state);
             environmentShader.unbind(&state);
 
-            if (outputBuffer)
-                outputBuffer.unbind();
+            outputBuffer.unbind();
         }
     }
 }

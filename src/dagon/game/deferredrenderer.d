@@ -80,13 +80,10 @@ class DeferredRenderer: Renderer
 
         gbuffer = New!GBuffer(view.width, view.height, this);
 
+        // HDR buffer
         outputBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
 
         stageShadow = New!ShadowStage(pipeline);
-
-        stageBackground = New!DeferredBackgroundStage(pipeline);
-        stageBackground.view = view;
-        stageBackground.gbuffer = gbuffer;
 
         stageGeom = New!DeferredGeometryStage(pipeline);
         stageGeom.view = view;
@@ -101,6 +98,10 @@ class DeferredRenderer: Renderer
         stageOcclusionDenoise.view = occlusionView;
         stageOcclusionDenoise.inputBuffer = occlusionNoisyBuffer;
         stageOcclusionDenoise.outputBuffer = occlusionBuffer;
+
+        stageBackground = New!DeferredBackgroundStage(pipeline);
+        stageBackground.view = view;
+        stageBackground.outputBuffer = outputBuffer;
 
         stageEnvironment = New!DeferredEnvironmentStage(pipeline, stageGeom);
         stageEnvironment.view = view;
@@ -136,8 +137,6 @@ class DeferredRenderer: Renderer
 
     override void update(Time t)
     {
-        stageBackground.gbuffer = stageGeom.gbuffer;
-
         stageShadow.camera = activeCamera;
         stageDebug.active = (outputMode != DebugOutputMode.Radiance);
         stageDebug.outputMode = outputMode;

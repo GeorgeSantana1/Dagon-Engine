@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 
 module dagon.graphics.material;
 
+import std.traits;
 import std.math;
 import std.algorithm;
 
@@ -40,6 +41,7 @@ import dlib.container.dict;
 
 import dagon.core.bindings;
 import dagon.graphics.texture;
+import dagon.graphics.cubemap;
 import dagon.graphics.state;
 import dagon.graphics.shader;
 
@@ -190,27 +192,27 @@ class Material: Owner
         setInput("diffuse2", Color4f(0.8f, 0.8f, 0.8f, 1.0f));
         setInput("diffuse3", Color4f(0.8f, 0.8f, 0.8f, 1.0f));
         setInput("diffuse4", Color4f(0.8f, 0.8f, 0.8f, 1.0f));
-        
+
         setInput("normal2", Vector3f(0.0f, 0.0f, 1.0f));
         setInput("normal3", Vector3f(0.0f, 0.0f, 1.0f));
         setInput("normal4", Vector3f(0.0f, 0.0f, 1.0f));
-        
+
         setInput("height2", 0.0f);
         setInput("height3", 0.0f);
         setInput("height4", 0.0f);
-        
+
         setInput("roughness2", 0.5f);
         setInput("roughness3", 0.5f);
         setInput("roughness4", 0.5f);
-        
+
         setInput("metallic2", 0.0f);
         setInput("metallic3", 0.0f);
         setInput("metallic4", 0.0f);
-        
+
         setInput("textureScale2", Vector2f(1.0f, 1.0f));
         setInput("textureScale3", Vector2f(1.0f, 1.0f));
         setInput("textureScale4", Vector2f(1.0f, 1.0f));
-        
+
         setInput("splatmap1", Color4f(1.0f, 1.0f, 1.0f, 1.0f));
         setInput("splatmap2", Color4f(0.0f, 0.0f, 0.0f, 0.0f));
         setInput("splatmap3", Color4f(0.0f, 0.0f, 0.0f, 0.0f));
@@ -265,9 +267,9 @@ class Material: Owner
             input.type = MaterialInputType.Vec4;
             input.asVector4f = value;
         }
-        else static if (is(T == Texture))
+        else static if (is(T == Texture) || is(T == Cubemap))
         {
-            input.texture = value;
+            input.texture = cast(Texture)value;
             if (value.format == GL_RED)
                 input.type = MaterialInputType.Float;
             else if (value.format == GL_RG)
@@ -277,10 +279,7 @@ class Material: Owner
             else if (value.format == GL_RGBA)
                 input.type = MaterialInputType.Vec4;
         }
-        else
-        {
-            input.type = MaterialInputType.Undefined;
-        }
+        else static assert("Unsupported type " ~ T.stringof);
 
         inputs[name] = input;
         return (name in inputs);
