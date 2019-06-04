@@ -68,6 +68,7 @@ class AssetManager: Owner
 {
     Dict!(Asset, string) assetsByFilename;
     VirtualFileSystem fs;
+    StdFileSystem stdfs;
     UnmanagedImageFactory imageFactory;
     UnmanagedHDRImageFactory hdrImageFactory;
     Thread loadingThread;
@@ -78,7 +79,7 @@ class AssetManager: Owner
     protected double monitorTimer = 0.0;
 
     float nextLoadingPercentage = 0.0f;
-    
+
     EventManager eventManager;
 
     this(EventManager emngr, Owner o = null)
@@ -87,12 +88,14 @@ class AssetManager: Owner
 
         assetsByFilename = New!(Dict!(Asset, string));
         fs = New!VirtualFileSystem();
+        stdfs = New!StdFileSystem();
+        fs.mount(stdfs);
         fs.mount(".");
         imageFactory = New!UnmanagedImageFactory();
         hdrImageFactory = New!UnmanagedHDRImageFactory();
 
         loadingThread = New!Thread(&threadFunc);
-        
+
         eventManager = emngr;
     }
 
@@ -100,6 +103,7 @@ class AssetManager: Owner
     {
         Delete(assetsByFilename);
         Delete(fs);
+        Delete(stdfs);
         Delete(imageFactory);
         Delete(hdrImageFactory);
         Delete(loadingThread);
@@ -205,15 +209,15 @@ class AssetManager: Owner
             writefln("Error: cannot find file \"%s\"", filename);
             return false;
         }
-            
+
         auto fstrm = fs.openForInput(filename);
-        
+
         bool res = asset.loadThreadSafePart(filename, fstrm, fs, this);
         if (!res)
         {
             writefln("Error: failed to load asset \"%s\"", filename);
         }
-            
+
         Delete(fstrm);
         return res;
     }
@@ -296,9 +300,9 @@ class AssetManager: Owner
             {
                 asset.monitorInfo.fileExists = true;
             }
-            else if (currentStat.modificationTimestamp > 
+            else if (currentStat.modificationTimestamp >
                      asset.monitorInfo.lastStat.modificationTimestamp ||
-                     currentStat.sizeInBytes != 
+                     currentStat.sizeInBytes !=
                      asset.monitorInfo.lastStat.sizeInBytes)
             {
                 reloadAsset(filename);
