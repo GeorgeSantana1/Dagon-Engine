@@ -4,6 +4,7 @@ in vec3 eyeNormal;
 in vec3 eyePosition;
 in vec2 texCoord;
 
+uniform float layer;
 
 /*
  * Diffuse color
@@ -191,7 +192,7 @@ void main()
     if (fragDiffuse.a < 1.0)
         discard;
     
-    fragColor = vec4(fragDiffuse.rgb, 1.0);
+    fragColor = vec4(fragDiffuse.rgb, layer);
     fragNormal = vec4(N, 0.0);
     fragPBR = vec4(roughness(), metallic(), 0.0, 0.0);
 }

@@ -37,11 +37,13 @@ import dagon.graphics.environment;
 import dagon.graphics.light;
 
 struct GraphicsState
-{   
+{
+    int layer;
+
     Vector2f resolution;
     float zNear;
     float zFar;
-    
+
     Vector3f cameraPosition;
 
     Matrix4x4f modelMatrix;
@@ -52,35 +54,37 @@ struct GraphicsState
 
     Matrix4x4f projectionMatrix;
     Matrix4x4f invProjectionMatrix;
-    
+
     Matrix4x4f modelViewMatrix;
     Matrix4x4f normalMatrix;
-    
+
     Material material;
     Shader overrideShader;
-    
+
     Environment environment;
     Light light;
-    
+
     bool colorMask;
     bool depthMask;
-    
+
     bool culling;
-    
+
     GLuint colorTexture;
     GLuint depthTexture;
     GLuint normalTexture;
     GLuint pbrTexture;
     GLuint occlusionTexture;
-    
+
     void reset()
     {
+        layer = 1;
+
         resolution = Vector2f(0.0f, 0.0f);
         zNear = 0.0f;
         zFar = 0.0f;
-    
+
         cameraPosition = Vector3f(0.0f, 0.0f, 0.0f);
-        
+
         modelMatrix = Matrix4x4f.identity;
         invModelMatrix = Matrix4x4f.identity;
 
@@ -89,21 +93,21 @@ struct GraphicsState
 
         projectionMatrix = Matrix4x4f.identity;
         invProjectionMatrix = Matrix4x4f.identity;
-        
+
         modelViewMatrix = Matrix4x4f.identity;
         normalMatrix = Matrix4x4f.identity;
-        
+
         material = null;
         overrideShader = null;
-        
+
         environment = null;
         light = null;
-        
+
         colorMask = true;
         depthMask = true;
-        
+
         culling = true;
-        
+
         colorTexture = 0;
         depthTexture = 0;
         normalTexture = 0;

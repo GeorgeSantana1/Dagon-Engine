@@ -40,23 +40,23 @@ import dagon.game.renderer;
 class HUDRenderer: Renderer
 {
     RenderStage stageHUD;
-    
+
     this(EventManager eventManager, Owner owner)
     {
         super(eventManager, owner);
-        
+
         setViewport(0, 0, eventManager.windowWidth, eventManager.windowHeight);
         view.ortho = true;
-        
+
         stageHUD = New!RenderStage(pipeline);
         stageHUD.clear = false;
         stageHUD.defaultMaterial.depthWrite = false;
         stageHUD.defaultMaterial.culling = false;
         stageHUD.view = view;
     }
-    
+
     override void scene(Scene s)
     {
-        stageHUD.group = s.hud;
+        stageHUD.group = s.foreground;
     }
 }

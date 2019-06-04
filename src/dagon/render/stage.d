@@ -53,7 +53,7 @@ class RenderStage: EventListener
     FallbackShader defaultShader;
     bool active = true;
     bool clear = true;
-    
+
     this(RenderPipeline pipeline, EntityGroup group = null)
     {
         super(pipeline.eventManager, pipeline);
@@ -68,36 +68,36 @@ class RenderStage: EventListener
     void update(Time t)
     {
         processEvents();
-    
+
         if (view)
         {
             state.viewMatrix = view.viewMatrix();
             state.invViewMatrix = view.invViewMatrix();
-            
+
             state.projectionMatrix = view.projectionMatrix();
             state.invProjectionMatrix = state.projectionMatrix.inverse;
-            
+
             state.resolution = Vector2f(view.width, view.height);
             state.zNear = view.zNear;
             state.zFar = view.zFar;
-    
+
             state.cameraPosition = view.cameraPosition;
         }
     }
-    
+
     void render()
     {
         if (view && group)
         {
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
-                
+
             if (clear)
             {
                 Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
                 if (state.environment)
                     backgroundColor = state.environment.backgroundColor;
-                
+
                 glClearColor(
                     backgroundColor.r,
                     backgroundColor.g,
@@ -105,21 +105,23 @@ class RenderStage: EventListener
                     backgroundColor.a);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             }
-        
+
             foreach(entity; group)
             if (entity.visible)
             {
+                state.layer = entity.layer;
+
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
-                
+
                 if (entity.material)
                     entity.material.bind(&state);
                 else
                     defaultMaterial.bind(&state);
-                
+
                 if (entity.drawable)
                     entity.drawable.render(&state);
-                
+
                 if (entity.material)
                         entity.material.unbind(&state);
                 else

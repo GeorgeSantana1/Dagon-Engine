@@ -45,119 +45,126 @@ import dagon.graphics.material;
 class EntityManager: Owner
 {
     DynamicArray!Entity entities;
-    
+
     this(Owner owner)
     {
         super(owner);
     }
-    
+
     void addEntity(Entity e)
     {
         entities.append(e);
     }
-    
+
     ~this()
     {
         entities.free();
     }
 }
 
+enum EntityLayer: int
+{
+    Background = 0,
+    Spatial = 1,
+    Foreground = 2
+}
+
 class Entity: Owner, Updateable
-{   
-    int layer = 0;
+{
+    EntityLayer layer = EntityLayer.Spatial;
     bool visible = true;
     bool castShadow = true;
     bool solid = false;
     bool dynamic = true;
 
     EntityManager manager;
-    
+
     Entity parent = null;
     DynamicArray!Entity children;
 
     DynamicArray!EntityComponent components;
-    
+
     Drawable drawable;
     Material material;
-    
+
     Vector3f position;
     Quaternionf rotation;
     Vector3f scaling;
-    
+
     Matrix4x4f transformation;
     Matrix4x4f invTransformation;
-    
+
     Matrix4x4f absoluteTransformation;
     Matrix4x4f invAbsoluteTransformation;
-    
+
     Matrix4x4f prevTransformation;
     Matrix4x4f prevAbsoluteTransformation;
-    
+
     this(Owner owner)
     {
         super(owner);
-        
+
         EntityManager mngr = cast(EntityManager)owner;
         if (mngr)
         {
             manager = mngr;
             manager.addEntity(this);
         }
-        
+
         position = Vector3f(0, 0, 0);
         rotation = Quaternionf.identity;
         scaling = Vector3f(1, 1, 1);
-        
+
         transformation = Matrix4x4f.identity;
         invTransformation = Matrix4x4f.identity;
-        
+
         absoluteTransformation = Matrix4x4f.identity;
         invAbsoluteTransformation = Matrix4x4f.identity;
-        
+
         prevTransformation = Matrix4x4f.identity;
         prevAbsoluteTransformation = Matrix4x4f.identity;
     }
-    
+
     void setParent(Entity e)
     {
         if (parent)
             parent.removeChild(this);
-            
+
         parent = e;
         parent.addChild(e);
     }
-    
+
     void addChild(Entity e)
     {
         children.append(e);
     }
-    
+
     void removeChild(Entity e)
     {
         children.removeFirst(e);
     }
-    
+
     void addComponent(EntityComponent ec)
     {
         components.append(ec);
     }
-    
+
     void removeComponent(EntityComponent ec)
     {
         components.removeFirst(ec);
     }
-    
+
     void updateTransformation()
     {
         prevTransformation = transformation;
-        
+
         transformation =
             translationMatrix(position) *
             rotation.toMatrix4x4 *
             scaleMatrix(scaling);
-            
+
         invTransformation = transformation.inverse;
-        
+
         if (parent)
         {
             absoluteTransformation = parent.absoluteTransformation * transformation;
@@ -171,34 +178,34 @@ class Entity: Owner, Updateable
             prevAbsoluteTransformation = prevTransformation;
         }
     }
-    
+
     void update(Time t)
     {
         updateTransformation();
-        
+
         foreach(c; components)
         {
             c.update(t);
         }
     }
-    
+
     void release()
     {
         if (parent)
             parent.removeChild(this);
-            
+
         for (size_t i = 0; i < children.data.length; i++)
             children.data[i].parent = null;
-            
+
         children.free();
         components.free();
     }
-    
+
     Vector3f positionAbsolute()
     {
         return absoluteTransformation.translation;
     }
-    
+
     Quaternionf rotationAbsolute()
     {
         if (parent)
@@ -206,7 +213,7 @@ class Entity: Owner, Updateable
         else
             return rotation;
     }
-    
+
     void translate(Vector3f v)
     {
         position += v;
@@ -268,27 +275,27 @@ class Entity: Owner, Updateable
     {
         rotation *= rotationQuaternion!float(Axis.z, degtorad(angle));
     }
-    
+
     void scale(float s)
     {
         scaling += Vector3f(s, s, s);
     }
-    
+
     void scale(Vector3f s)
     {
         scaling += s;
     }
-    
+
     void scaleX(float s)
     {
         scaling.x += s;
     }
-    
+
     void scaleY(float s)
     {
         scaling.y += s;
     }
-    
+
     void scaleZ(float s)
     {
         scaling.z += s;
@@ -308,7 +315,7 @@ class Entity: Owner, Updateable
     {
         return transformation.up;
     }
-    
+
     Vector3f directionAbsolute() @property
     {
         return absoluteTransformation.forward;
@@ -323,12 +330,12 @@ class Entity: Owner, Updateable
     {
         return absoluteTransformation.up;
     }
-    
+
     ~this()
     {
         release();
     }
-    
+
     void processEvents()
     {
         foreach(c; components)
@@ -348,12 +355,12 @@ class EntityComponent: EventListener, Updateable, Drawable
         entity = e;
         entity.addComponent(this);
     }
-    
+
     // Override me
     void update(Time t)
     {
     }
-    
+
     // Override me
     void render(GraphicsState* state)
     {

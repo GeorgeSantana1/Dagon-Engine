@@ -52,7 +52,7 @@ class GeometryShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("GeometryShader: program ", program.program);
     }
 
@@ -66,21 +66,23 @@ class GeometryShader: Shader
         auto imetallic = "metallic" in state.material.inputs;
         auto itextureScale = "textureScale" in state.material.inputs;
         auto iparallax = "parallax" in state.material.inputs;
-        
+
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
         setParameter("normalMatrix", state.normalMatrix);
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
-        
+
+        setParameter("layer", cast(float)(state.layer));
+
         setParameter("textureScale", itextureScale.asVector2f);
-        
+
         int parallaxMethod = iparallax.asInteger;
         if (parallaxMethod > ParallaxOcclusionMapping)
             parallaxMethod = ParallaxOcclusionMapping;
         if (parallaxMethod < 0)
             parallaxMethod = 0;
-        
+
         // Diffuse
         if (idiffuse.texture)
         {
@@ -94,7 +96,7 @@ class GeometryShader: Shader
             setParameter("diffuseVector", idiffuse.asVector4f);
             setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseColorValue");
         }
-        
+
         // Normal/height
         bool haveHeightMap = inormal.texture !is null;
         if (haveHeightMap)
@@ -160,7 +162,7 @@ class GeometryShader: Shader
             setParameterSubroutine("parallax", ShaderType.Fragment, "parallaxOcclusionMapping");
         else
             setParameterSubroutine("parallax", ShaderType.Fragment, "parallaxNone");
-        
+
         // PBR
         if (ipbr is null)
         {
@@ -174,11 +176,11 @@ class GeometryShader: Shader
         glActiveTexture(GL_TEXTURE2);
         ipbr.texture.bind();
         setParameter("pbrTexture", 2);
-        
+
         if (iroughness.texture is null)
         {
             setParameterSubroutine("roughness", ShaderType.Fragment, "roughnessValue");
-            
+
             if (iroughness.type == MaterialInputType.Float)
                 setParameter("roughnessScalar", iroughness.asFloat);
             else if (iroughness.type == MaterialInputType.Bool)
@@ -196,11 +198,11 @@ class GeometryShader: Shader
         {
             setParameterSubroutine("roughness", ShaderType.Fragment, "roughnessMap");
         }
-        
+
         if (imetallic.texture is null)
         {
             setParameterSubroutine("metallic", ShaderType.Fragment, "metallicValue");
-            
+
             if (imetallic.type == MaterialInputType.Float)
                 setParameter("metallicScalar", imetallic.asFloat);
             else if (imetallic.type == MaterialInputType.Bool)
@@ -218,7 +220,7 @@ class GeometryShader: Shader
         {
             setParameterSubroutine("metallic", ShaderType.Fragment, "metallicMap");
         }
-        
+
         glActiveTexture(GL_TEXTURE0);
 
         super.bind(state);
@@ -227,13 +229,13 @@ class GeometryShader: Shader
     override void unbind(GraphicsState* state)
     {
         super.unbind(state);
-        
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
 

@@ -54,13 +54,14 @@ class Scene: EventListener
     EntityManager entityManager;
     EntityGroupSpatial spatial;
     EntityGroupSpatialOpaque spatialOpaque;
-    EntityGroupHUD hud;
+    EntityGroupBackground backround;
+    EntityGroupForeground foreground;
     EntityGroupLights lights;
     Environment environment;
     bool isLoading = false;
     bool loaded = false;
     bool canRender = false;
-    
+
     this(Application application)
     {
         super(application.eventManager, application);
@@ -68,17 +69,18 @@ class Scene: EventListener
         entityManager = New!EntityManager(this);
         spatial = New!EntityGroupSpatial(entityManager, this);
         spatialOpaque = New!EntityGroupSpatialOpaque(entityManager, this);
-        hud = New!EntityGroupHUD(entityManager, this);
+        backround = New!EntityGroupBackground(entityManager, this);
+        foreground = New!EntityGroupForeground(entityManager, this);
         lights = New!EntityGroupLights(entityManager, this);
-        
+
         environment = New!Environment(this);
-        
+
         assetManager = New!AssetManager(eventManager, this);
         beforeLoad();
         isLoading = true;
         assetManager.loadThreadSafePart();
     }
-    
+
     // Set preload to true if you want to load the asset immediately
     // before actual loading (e.g., to render a loading screen)
     Asset addAsset(Asset asset, string filename, bool preload = false)
@@ -89,7 +91,7 @@ class Scene: EventListener
             assetManager.addAsset(asset, filename);
         return asset;
     }
-    
+
     ImageAsset addImageAsset(string filename, bool preload = false)
     {
         ImageAsset img;
@@ -102,7 +104,7 @@ class Scene: EventListener
         }
         return img;
     }
-    
+
     TextureAsset addTextureAsset(string filename, bool preload = false)
     {
         TextureAsset tex;
@@ -115,7 +117,7 @@ class Scene: EventListener
         }
         return tex;
     }
-    
+
     version(NoFreetype)
     {
         pragma(msg, "Warning: Dagon is compiled without Freetype support, Scene.addFontAsset is not available");
@@ -148,7 +150,7 @@ class Scene: EventListener
         }
         return obj;
     }
-    
+
     TextAsset addTextAsset(string filename, bool preload = false)
     {
         TextAsset text;
@@ -161,7 +163,7 @@ class Scene: EventListener
         }
         return text;
     }
-    
+
     BinaryAsset addBinaryAsset(string filename, bool preload = false)
     {
         BinaryAsset bin;
@@ -174,7 +176,7 @@ class Scene: EventListener
         }
         return bin;
     }
-    
+
     Entity addEntity(Entity parent = null)
     {
         Entity e = New!Entity(entityManager);
@@ -182,16 +184,16 @@ class Scene: EventListener
             e.setParent(parent);
         return e;
     }
-    
+
     Entity addEntityHUD(Entity parent = null)
     {
         Entity e = New!Entity(entityManager);
-        e.layer = -1;
+        e.layer = EntityLayer.Foreground;
         if (parent)
             e.setParent(parent);
         return e;
     }
-    
+
     Camera addCamera(Entity parent = null)
     {
         Camera c = New!Camera(entityManager);
@@ -199,7 +201,7 @@ class Scene: EventListener
             c.setParent(parent);
         return c;
     }
-    
+
     Light addLight(LightType type, Entity parent = null)
     {
         Light light = New!Light(entityManager);
@@ -208,33 +210,33 @@ class Scene: EventListener
         light.type = type;
         return light;
     }
-    
+
     // Override me
     void beforeLoad()
     {
     }
-    
+
     // Override me
     void onLoad(Time t, float progress)
     {
     }
-    
+
     // Override me
     void afterLoad()
     {
     }
-    
+
     // Override me
     void onUpdate(Time t)
     {
     }
-    
+
     import std.stdio;
-    
+
     void update(Time t)
     {
         processEvents();
-        
+
         if (isLoading)
         {
             onLoad(t, assetManager.nextLoadingPercentage);
@@ -248,14 +250,14 @@ class Scene: EventListener
                 debug writeln("Scene loaded");
                 loaded = true;
                 afterLoad();
-                
+
                 onLoad(t, 1.0f);
-                
+
                 canRender = true;
             }
-            
+
             onUpdate(t);
-            
+
             foreach(e; entityManager.entities)
             {
                 e.update(t);
@@ -281,7 +283,7 @@ class EntityGroupSpatial: Owner, EntityGroup
         for(size_t i = 0; i < entities.length; i++)
         {
             auto e = entities[i];
-            if (e.layer >= 0)
+            if (e.layer == EntityLayer.Spatial)
             {
                 res = dg(e);
                 if (res)
@@ -309,12 +311,12 @@ class EntityGroupSpatialOpaque: Owner, EntityGroup
         for(size_t i = 0; i < entities.length; i++)
         {
             auto e = entities[i];
-            if (e.layer >= 0)
+            if (e.layer == EntityLayer.Spatial)
             {
                 bool opaque = true;
                 if (e.material)
                     opaque = !e.material.isTransparent;
-                    
+
                 res = dg(e);
                 if (res)
                     break;
@@ -324,7 +326,7 @@ class EntityGroupSpatialOpaque: Owner, EntityGroup
     }
 }
 
-class EntityGroupHUD: Owner, EntityGroup
+class EntityGroupBackground: Owner, EntityGroup
 {
     EntityManager entityManager;
 
@@ -341,7 +343,35 @@ class EntityGroupHUD: Owner, EntityGroup
         for(size_t i = 0; i < entities.length; i++)
         {
             auto e = entities[i];
-            if (e.layer < 0)
+            if (e.layer == EntityLayer.Background)
+            {
+                res = dg(e);
+                if (res)
+                    break;
+            }
+        }
+        return res;
+    }
+}
+
+class EntityGroupForeground: Owner, EntityGroup
+{
+    EntityManager entityManager;
+
+    this(EntityManager entityManager, Owner owner)
+    {
+        super(owner);
+        this.entityManager = entityManager;
+    }
+
+    int opApply(scope int delegate(Entity) dg)
+    {
+        int res = 0;
+        auto entities = entityManager.entities.data;
+        for(size_t i = 0; i < entities.length; i++)
+        {
+            auto e = entities[i];
+            if (e.layer == EntityLayer.Foreground)
             {
                 res = dg(e);
                 if (res)
