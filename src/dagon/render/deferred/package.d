@@ -29,6 +29,7 @@ module dagon.render.deferred;
 
 public
 {
+    import dagon.render.deferred.backgroundstage;
     import dagon.render.deferred.debugoutputstage;
     import dagon.render.deferred.environmentstage;
     import dagon.render.deferred.geometrystage;

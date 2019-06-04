@@ -54,7 +54,7 @@ class Scene: EventListener
     EntityManager entityManager;
     EntityGroupSpatial spatial;
     EntityGroupSpatialOpaque spatialOpaque;
-    EntityGroupBackground backround;
+    EntityGroupBackground background;
     EntityGroupForeground foreground;
     EntityGroupLights lights;
     Environment environment;
@@ -69,7 +69,7 @@ class Scene: EventListener
         entityManager = New!EntityManager(this);
         spatial = New!EntityGroupSpatial(entityManager, this);
         spatialOpaque = New!EntityGroupSpatialOpaque(entityManager, this);
-        backround = New!EntityGroupBackground(entityManager, this);
+        background = New!EntityGroupBackground(entityManager, this);
         foreground = New!EntityGroupForeground(entityManager, this);
         lights = New!EntityGroupLights(entityManager, this);
 
