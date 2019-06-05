@@ -46,7 +46,7 @@ class BlurShader: Shader
 {
     string vs = import("Blur.vert.glsl");
     string fs = import("Blur.frag.glsl");
-    
+
     bool enabled = true;
     Vector2f direction;
     float radius = 1.0f;
@@ -55,32 +55,32 @@ class BlurShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("BlurShader: program ", program.program);
-        
+
         direction = Vector2f(1.0f, 0.0f);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         setParameter("viewSize", state.resolution);
         setParameter("enabled", enabled);
-        
+
         Vector2f dirScaled = direction * radius;
         setParameter("direction", dirScaled);
-        
+
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
-        
+        super.unbindParameters(state);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }

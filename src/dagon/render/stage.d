@@ -62,7 +62,7 @@ class RenderStage: EventListener
         pipeline.addStage(this);
         state.reset();
         defaultShader = New!FallbackShader(this);
-        defaultMaterial = New!Material(defaultShader, this);
+        defaultMaterial = New!Material(this);
     }
 
     void update(Time t)
@@ -106,8 +106,9 @@ class RenderStage: EventListener
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             }
 
+            defaultShader.bind();
             foreach(entity; group)
-            if (entity.visible)
+            if (entity.visible && entity.drawable)
             {
                 state.layer = entity.layer;
 
@@ -119,14 +120,18 @@ class RenderStage: EventListener
                 else
                     defaultMaterial.bind(&state);
 
-                if (entity.drawable)
-                    entity.drawable.render(&state);
+                defaultShader.bindParameters(&state);
+
+                entity.drawable.render(&state);
+
+                defaultShader.unbindParameters(&state);
 
                 if (entity.material)
-                        entity.material.unbind(&state);
+                    entity.material.unbind(&state);
                 else
                     defaultMaterial.unbind(&state);
             }
+            defaultShader.unbind();
         }
     }
 }

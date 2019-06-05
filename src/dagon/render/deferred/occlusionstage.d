@@ -47,7 +47,7 @@ class DeferredOcclusionStage: RenderStage
     ScreenSurface screenSurface;
     SSAOShader ssaoShader;
     Framebuffer outputBuffer;
-    
+
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
         super(pipeline);
@@ -55,26 +55,28 @@ class DeferredOcclusionStage: RenderStage
         screenSurface = New!ScreenSurface(this);
         ssaoShader = New!SSAOShader(this);
     }
-    
+
     override void render()
     {
         if (view && geometryStage)
         {
             if (outputBuffer)
                 outputBuffer.bind();
-            
+
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
             state.pbrTexture = geometryStage.gbuffer.pbrTexture;
-            
+
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
-            
-            ssaoShader.bind(&state);
+
+            ssaoShader.bind();
+            ssaoShader.bindParameters(&state);
             screenSurface.render(&state);
-            ssaoShader.unbind(&state);
-            
+            ssaoShader.unbindParameters(&state);
+            ssaoShader.unbind();
+
             if (outputBuffer)
                 outputBuffer.unbind();
         }

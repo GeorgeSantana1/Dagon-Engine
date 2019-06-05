@@ -78,6 +78,8 @@ class DeferredLightStage: RenderStage
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+            // TODO: use different groups for each light type,
+            // bind shaders only once for each light group
             foreach(entity; group)
             {
                 Light light = cast(Light)entity;
@@ -89,9 +91,11 @@ class DeferredLightStage: RenderStage
 
                         if (light.type == LightType.Sun)
                         {
-                            sunLightShader.bind(&state);
+                            sunLightShader.bind();
+                            sunLightShader.bindParameters(&state);
                             screenSurface.render(&state);
-                            sunLightShader.unbind(&state);
+                            sunLightShader.unbindParameters(&state);
+                            sunLightShader.unbind();
                         }
                         // TODO: other light types
                     }

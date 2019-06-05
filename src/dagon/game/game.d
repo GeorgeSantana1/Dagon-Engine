@@ -48,26 +48,26 @@ class Game: Application
     // TODO: scene manager
     Scene currentScene;
     Cadencer cadencer;
-    
+
     Renderer renderer;
     DeferredRenderer deferredRenderer;
     PostProcRenderer postProcRenderer;
     PresentRenderer presentRenderer;
     HUDRenderer hudRenderer;
-    
+
     this(uint w, uint h, bool fullscreen, string title, string[] args)
     {
         super(w, h, fullscreen, title, args);
-        
+
         cadencer = New!Cadencer(&fixedUpdate, 60, this);
-        
+
         deferredRenderer = New!DeferredRenderer(eventManager, this);
         renderer = deferredRenderer;
         postProcRenderer = New!PostProcRenderer(eventManager, deferredRenderer.outputBuffer, this);
         presentRenderer = New!PresentRenderer(eventManager, postProcRenderer.outputBuffer, this);
         hudRenderer = New!HUDRenderer(eventManager, this);
     }
-    
+
     void fixedUpdate(Time t)
     {
         if (currentScene)
@@ -81,12 +81,12 @@ class Game: Application
             hudRenderer.update(t);
         }
     }
-    
+
     override void onUpdate(Time t)
     {
         cadencer.update(t);
     }
-    
+
     override void onRender()
     {
         if (currentScene)
@@ -99,26 +99,5 @@ class Game: Application
                 hudRenderer.render();
             }
         }
-    }
-    
-    void renderEntity(Entity e, GraphicsState* state)
-    {
-        glScissor(0, 0, eventManager.windowWidth, eventManager.windowHeight);
-        glViewport(0, 0, eventManager.windowWidth, eventManager.windowHeight);
-        
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        state.modelViewMatrix = state.viewMatrix * e.absoluteTransformation;
-        state.normalMatrix = state.modelViewMatrix.inverse.transposed;
-        
-        if (e.material)
-            e.material.bind(state);
-        
-        if (e.drawable)
-            e.drawable.render(state);
-        
-        if (e.material)
-            e.material.unbind(state);
     }
 }

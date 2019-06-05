@@ -46,32 +46,32 @@ class GlowShader: Shader
 {
     string vs = import("Glow.vert.glsl");
     string fs = import("Glow.frag.glsl");
-    
+
     bool enabled = true;
-    
+
     float intensity = 1.0f;
-    
+
     Framebuffer blurredBuffer;
 
     this(Owner owner)
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("GlowShader: program ", program.program);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         setParameter("viewSize", state.resolution);
         setParameter("enabled", enabled);
         setParameter("intensity", intensity);
-        
+
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
-        
+
         // Texture 1 - blurred buffer
         if (blurredBuffer)
         {
@@ -79,22 +79,22 @@ class GlowShader: Shader
             glBindTexture(GL_TEXTURE_2D, blurredBuffer.colorTexture);
             setParameter("blurredBuffer", 1);
         }
-        
+
         glActiveTexture(GL_TEXTURE0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
-        
+        super.unbindParameters(state);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE0);
     }
 }

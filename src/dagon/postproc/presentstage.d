@@ -44,30 +44,32 @@ class PresentStage: RenderStage
     Framebuffer inputBuffer;
     ScreenSurface screenSurface;
     PresentShader presentShader;
-    
+
     this(RenderPipeline pipeline)
     {
         super(pipeline);
         screenSurface = New!ScreenSurface(this);
         presentShader = New!PresentShader(this);
     }
-    
+
     override void render()
     {
         if (inputBuffer && view)
         {
             state.colorTexture = inputBuffer.colorTexture;
             state.depthTexture = inputBuffer.depthTexture;
-            
+
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
-            
+
             glClearColor(0.0, 0.0, 0.0, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
-            presentShader.bind(&state);
+
+            presentShader.bind();
+            presentShader.bindParameters(&state);
             screenSurface.render(&state);
-            presentShader.unbind(&state);
+            presentShader.unbindParameters(&state);
+            presentShader.unbind();
         }
     }
 }

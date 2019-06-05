@@ -51,20 +51,20 @@ class HUDShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("HUDShader: program ", program.program);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         auto idiffuse = "diffuse" in state.material.inputs;
-        
+
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
         setParameter("normalMatrix", state.normalMatrix);
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
-        
+
         // Diffuse
         if (idiffuse.texture)
         {
@@ -78,16 +78,16 @@ class HUDShader: Shader
             setParameter("diffuseVector", idiffuse.asVector4f);
             setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseColorValue");
         }
-        
+
         glActiveTexture(GL_TEXTURE0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
-        
+        super.unbindParameters(state);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }

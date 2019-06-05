@@ -48,7 +48,7 @@ class DeferredGeometryStage: RenderStage
     {
         super(pipeline, group);
         geometryShader = New!GeometryShader(this);
-        state.overrideShader = geometryShader;
+        //state.overrideShader = geometryShader;
     }
 
     override void render()
@@ -63,8 +63,9 @@ class DeferredGeometryStage: RenderStage
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            geometryShader.bind();
             foreach(entity; group)
-            if (entity.visible)
+            if (entity.visible && entity.drawable)
             {
                 state.layer = entity.layer;
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
@@ -75,14 +76,18 @@ class DeferredGeometryStage: RenderStage
                 else
                     defaultMaterial.bind(&state);
 
-                if (entity.drawable)
-                    entity.drawable.render(&state);
+                geometryShader.bindParameters(&state);
+
+                entity.drawable.render(&state);
+
+                geometryShader.unbindParameters(&state);
 
                 if (entity.material)
                     entity.material.unbind(&state);
                 else
                     defaultMaterial.unbind(&state);
             }
+            geometryShader.unbind();
 
             gbuffer.unbind();
         }

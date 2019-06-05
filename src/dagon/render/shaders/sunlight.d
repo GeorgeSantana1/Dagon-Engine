@@ -47,7 +47,7 @@ class SunLightShader: Shader
 {
     string vs = import("SunLight.vert.glsl");
     string fs = import("SunLight.frag.glsl");
-    
+
     Matrix4x4f defaultShadowMatrix;
     GLuint defaultShadowTexture;
 
@@ -55,11 +55,11 @@ class SunLightShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("SunLightShader: program ", program.program);
-        
+
         defaultShadowMatrix = Matrix4x4f.identity;
-        
+
         glGenTextures(1, &defaultShadowTexture);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, defaultShadowTexture);
@@ -68,14 +68,14 @@ class SunLightShader: Shader
 	    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
-    
+
     ~this()
     {
         if (glIsFramebuffer(defaultShadowTexture))
             glDeleteFramebuffers(1, &defaultShadowTexture);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
@@ -84,7 +84,7 @@ class SunLightShader: Shader
         setParameter("resolution", state.resolution);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
-        
+
         // Environment
         if (state.environment)
         {
@@ -98,13 +98,13 @@ class SunLightShader: Shader
             setParameter("fogStart", 0.0f);
             setParameter("fogEnd", 1000.0f);
         }
-        
+
         // Light
         Vector4f lightDirHg;
         Color4f lightColor;
         float lightEnergy = 1.0f;
         if (state.light)
-        {        
+        {
             lightDirHg = Vector4f(state.light.directionAbsolute);
             lightDirHg.w = 0.0;
             lightColor = state.light.color;
@@ -120,34 +120,34 @@ class SunLightShader: Shader
         setParameter("lightColor", lightColor);
         setParameter("lightEnergy", lightEnergy);
         // TODO: light color and energy
-        
+
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
-        
+
         // Texture 1 - depth buffer
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, state.depthTexture);
         setParameter("depthBuffer", 1);
-        
+
         // Texture 2 - normal buffer
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, state.normalTexture);
         setParameter("normalBuffer", 2);
-        
+
         // Texture 3 - pbr buffer
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
         setParameter("pbrBuffer", 3);
-        
+
         // Texture 4 - shadow map
         if (state.light)
         {
             if (state.light.shadowEnabled)
             {
                 CascadedShadowMap csm = cast(CascadedShadowMap)state.light.shadowMap;
-                
+
                 glActiveTexture(GL_TEXTURE4);
                 glBindTexture(GL_TEXTURE_2D_ARRAY, csm.depthTexture);
                 setParameter("shadowTextureArray", 4);
@@ -168,7 +168,7 @@ class SunLightShader: Shader
                 setParameterSubroutine("shadowMap", ShaderType.Fragment, "shadowMapNone");
             }
         }
-        
+
         // Texture 5 - occlusion buffer
         if (glIsTexture(state.occlusionTexture))
         {
@@ -181,16 +181,16 @@ class SunLightShader: Shader
         {
             setParameter("haveOcclusionBuffer", false);
         }
-        
+
         glActiveTexture(GL_TEXTURE0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
-        
+        super.unbindParameters(state);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -199,16 +199,16 @@ class SunLightShader: Shader
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-        
+
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE0);
     }
 }

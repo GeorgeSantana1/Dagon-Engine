@@ -60,7 +60,7 @@ class DeferredDebugOutputStage: RenderStage
     DebugOutputShader debugOutputShader;
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
     Framebuffer outputBuffer;
-    
+
     this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
     {
         super(pipeline);
@@ -68,14 +68,14 @@ class DeferredDebugOutputStage: RenderStage
         screenSurface = New!ScreenSurface(this);
         debugOutputShader = New!DebugOutputShader(this);
     }
-    
+
     override void render()
     {
         if (view && geometryStage)
         {
             if (outputBuffer)
                 outputBuffer.bind();
-            
+
             state.colorTexture = geometryStage.gbuffer.colorTexture;
             state.depthTexture = geometryStage.gbuffer.depthTexture;
             state.normalTexture = geometryStage.gbuffer.normalTexture;
@@ -88,22 +88,24 @@ class DeferredDebugOutputStage: RenderStage
             Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
             if (state.environment)
                 backgroundColor = state.environment.backgroundColor;
-            
+
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
-            
+
             glClearColor(
-                backgroundColor.r, 
+                backgroundColor.r,
                 backgroundColor.g,
                 backgroundColor.b,
                 backgroundColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
+
             debugOutputShader.outputMode = outputMode;
-            debugOutputShader.bind(&state);
+            debugOutputShader.bind();
+            debugOutputShader.bindParameters(&state);
             screenSurface.render(&state);
-            debugOutputShader.unbind(&state);
-            
+            debugOutputShader.unbindParameters(&state);
+            debugOutputShader.unbind();
+
             if (outputBuffer)
                 outputBuffer.unbind();
         }

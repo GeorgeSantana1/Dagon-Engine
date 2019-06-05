@@ -51,11 +51,11 @@ class FallbackShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("FallbackShader: program ", program.program);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
@@ -63,11 +63,6 @@ class FallbackShader: Shader
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
 
-        super.bind(state);
-    }
-
-    override void unbind(GraphicsState* state)
-    {
-        super.unbind(state);
+        super.bindParameters(state);
     }
 }

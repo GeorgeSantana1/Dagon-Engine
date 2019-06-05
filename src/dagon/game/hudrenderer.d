@@ -29,13 +29,81 @@ module dagon.game.hudrenderer;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.image.color;
 
+import dagon.core.bindings;
 import dagon.core.event;
 import dagon.core.time;
+import dagon.graphics.entity;
 import dagon.resource.scene;
+import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.deferred;
 import dagon.game.renderer;
+
+class HUDStage: RenderStage
+{
+    this(RenderPipeline pipeline, EntityGroup group = null)
+    {
+        super(pipeline, group);
+    }
+
+    override void render()
+    {
+        if (view && group)
+        {
+            glScissor(view.x, view.y, view.width, view.height);
+            glViewport(view.x, view.y, view.width, view.height);
+
+            if (clear)
+            {
+                Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 1.0f);
+                if (state.environment)
+                    backgroundColor = state.environment.backgroundColor;
+
+                glClearColor(
+                    backgroundColor.r,
+                    backgroundColor.g,
+                    backgroundColor.b,
+                    backgroundColor.a);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            }
+
+            foreach(entity; group)
+            if (entity.visible && entity.drawable)
+            {
+                state.layer = entity.layer;
+
+                state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
+                state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+
+                //TODO:
+
+                if (entity.material)
+                {
+                    entity.material.bind(&state);
+                    if (entity.material.shader)
+                    {
+                        entity.material.shader.bind();
+                        entity.material.shader.bindParameters(&state);
+                    }
+                }
+
+                entity.drawable.render(&state);
+
+                if (entity.material)
+                {
+                    if (entity.material.shader)
+                    {
+                        entity.material.shader.unbindParameters(&state);
+                        entity.material.shader.unbind();
+                    }
+                    entity.material.unbind(&state);
+                }
+            }
+        }
+    }
+}
 
 class HUDRenderer: Renderer
 {
@@ -48,7 +116,7 @@ class HUDRenderer: Renderer
         setViewport(0, 0, eventManager.windowWidth, eventManager.windowHeight);
         view.ortho = true;
 
-        stageHUD = New!RenderStage(pipeline);
+        stageHUD = New!HUDStage(pipeline);
         stageHUD.clear = false;
         stageHUD.defaultMaterial.depthWrite = false;
         stageHUD.defaultMaterial.culling = false;

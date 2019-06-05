@@ -56,7 +56,7 @@ class GeometryShader: Shader
         debug writeln("GeometryShader: program ", program.program);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         auto idiffuse = "diffuse" in state.material.inputs;
         auto inormal = "normal" in state.material.inputs;
@@ -223,12 +223,12 @@ class GeometryShader: Shader
 
         glActiveTexture(GL_TEXTURE0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
+        super.unbindParameters(state);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);

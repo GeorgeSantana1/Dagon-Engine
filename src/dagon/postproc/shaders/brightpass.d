@@ -45,7 +45,7 @@ class BrightPassShader: Shader
 {
     string vs = import("BrightPass.vert.glsl");
     string fs = import("BrightPass.frag.glsl");
-    
+
     bool enabled = true;
     float luminanceThreshold = 1.0f;
 
@@ -53,33 +53,33 @@ class BrightPassShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("BrightPassShader: program ", program.program);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         setParameter("viewSize", state.resolution);
         setParameter("enabled", enabled);
         setParameter("luminanceThreshold", luminanceThreshold);
-        
+
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
-        
+
         glActiveTexture(GL_TEXTURE0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
-        
+        super.unbindParameters(state);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE0);
     }
 }

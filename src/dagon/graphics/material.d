@@ -144,15 +144,13 @@ class Material: Owner
 {
     Dict!(MaterialInput, string) inputs;
     Shader shader;
-    bool customShader = false;
 
-    this(Shader shader, Owner o)
+    this(Owner o)
     {
         super(o);
 
         inputs = New!(Dict!(MaterialInput, string));
         setStandardInputs();
-        this.shader = shader;
     }
 
     ~this()
@@ -426,11 +424,6 @@ class Material: Owner
         return (b == Transparent || b == Additive);
     }
 
-    bool usesCustomShader()
-    {
-        return customShader;
-    }
-
     void bind(GraphicsState* state)
     {
         auto iblending = "blending" in inputs;
@@ -476,6 +469,9 @@ class Material: Owner
             glDepthMask(GL_FALSE);
         }
 
+        state.material = this;
+
+        /*
         GraphicsState stateLocal = *state;
         stateLocal.material = this;
 
@@ -487,13 +483,15 @@ class Material: Owner
         {
             shader.bind(&stateLocal);
         }
+        */
     }
 
     void unbind(GraphicsState* state)
     {
-        auto icolorWrite = "colorWrite" in inputs;
-        auto idepthWrite = "depthWrite" in inputs;
+        //auto icolorWrite = "colorWrite" in inputs;
+        //auto idepthWrite = "depthWrite" in inputs;
 
+        /*
         GraphicsState stateLocal = *state;
         stateLocal.material = this;
 
@@ -505,6 +503,9 @@ class Material: Owner
         {
             shader.unbind(&stateLocal);
         }
+        */
+
+        state.material = null;
 
         glDepthMask(GL_TRUE);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

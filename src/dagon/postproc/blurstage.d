@@ -49,51 +49,57 @@ class BlurStage: RenderStage
     ScreenSurface screenSurface;
     BlurShader blurShader;
     uint radius = 1;
-    
+
     this(RenderPipeline pipeline)
     {
         super(pipeline);
         screenSurface = New!ScreenSurface(this);
         blurShader = New!BlurShader(this);
     }
-    
+
     override void render()
     {
         if (inputBuffer && outputBuffer && outputBuffer2 && view)
         {
             Framebuffer currentInputBuffer = inputBuffer;
             Framebuffer currentOutputBuffer = outputBuffer2;
-            
+
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);
-            
+
             glDisable(GL_DEPTH_TEST);
-            
+
+            blurShader.bind();
+
             foreach(i; 1..radius+1)
             {
                 state.colorTexture = currentInputBuffer.colorTexture;
                 currentOutputBuffer.bind();
                 blurShader.radius = i;
                 blurShader.direction = Vector2f(1.0f, 0.0f);
-                blurShader.bind(&state);
+
+                blurShader.bindParameters(&state);
                 screenSurface.render(&state);
-                blurShader.unbind(&state);
+                blurShader.unbindParameters(&state);
                 currentOutputBuffer.unbind();
-                
+
                 currentInputBuffer = currentOutputBuffer;
                 currentOutputBuffer = outputBuffer;
-                
+
                 state.colorTexture = currentInputBuffer.colorTexture;
                 currentOutputBuffer.bind();
                 blurShader.direction = Vector2f(0.0f, 1.0f);
-                blurShader.bind(&state);
+                blurShader.bindParameters(&state);
                 screenSurface.render(&state);
-                blurShader.unbind(&state);
+                blurShader.unbindParameters(&state);
+
                 currentOutputBuffer.unbind();
-                
+
                 currentInputBuffer = currentOutputBuffer;
                 currentOutputBuffer = outputBuffer2;
             }
+
+            blurShader.unbind();
 
             glEnable(GL_DEPTH_TEST);
         }

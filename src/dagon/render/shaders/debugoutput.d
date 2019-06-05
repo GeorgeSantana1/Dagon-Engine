@@ -47,50 +47,50 @@ class DebugOutputShader: Shader
 {
     string vs = import("DebugOutput.vert.glsl");
     string fs = import("DebugOutput.frag.glsl");
-    
+
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
 
     this(Owner owner)
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("DebugOutputShader: program ", program.program);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         setParameter("projectionMatrix", state.projectionMatrix);
-        
+
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
         setParameter("invProjectionMatrix", state.invProjectionMatrix);
         setParameter("resolution", state.resolution);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
-        
+
         setParameter("outputMode", cast(int)outputMode);
-        
+
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
-        
+
         // Texture 1 - depth buffer
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, state.depthTexture);
         setParameter("depthBuffer", 1);
-        
+
         // Texture 2 - normal buffer
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, state.normalTexture);
         setParameter("normalBuffer", 2);
-        
+
         // Texture 3 - pbr buffer
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
         setParameter("pbrBuffer", 3);
-        
+
         // Texture 4 - occlusion buffer
         if (glIsTexture(state.occlusionTexture))
         {
@@ -103,16 +103,16 @@ class DebugOutputShader: Shader
         {
             setParameter("haveOcclusionBuffer", false);
         }
-        
+
         glActiveTexture(GL_TEXTURE0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
-        
+        super.unbindParameters(state);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -121,13 +121,13 @@ class DebugOutputShader: Shader
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE0);
     }
 }

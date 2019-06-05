@@ -52,11 +52,11 @@ class EnvironmentShader: Shader
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
-        
+
         debug writeln("EnvironmentShader: program ", program.program);
     }
 
-    override void bind(GraphicsState* state)
+    override void bindParameters(GraphicsState* state)
     {
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
@@ -65,27 +65,27 @@ class EnvironmentShader: Shader
         setParameter("resolution", state.resolution);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
-        
+
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
-        
+
         // Texture 1 - depth buffer
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, state.depthTexture);
         setParameter("depthBuffer", 1);
-        
+
         // Texture 2 - normal buffer
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, state.normalTexture);
         setParameter("normalBuffer", 2);
-        
+
         // Texture 3 - pbr buffer
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
         setParameter("pbrBuffer", 3);
-        
+
         // Texture 4 - environment
         if (state.environment)
         {
@@ -93,7 +93,7 @@ class EnvironmentShader: Shader
             setParameter("fogStart", state.environment.fogStart);
             setParameter("fogEnd", state.environment.fogEnd);
             setParameter("ambientEnergy", state.environment.ambientEnergy);
-            
+
             if (state.environment.ambientMap)
             {
                 glActiveTexture(GL_TEXTURE4);
@@ -124,7 +124,7 @@ class EnvironmentShader: Shader
             setParameter("ambientVector", Color4f(0.5f, 0.5f, 0.5f, 1.0f));
             setParameterSubroutine("ambient", ShaderType.Fragment, "ambientColor");
         }
-        
+
         // Texture 5 - occlusion buffer
         if (glIsTexture(state.occlusionTexture))
         {
@@ -137,16 +137,16 @@ class EnvironmentShader: Shader
         {
             setParameter("haveOcclusionBuffer", false);
         }
-        
+
         glActiveTexture(GL_TEXTURE0);
 
-        super.bind(state);
+        super.bindParameters(state);
     }
 
-    override void unbind(GraphicsState* state)
+    override void unbindParameters(GraphicsState* state)
     {
-        super.unbind(state);
-        
+        super.unbindParameters(state);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -155,17 +155,17 @@ class EnvironmentShader: Shader
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        
+
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE0);
     }
 }

@@ -59,8 +59,7 @@ struct GraphicsState
     Matrix4x4f normalMatrix;
 
     Material material;
-    Shader overrideShader;
-
+    //Shader overrideShader;
     Environment environment;
     Light light;
 
@@ -98,8 +97,7 @@ struct GraphicsState
         normalMatrix = Matrix4x4f.identity;
 
         material = null;
-        overrideShader = null;
-
+        //overrideShader = null;
         environment = null;
         light = null;
 

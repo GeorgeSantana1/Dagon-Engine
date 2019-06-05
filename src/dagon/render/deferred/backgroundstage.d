@@ -49,7 +49,7 @@ class DeferredBackgroundStage: RenderStage
     {
         super(pipeline, group);
         skyShader = New!SkyShader(this);
-        state.overrideShader = skyShader;
+        //state.overrideShader = skyShader;
     }
 
     override void render()
@@ -72,6 +72,7 @@ class DeferredBackgroundStage: RenderStage
                 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            skyShader.bind();
             foreach(entity; group)
             if (entity.visible)
             {
@@ -84,14 +85,19 @@ class DeferredBackgroundStage: RenderStage
                 else
                     defaultMaterial.bind(&state);
 
+                skyShader.bindParameters(&state);
+
                 if (entity.drawable)
                     entity.drawable.render(&state);
+
+                skyShader.unbindParameters(&state);
 
                 if (entity.material)
                     entity.material.unbind(&state);
                 else
                     defaultMaterial.unbind(&state);
             }
+            skyShader.unbind();
 
             outputBuffer.unbind();
         }

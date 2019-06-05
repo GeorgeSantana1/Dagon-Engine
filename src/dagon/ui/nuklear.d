@@ -326,6 +326,7 @@ class NuklearGUI : Owner, Updateable, Drawable
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_DEPTH_TEST);
         glActiveTexture(GL_TEXTURE0);
 
         glUseProgram(shaderProgram);
@@ -392,6 +393,7 @@ class NuklearGUI : Owner, Updateable, Drawable
                             offset += cmd.elem_count;
                         });
 
+        glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         glDisable(GL_SCISSOR_TEST);
     }

@@ -51,7 +51,7 @@ class LoadingScreen: EventListener
     ShapeQuad loadingProgressBar;
     Entity eLoadingProgressBar;
     HUDShader hudShader;
-    
+
     this(Game game, Owner owner)
     {
         super(game.eventManager, owner);
@@ -60,11 +60,11 @@ class LoadingScreen: EventListener
         eLoadingProgressBar = New!Entity(this);
         eLoadingProgressBar.drawable = loadingProgressBar;
         hudShader = New!HUDShader(this);
-        eLoadingProgressBar.material = New!Material(hudShader, this);
+        eLoadingProgressBar.material = New!Material(this);
         eLoadingProgressBar.material.diffuse = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
         eLoadingProgressBar.material.culling = false;
     }
-    
+
     void update(Time t, float progress)
     {
         float maxWidth = eventManager.windowWidth * 0.33f;
@@ -75,7 +75,7 @@ class LoadingScreen: EventListener
         eLoadingProgressBar.scaling = Vector3f(w, 10, 1);
         eLoadingProgressBar.update(t);
     }
-    
+
     void render()
     {
         GraphicsState state;
@@ -86,6 +86,29 @@ class LoadingScreen: EventListener
         state.resolution = Vector2f(eventManager.windowWidth, eventManager.windowHeight);
         state.zNear = 0.0f;
         state.zFar = 1000.0f;
-        game.renderEntity(eLoadingProgressBar, &state);
+
+        glScissor(0, 0, eventManager.windowWidth, eventManager.windowHeight);
+        glViewport(0, 0, eventManager.windowWidth, eventManager.windowHeight);
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        state.modelViewMatrix = state.viewMatrix * eLoadingProgressBar.absoluteTransformation;
+        state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+
+        if (eLoadingProgressBar.material)
+            eLoadingProgressBar.material.bind(&state);
+
+        hudShader.bind();
+        hudShader.bindParameters(&state);
+
+        if (eLoadingProgressBar.drawable)
+            eLoadingProgressBar.drawable.render(&state);
+
+        hudShader.unbindParameters(&state);
+        hudShader.unbind();
+
+        if (eLoadingProgressBar.material)
+            eLoadingProgressBar.material.unbind(&state);
     }
 }

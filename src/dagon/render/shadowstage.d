@@ -39,6 +39,7 @@ import dagon.graphics.entity;
 import dagon.graphics.camera;
 import dagon.graphics.light;
 import dagon.graphics.csm;
+import dagon.graphics.shader;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.shaders.shadow;
@@ -48,20 +49,20 @@ class ShadowStage: RenderStage
     EntityGroup lightGroup;
     ShadowShader shadowShader;
     Camera camera;
-    
+
     this(RenderPipeline pipeline)
     {
         super(pipeline);
         shadowShader = New!ShadowShader(this);
-        state.overrideShader = shadowShader;
+        //state.overrideShader = shadowShader;
         state.colorMask = false;
         state.culling = false;
     }
-    
+
     override void update(Time t)
     {
         super.update(t);
-        
+
         if (lightGroup)
         {
             foreach(entity; lightGroup)
@@ -72,7 +73,7 @@ class ShadowStage: RenderStage
                     if (light.shadowEnabled)
                     {
                         CascadedShadowMap csm = cast(CascadedShadowMap)light.shadowMap;
-                        
+
                         if (csm)
                             csm.camera = camera;
                         light.shadowMap.update(t);
@@ -81,7 +82,7 @@ class ShadowStage: RenderStage
             }
         }
     }
-    
+
     override void render()
     {
         if (group && lightGroup)
@@ -95,7 +96,7 @@ class ShadowStage: RenderStage
                     {
                         state.light = light;
                         CascadedShadowMap csm = cast(CascadedShadowMap)light.shadowMap;
-                        
+
                         if (light.type == LightType.Sun && csm)
                             renderCSM(csm);
                     }
@@ -103,72 +104,80 @@ class ShadowStage: RenderStage
             }
         }
     }
-    
-    void renderEntities()
+
+    void renderEntities(Shader shader)
     {
         foreach(entity; group)
         if (entity.castShadow)
         {
             state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
             state.normalMatrix = state.modelViewMatrix.inverse.transposed;
-                
+
             if (entity.material)
                 entity.material.bind(&state);
             else
                 defaultMaterial.bind(&state);
-                
+
+            shader.bindParameters(&state);
+
             if (entity.drawable)
                 entity.drawable.render(&state);
-                
+
+            shader.unbindParameters(&state);
+
             if (entity.material)
                 entity.material.unbind(&state);
             else
                 defaultMaterial.unbind(&state);
         }
     }
-    
+
     void renderCSM(CascadedShadowMap csm)
     {
         state.resolution = Vector2f(csm.resolution, csm.resolution);
         state.zNear = csm.area1.zStart;
         state.zFar = csm.area1.zEnd;
-    
+
         state.cameraPosition = csm.area1.position;
-        
+
         glScissor(0, 0, csm.resolution, csm.resolution);
         glViewport(0, 0, csm.resolution, csm.resolution);
-        
+
+        shadowShader.bind();
+
         glPolygonOffset(3.0, 0.0);
         glDisable(GL_CULL_FACE);
-        
+
         state.viewMatrix = csm.area1.viewMatrix;
         state.invViewMatrix = csm.area1.invViewMatrix;
         state.projectionMatrix = csm.area1.projectionMatrix;
         state.invProjectionMatrix = csm.area1.projectionMatrix.inverse;
         glBindFramebuffer(GL_FRAMEBUFFER, csm.framebuffer1);
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderEntities();
+        renderEntities(shadowShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
+
         state.viewMatrix = csm.area2.viewMatrix;
         state.invViewMatrix = csm.area2.invViewMatrix;
         state.projectionMatrix = csm.area2.projectionMatrix;
         state.invProjectionMatrix = csm.area2.projectionMatrix.inverse;
         glBindFramebuffer(GL_FRAMEBUFFER, csm.framebuffer2);
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderEntities();
+        renderEntities(shadowShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
+
         state.viewMatrix = csm.area3.viewMatrix;
         state.invViewMatrix = csm.area3.invViewMatrix;
         state.projectionMatrix = csm.area3.projectionMatrix;
         state.invProjectionMatrix = csm.area3.projectionMatrix.inverse;
         glBindFramebuffer(GL_FRAMEBUFFER, csm.framebuffer3);
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderEntities();
+        renderEntities(shadowShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
+
         glEnable(GL_CULL_FACE);
         glPolygonOffset(0.0, 0.0);
+
+        shadowShader.unbind();
     }
 }

@@ -368,7 +368,7 @@ class Shader: Owner
             return sp;
         }
     }
-    
+
     BaseShaderParameter getParameter(string name)
     {
         if (name in parameters.indices)
@@ -405,10 +405,18 @@ class Shader: Owner
         }
     }
 
-    void bind(GraphicsState* state)
+    void bind()
     {
         program.bind();
+    }
 
+    void unbind()
+    {
+        program.unbind();
+    }
+
+    void bindParameters(GraphicsState* state)
+    {
         GLsizei n;
         glGetProgramStageiv(program.program, GL_VERTEX_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &n);
         if (n > 0 && n != vertexSubroutineIndices.length)
@@ -431,17 +439,15 @@ class Shader: Owner
             glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, cast(uint)fragmentSubroutineIndices.length, fragmentSubroutineIndices.ptr);
     }
 
-    void unbind(GraphicsState* state)
+    void unbindParameters(GraphicsState* state)
     {
         foreach(v; parameters.data)
         {
             if (v.autoBind)
                 v.unbind();
         }
-
-        program.unbind();
     }
-    
+
     void validate()
     {
         glValidateProgram(program.program);

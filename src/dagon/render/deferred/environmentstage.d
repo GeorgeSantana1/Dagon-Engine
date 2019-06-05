@@ -75,9 +75,11 @@ class DeferredEnvironmentStage: RenderStage
             glScissor(0, 0, outputBuffer.width, outputBuffer.height);
             glViewport(0, 0, outputBuffer.width, outputBuffer.height);
 
-            environmentShader.bind(&state);
+            environmentShader.bind();
+            environmentShader.bindParameters(&state);
             screenSurface.render(&state);
-            environmentShader.unbind(&state);
+            environmentShader.unbindParameters(&state);
+            environmentShader.unbind();
 
             outputBuffer.unbind();
         }
