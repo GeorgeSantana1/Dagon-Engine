@@ -327,16 +327,17 @@ class NuklearGUI : Owner, Updateable, Drawable
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
         glActiveTexture(GL_TEXTURE0);
 
         glUseProgram(shaderProgram);
         glUniform1i(textureLoc, 0);
         glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, state.projectionMatrix.arrayof.ptr);
 
-        const(nk_draw_command) *cmd;
+        //const(nk_draw_command) *cmd;
         void *vertices;
         void *elements;
-        const(nk_draw_index) *offset = null;
+        nk_draw_index* offset = null;
         nk_buffer vbuf;
         nk_buffer ebuf;
 
@@ -354,7 +355,7 @@ class NuklearGUI : Owner, Updateable, Drawable
         {
             // fill convert configuration
             nk_convert_config config;
-            nk_draw_vertex_layout_element[] vertex_layout =
+            nk_draw_vertex_layout_element[4] vertex_layout =
             [
                 { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, 0 },
                     { NK_VERTEX_TEXCOORD,  NK_FORMAT_FLOAT, 8 },
@@ -382,20 +383,41 @@ class NuklearGUI : Owner, Updateable, Drawable
 
         // iterate over and execute each draw command
         nk_draw_foreach(&ctx, &cmds, (cmd)
-                        {
-                            if (!cmd.elem_count) return;
-                            glBindTexture(GL_TEXTURE_2D, cmd.texture.id);
-                            glScissor(cast(GLint)(cmd.clip_rect.x),
-                                      cast(GLint)((eventManager.windowHeight - cast(GLint)(cmd.clip_rect.y + cmd.clip_rect.h))),
-                                      cast(GLint)(cmd.clip_rect.w),
-                                      cast(GLint)(cmd.clip_rect.h));
-                            glDrawElements(GL_TRIANGLES, cmd.elem_count, GL_UNSIGNED_INT, offset);
-                            offset += cmd.elem_count;
-                        });
+        {
+            if (!cmd.elem_count) return;
+            glBindTexture(GL_TEXTURE_2D, cmd.texture.id);
+            glScissor(cast(GLint)(cmd.clip_rect.x),
+                cast(GLint)((eventManager.windowHeight - cast(GLint)(cmd.clip_rect.y + cmd.clip_rect.h))),
+                cast(GLint)(cmd.clip_rect.w),
+                cast(GLint)(cmd.clip_rect.h));
+            glDrawElements(GL_TRIANGLES, cmd.elem_count, GL_UNSIGNED_INT, offset);
+            offset += cmd.elem_count;
+        });
 
+        /*
+        // FIXME
+        const(nk_draw_command)* c = nk__draw_begin(&ctx, &cmds);
+        while (c !is null)
+        {
+            if (!c.elem_count) break;
+            glBindTexture(GL_TEXTURE_2D, c.texture.id);
+            glScissor(cast(GLint)(c.clip_rect.x),
+                cast(GLint)((eventManager.windowHeight - cast(GLint)(c.clip_rect.y + c.clip_rect.h))),
+                cast(GLint)(c.clip_rect.w),
+                cast(GLint)(c.clip_rect.h));
+            glDrawElements(GL_TRIANGLES, c.elem_count, GL_UNSIGNED_INT, offset);
+            offset += c.elem_count;
+
+            c = nk__draw_next(c, &cmds, &ctx);
+        }
+        */
+
+        glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         glDisable(GL_SCISSOR_TEST);
+
+        glUseProgram(0);
     }
 
     // TODO: move this to a separate module for easier extending?
