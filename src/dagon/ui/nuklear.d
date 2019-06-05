@@ -382,24 +382,10 @@ class NuklearGUI : Owner, Updateable, Drawable
         glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
         // iterate over and execute each draw command
-        nk_draw_foreach(&ctx, &cmds, (cmd)
+        for (auto c = nk__draw_begin(&ctx, &cmds); c != null; c = nk__draw_next(c, &cmds, &ctx))
         {
-            if (!cmd.elem_count) return;
-            glBindTexture(GL_TEXTURE_2D, cmd.texture.id);
-            glScissor(cast(GLint)(cmd.clip_rect.x),
-                cast(GLint)((eventManager.windowHeight - cast(GLint)(cmd.clip_rect.y + cmd.clip_rect.h))),
-                cast(GLint)(cmd.clip_rect.w),
-                cast(GLint)(cmd.clip_rect.h));
-            glDrawElements(GL_TRIANGLES, cmd.elem_count, GL_UNSIGNED_INT, offset);
-            offset += cmd.elem_count;
-        });
-
-        /*
-        // FIXME
-        const(nk_draw_command)* c = nk__draw_begin(&ctx, &cmds);
-        while (c !is null)
-        {
-            if (!c.elem_count) break;
+            if (!c.elem_count)
+                continue;
             glBindTexture(GL_TEXTURE_2D, c.texture.id);
             glScissor(cast(GLint)(c.clip_rect.x),
                 cast(GLint)((eventManager.windowHeight - cast(GLint)(c.clip_rect.y + c.clip_rect.h))),
@@ -407,10 +393,7 @@ class NuklearGUI : Owner, Updateable, Drawable
                 cast(GLint)(c.clip_rect.h));
             glDrawElements(GL_TRIANGLES, c.elem_count, GL_UNSIGNED_INT, offset);
             offset += c.elem_count;
-
-            c = nk__draw_next(c, &cmds, &ctx);
         }
-        */
 
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
