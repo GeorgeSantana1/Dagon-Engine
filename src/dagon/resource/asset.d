@@ -164,6 +164,17 @@ class AssetManager: Owner
         return asset;
     }
 
+    void reloadAsset(Asset asset, string filename)
+    {
+        asset.release();
+        asset.threadSafePartLoaded = false;
+        asset.threadUnsafePartLoaded = false;
+
+        asset.threadSafePartLoaded = loadAssetThreadSafePart(asset, filename);
+        if (asset.threadSafePartLoaded)
+            asset.threadUnsafePartLoaded = asset.loadThreadUnsafePart();
+    }
+
     void reloadAsset(string name)
     {
         auto asset = assetsByFilename[name];
