@@ -47,14 +47,13 @@ import dagon.render.shaders.shadow;
 class ShadowStage: RenderStage
 {
     EntityGroup lightGroup;
-    ShadowShader shadowShader;
+    ShadowShader csmShader;
     Camera camera;
 
     this(RenderPipeline pipeline)
     {
         super(pipeline);
-        shadowShader = New!ShadowShader(this);
-        //state.overrideShader = shadowShader;
+        csmShader = New!ShadowShader(this);
         state.colorMask = false;
         state.culling = false;
     }
@@ -73,9 +72,11 @@ class ShadowStage: RenderStage
                     if (light.shadowEnabled)
                     {
                         CascadedShadowMap csm = cast(CascadedShadowMap)light.shadowMap;
-
                         if (csm)
                             csm.camera = camera;
+                            
+                        // TODO: other shadow types
+                            
                         light.shadowMap.update(t);
                     }
                 }
@@ -99,6 +100,8 @@ class ShadowStage: RenderStage
 
                         if (light.type == LightType.Sun && csm)
                             renderCSM(csm);
+                            
+                        // TODO: other shadow types
                     }
                 }
             }
@@ -143,7 +146,7 @@ class ShadowStage: RenderStage
         glScissor(0, 0, csm.resolution, csm.resolution);
         glViewport(0, 0, csm.resolution, csm.resolution);
 
-        shadowShader.bind();
+        csmShader.bind();
 
         glPolygonOffset(3.0, 0.0);
         glDisable(GL_CULL_FACE);
@@ -154,7 +157,7 @@ class ShadowStage: RenderStage
         state.invProjectionMatrix = csm.area1.projectionMatrix.inverse;
         glBindFramebuffer(GL_FRAMEBUFFER, csm.framebuffer1);
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderEntities(shadowShader);
+        renderEntities(csmShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         state.viewMatrix = csm.area2.viewMatrix;
@@ -163,7 +166,7 @@ class ShadowStage: RenderStage
         state.invProjectionMatrix = csm.area2.projectionMatrix.inverse;
         glBindFramebuffer(GL_FRAMEBUFFER, csm.framebuffer2);
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderEntities(shadowShader);
+        renderEntities(csmShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         state.viewMatrix = csm.area3.viewMatrix;
@@ -172,12 +175,12 @@ class ShadowStage: RenderStage
         state.invProjectionMatrix = csm.area3.projectionMatrix.inverse;
         glBindFramebuffer(GL_FRAMEBUFFER, csm.framebuffer3);
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderEntities(shadowShader);
+        renderEntities(csmShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glEnable(GL_CULL_FACE);
         glPolygonOffset(0.0, 0.0);
 
-        shadowShader.unbind();
+        csmShader.unbind();
     }
 }

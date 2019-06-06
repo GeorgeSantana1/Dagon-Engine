@@ -38,8 +38,8 @@ import dagon.graphics.screensurface;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
+import dagon.render.gbuffer;
 import dagon.render.shaders.debugoutput;
-import dagon.render.deferred.geometrystage;
 
 enum DebugOutputMode: int
 {
@@ -54,32 +54,32 @@ enum DebugOutputMode: int
 
 class DeferredDebugOutputStage: RenderStage
 {
-    DeferredGeometryStage geometryStage;
+    GBuffer gbuffer;
     Framebuffer occlusionBuffer;
     ScreenSurface screenSurface;
     DebugOutputShader debugOutputShader;
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
     Framebuffer outputBuffer;
 
-    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    this(RenderPipeline pipeline, GBuffer gbuffer)
     {
         super(pipeline);
-        this.geometryStage = geometryStage;
+        this.gbuffer = gbuffer;
         screenSurface = New!ScreenSurface(this);
         debugOutputShader = New!DebugOutputShader(this);
     }
 
     override void render()
     {
-        if (view && geometryStage)
+        if (view && gbuffer)
         {
             if (outputBuffer)
                 outputBuffer.bind();
 
-            state.colorTexture = geometryStage.gbuffer.colorTexture;
-            state.depthTexture = geometryStage.gbuffer.depthTexture;
-            state.normalTexture = geometryStage.gbuffer.normalTexture;
-            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
+            state.colorTexture = gbuffer.colorTexture;
+            state.depthTexture = gbuffer.depthTexture;
+            state.normalTexture = gbuffer.normalTexture;
+            state.pbrTexture = gbuffer.pbrTexture;
             if (occlusionBuffer)
                 state.occlusionTexture = occlusionBuffer.colorTexture;
             else

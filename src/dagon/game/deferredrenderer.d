@@ -85,11 +85,10 @@ class DeferredRenderer: Renderer
 
         stageShadow = New!ShadowStage(pipeline);
 
-        stageGeom = New!DeferredGeometryStage(pipeline);
+        stageGeom = New!DeferredGeometryStage(pipeline, gbuffer);
         stageGeom.view = view;
-        stageGeom.gbuffer = gbuffer;
 
-        stageOcclusion = New!DeferredOcclusionStage(pipeline, stageGeom);
+        stageOcclusion = New!DeferredOcclusionStage(pipeline, gbuffer);
         stageOcclusion.view = occlusionView;
         stageOcclusion.outputBuffer = occlusionNoisyBuffer;
 
@@ -103,17 +102,17 @@ class DeferredRenderer: Renderer
         stageBackground.view = view;
         stageBackground.outputBuffer = outputBuffer;
 
-        stageEnvironment = New!DeferredEnvironmentStage(pipeline, stageGeom);
+        stageEnvironment = New!DeferredEnvironmentStage(pipeline, gbuffer);
         stageEnvironment.view = view;
         stageEnvironment.outputBuffer = outputBuffer;
         stageEnvironment.occlusionBuffer = occlusionBuffer;
 
-        stageLight = New!DeferredLightStage(pipeline, stageGeom);
+        stageLight = New!DeferredLightStage(pipeline, gbuffer);
         stageLight.view = view;
         stageLight.outputBuffer = outputBuffer;
         stageLight.occlusionBuffer = occlusionBuffer;
 
-        stageDebug = New!DeferredDebugOutputStage(pipeline, stageGeom);
+        stageDebug = New!DeferredDebugOutputStage(pipeline, gbuffer);
         stageDebug.view = view;
         stageDebug.active = false;
         stageDebug.outputBuffer = outputBuffer;
@@ -126,7 +125,7 @@ class DeferredRenderer: Renderer
         stageShadow.lightGroup = s.lights;
         stageBackground.group = s.background;
         stageGeom.group = s.spatialOpaque;
-        stageLight.group = s.lights;
+        stageLight.groupSunLights = s.sunLights;
 
         stageBackground.state.environment = s.environment;
         stageGeom.state.environment = s.environment;

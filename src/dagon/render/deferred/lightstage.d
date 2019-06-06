@@ -34,39 +34,41 @@ import dlib.core.ownership;
 
 import dagon.core.bindings;
 import dagon.graphics.screensurface;
+import dagon.graphics.entity;
 import dagon.graphics.light;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
+import dagon.render.gbuffer;
 import dagon.render.shaders.sunlight;
-import dagon.render.deferred.geometrystage;
 
 class DeferredLightStage: RenderStage
 {
-    DeferredGeometryStage geometryStage;
+    GBuffer gbuffer;
     ScreenSurface screenSurface;
     SunLightShader sunLightShader;
     Framebuffer outputBuffer;
     Framebuffer occlusionBuffer;
+    EntityGroup groupSunLights;
 
-    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    this(RenderPipeline pipeline, GBuffer gbuffer)
     {
         super(pipeline);
-        this.geometryStage = geometryStage;
+        this.gbuffer = gbuffer;
         screenSurface = New!ScreenSurface(this);
         sunLightShader = New!SunLightShader(this);
     }
 
     override void render()
     {
-        if (group && outputBuffer && geometryStage)
+        if (groupSunLights && outputBuffer && gbuffer)
         {
             outputBuffer.bind();
 
-            state.colorTexture = geometryStage.gbuffer.colorTexture;
-            state.depthTexture = geometryStage.gbuffer.depthTexture;
-            state.normalTexture = geometryStage.gbuffer.normalTexture;
-            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
+            state.colorTexture = gbuffer.colorTexture;
+            state.depthTexture = gbuffer.depthTexture;
+            state.normalTexture = gbuffer.normalTexture;
+            state.pbrTexture = gbuffer.pbrTexture;
             if (occlusionBuffer)
                 state.occlusionTexture = occlusionBuffer.colorTexture;
             else
@@ -78,9 +80,9 @@ class DeferredLightStage: RenderStage
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-            // TODO: use different groups for each light type,
-            // bind shaders only once for each light group
-            foreach(entity; group)
+            sunLightShader.bind();
+            
+            foreach(entity; groupSunLights)
             {
                 Light light = cast(Light)entity;
                 if (light)
@@ -89,18 +91,16 @@ class DeferredLightStage: RenderStage
                     {
                         state.light = light;
 
-                        if (light.type == LightType.Sun)
-                        {
-                            sunLightShader.bind();
-                            sunLightShader.bindParameters(&state);
-                            screenSurface.render(&state);
-                            sunLightShader.unbindParameters(&state);
-                            sunLightShader.unbind();
-                        }
-                        // TODO: other light types
+                        sunLightShader.bindParameters(&state);
+                        screenSurface.render(&state);
+                        sunLightShader.unbindParameters(&state);
                     }
                 }
             }
+            
+            sunLightShader.unbind();
+            
+            // TODO: other light types
 
             glDisable(GL_BLEND);
 

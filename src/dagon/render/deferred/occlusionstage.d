@@ -38,35 +38,35 @@ import dagon.graphics.screensurface;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
+import dagon.render.gbuffer;
 import dagon.render.shaders.ssao;
-import dagon.render.deferred.geometrystage;
 
 class DeferredOcclusionStage: RenderStage
 {
-    DeferredGeometryStage geometryStage;
+    GBuffer gbuffer;
     ScreenSurface screenSurface;
     SSAOShader ssaoShader;
     Framebuffer outputBuffer;
 
-    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    this(RenderPipeline pipeline, GBuffer gbuffer)
     {
         super(pipeline);
-        this.geometryStage = geometryStage;
+        this.gbuffer = gbuffer;
         screenSurface = New!ScreenSurface(this);
         ssaoShader = New!SSAOShader(this);
     }
 
     override void render()
     {
-        if (view && geometryStage)
+        if (view && gbuffer)
         {
             if (outputBuffer)
                 outputBuffer.bind();
 
-            state.colorTexture = geometryStage.gbuffer.colorTexture;
-            state.depthTexture = geometryStage.gbuffer.depthTexture;
-            state.normalTexture = geometryStage.gbuffer.normalTexture;
-            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
+            state.colorTexture = gbuffer.colorTexture;
+            state.depthTexture = gbuffer.depthTexture;
+            state.normalTexture = gbuffer.normalTexture;
+            state.pbrTexture = gbuffer.pbrTexture;
 
             glScissor(view.x, view.y, view.width, view.height);
             glViewport(view.x, view.y, view.width, view.height);

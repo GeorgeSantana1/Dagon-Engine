@@ -57,6 +57,7 @@ class Scene: EventListener
     EntityGroupBackground background;
     EntityGroupForeground foreground;
     EntityGroupLights lights;
+    EntityGroupSunLights sunLights;
     Environment environment;
     bool isLoading = false;
     bool loaded = false;
@@ -72,6 +73,7 @@ class Scene: EventListener
         background = New!EntityGroupBackground(entityManager, this);
         foreground = New!EntityGroupForeground(entityManager, this);
         lights = New!EntityGroupLights(entityManager, this);
+        sunLights = New!EntityGroupSunLights(entityManager, this);
 
         environment = New!Environment(this);
 
@@ -399,11 +401,44 @@ class EntityGroupLights: Owner, EntityGroup
         for(size_t i = 0; i < entities.length; i++)
         {
             auto e = entities[i];
-            if (cast(Light)e)
+            Light light = cast(Light)e;
+            if (light)
             {
                 res = dg(e);
                 if (res)
                     break;
+            }
+        }
+        return res;
+    }
+}
+
+class EntityGroupSunLights: Owner, EntityGroup
+{
+    EntityManager entityManager;
+
+    this(EntityManager entityManager, Owner owner)
+    {
+        super(owner);
+        this.entityManager = entityManager;
+    }
+
+    int opApply(scope int delegate(Entity) dg)
+    {
+        int res = 0;
+        auto entities = entityManager.entities.data;
+        for(size_t i = 0; i < entities.length; i++)
+        {
+            auto e = entities[i];
+            Light light = cast(Light)e;
+            if (light)
+            {
+                if (light.type == LightType.Sun)
+                {
+                    res = dg(e);
+                    if (res)
+                        break;
+                }
             }
         }
         return res;

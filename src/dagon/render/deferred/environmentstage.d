@@ -38,35 +38,35 @@ import dagon.graphics.screensurface;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
+import dagon.render.gbuffer;
 import dagon.render.shaders.environment;
-import dagon.render.deferred.geometrystage;
 
 class DeferredEnvironmentStage: RenderStage
 {
-    DeferredGeometryStage geometryStage;
+    GBuffer gbuffer;
     ScreenSurface screenSurface;
     EnvironmentShader environmentShader;
     Framebuffer outputBuffer;
     Framebuffer occlusionBuffer;
 
-    this(RenderPipeline pipeline, DeferredGeometryStage geometryStage)
+    this(RenderPipeline pipeline, GBuffer gbuffer)
     {
         super(pipeline);
-        this.geometryStage = geometryStage;
+        this.gbuffer = gbuffer;
         screenSurface = New!ScreenSurface(this);
         environmentShader = New!EnvironmentShader(this);
     }
 
     override void render()
     {
-        if (outputBuffer && geometryStage)
+        if (outputBuffer && gbuffer)
         {
             outputBuffer.bind();
 
-            state.colorTexture = geometryStage.gbuffer.colorTexture;
-            state.depthTexture = geometryStage.gbuffer.depthTexture;
-            state.normalTexture = geometryStage.gbuffer.normalTexture;
-            state.pbrTexture = geometryStage.gbuffer.pbrTexture;
+            state.colorTexture = gbuffer.colorTexture;
+            state.depthTexture = gbuffer.depthTexture;
+            state.normalTexture = gbuffer.normalTexture;
+            state.pbrTexture = gbuffer.pbrTexture;
             if (occlusionBuffer)
                 state.occlusionTexture = occlusionBuffer.colorTexture;
             else
