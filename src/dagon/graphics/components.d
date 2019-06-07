@@ -25,29 +25,40 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.graphics;
+module dagon.graphics.components;
 
-public
+import dlib.math.matrix;
+import dlib.math.transformation;
+
+import dagon.core.event;
+import dagon.core.time;
+import dagon.graphics.entity;
+
+/*
+ * A component that synchronizes Entity's position with other Entity
+ */
+class PositionSync: EntityComponent
 {
-    import dagon.graphics.camera;
-    import dagon.graphics.components;
-    import dagon.graphics.csm;
-    import dagon.graphics.cubemap;
-    import dagon.graphics.drawable;
-    import dagon.graphics.entity;
-    import dagon.graphics.environment;
-    import dagon.graphics.heightmap;
-    import dagon.graphics.light;
-    import dagon.graphics.material;
-    import dagon.graphics.mesh;
-    import dagon.graphics.opensimplex;
-    import dagon.graphics.screensurface;
-    import dagon.graphics.shader;
-    import dagon.graphics.shaderloader;
-    import dagon.graphics.shadowmap;
-    import dagon.graphics.shapes;
-    import dagon.graphics.state;
-    import dagon.graphics.terrain;
-    import dagon.graphics.texture;
-    import dagon.graphics.updateable;
+    Entity parent;
+
+    this(EventManager em, Entity e, Entity parent)
+    {
+        super(em, e);
+        this.parent = parent;
+    }
+
+    override void update(Time time)
+    {
+        entity.position = parent.positionAbsolute;
+
+        entity.transformation =
+            translationMatrix(entity.position) *
+            entity.rotation.toMatrix4x4 *
+            scaleMatrix(entity.scaling);
+        entity.invTransformation = entity.transformation.inverse;
+
+        entity.absoluteTransformation = entity.transformation;
+        entity.invAbsoluteTransformation = entity.invTransformation;
+        entity.prevAbsoluteTransformation = entity.prevTransformation;
+    }
 }
