@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2019 Timur Gafarov
+Copyright (c) 2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -25,16 +25,28 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon;
+module dagon.graphics;
 
 public
 {
-    import dlib;
-    import dagon.core;
-    import dagon.game;
-    import dagon.graphics;
-    import dagon.postproc;
-    import dagon.render;
-    import dagon.resource;
-    import dagon.ui;
+    import dagon.graphics.camera;
+    import dagon.graphics.csm;
+    import dagon.graphics.cubemap;
+    import dagon.graphics.drawable;
+    import dagon.graphics.entity;
+    import dagon.graphics.environment;
+    import dagon.graphics.heightmap;
+    import dagon.graphics.light;
+    import dagon.graphics.material;
+    import dagon.graphics.mesh;
+    import dagon.graphics.opensimplex;
+    import dagon.graphics.screensurface;
+    import dagon.graphics.shader;
+    import dagon.graphics.shaderloader;
+    import dagon.graphics.shadowmap;
+    import dagon.graphics.shapes;
+    import dagon.graphics.state;
+    import dagon.graphics.terrain;
+    import dagon.graphics.texture;
+    import dagon.graphics.updateable;
 }
