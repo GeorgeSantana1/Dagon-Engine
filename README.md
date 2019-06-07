@@ -41,7 +41,7 @@ Dagon depends on the following D packages:
 * [dlib](https://github.com/gecko0307/dlib)
 * [bindbc-opengl](https://github.com/BindBC/bindbc-opengl)
 * [bindbc-sdl](https://github.com/BindBC/bindbc-sdl)
-* [bindbc-ft](https://github.com/gecko0307/bindbc-ft)
+* [bindbc-freetype](https://github.com/BindBC/bindbc-freetype)
 * [bindbc-nuklear](https://github.com/Timu5/bindbc-nuklear)
 
 Runtime dependencies (dynamic link libraries):
