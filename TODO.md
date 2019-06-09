@@ -28,7 +28,7 @@ Status:
 * [ ] Area lights
 * [x] Shadows
 * [x] Terrain
-* [ ] Sky
+* [x] Sky
 * [ ] Water
 * [ ] Particles
 * [ ] Decals

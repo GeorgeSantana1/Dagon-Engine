@@ -73,7 +73,7 @@ class DeferredBackgroundStage: RenderStage
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
             foreach(entity; group)
-            if (entity.visible)
+            if (entity.visible && entity.drawable)
             {
                 state.layer = entity.layer;
                 state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
@@ -91,8 +91,7 @@ class DeferredBackgroundStage: RenderStage
                 shader.bind();
                 shader.bindParameters(&state);
 
-                if (entity.drawable)
-                    entity.drawable.render(&state);
+                entity.drawable.render(&state);
 
                 shader.unbindParameters(&state);
                 shader.unbind();

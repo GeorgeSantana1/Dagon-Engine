@@ -25,18 +25,48 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.shaders;
+module dagon.render.shaders.rayleigh;
 
-public
+import std.stdio;
+import std.math;
+import std.conv;
+
+import dlib.core.memory;
+import dlib.core.ownership;
+import dlib.math.vector;
+import dlib.math.matrix;
+import dlib.image.color;
+
+import dagon.core.bindings;
+import dagon.graphics.state;
+import dagon.graphics.shader;
+import dagon.graphics.cubemap;
+
+class RayleighShader: Shader
 {
-    import dagon.render.shaders.debugoutput;
-    import dagon.render.shaders.environment;
-    import dagon.render.shaders.fallback;
-    import dagon.render.shaders.geometry;
-    import dagon.render.shaders.hud;
-    import dagon.render.shaders.rayleigh;
-    import dagon.render.shaders.shadow;
-    import dagon.render.shaders.sky;
-    import dagon.render.shaders.ssao;
-    import dagon.render.shaders.sunlight;
+    string vs = import("Rayleigh.vert.glsl");
+    string fs = import("Rayleigh.frag.glsl");
+    
+    Vector3f sunDirection = Vector3f(-1.0f, -1.0f, -1.0f).normalized;
+
+    this(Owner owner)
+    {
+        auto myProgram = New!ShaderProgram(vs, fs, this);
+        super(myProgram, owner);
+    }
+
+    override void bindParameters(GraphicsState* state)
+    {
+        // Matrices
+        setParameter("modelViewMatrix", state.modelViewMatrix);
+        setParameter("projectionMatrix", state.projectionMatrix);
+        setParameter("normalMatrix", state.normalMatrix);
+        setParameter("viewMatrix", state.viewMatrix);
+        setParameter("invViewMatrix", state.invViewMatrix);
+        
+        setParameter("cameraPosition", state.cameraPosition);
+        setParameter("sunDirection", -sunDirection);
+        
+        super.bindParameters(state);
+    }
 }
