@@ -35,6 +35,7 @@ import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.graphics.entity;
+import dagon.graphics.shader;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
@@ -70,8 +71,6 @@ class DeferredBackgroundStage: RenderStage
                 backgroundColor.b,
                 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            skyShader.bind();
             
             foreach(entity; group)
             if (entity.visible)
@@ -85,20 +84,24 @@ class DeferredBackgroundStage: RenderStage
                 else
                     defaultMaterial.bind(&state);
 
-                skyShader.bindParameters(&state);
+                Shader shader = skyShader;
+                if (entity.material.shader)
+                    shader = entity.material.shader;
+                
+                shader.bind();
+                shader.bindParameters(&state);
 
                 if (entity.drawable)
                     entity.drawable.render(&state);
 
-                skyShader.unbindParameters(&state);
+                shader.unbindParameters(&state);
+                shader.unbind();
 
                 if (entity.material)
                     entity.material.unbind(&state);
                 else
                     defaultMaterial.unbind(&state);
             }
-            
-            skyShader.unbind();
 
             outputBuffer.unbind();
         }
