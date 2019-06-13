@@ -62,7 +62,7 @@
                 "bindbc-freetype": "~>0.5.0"
             },
             "versions": ["NoNuklear"]
-        },
+        }
     ],
     
     "copyFiles-windows-x86": ["lib/x86/*.dll"],
