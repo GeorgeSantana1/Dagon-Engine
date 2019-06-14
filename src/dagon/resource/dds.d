@@ -201,8 +201,7 @@ Compound!(CompressedImage, string) loadDDS(InputStream istrm)
     }
     
     size_t bufferSize = cast(size_t)(istrm.size - istrm.getPosition);
-    //size_t bufferSize = (surfaceDesc.mipMapLevels > 1)? surfaceDesc.pitch * 2 : surfaceDesc.pitch;
-    version(DDSPDebug) writeln(bufferSize);
+    version(DDSPDebug) writeln("bufferSize: ", bufferSize);
     
     img = New!CompressedImage(surfaceDesc.width, surfaceDesc.height, format, surfaceDesc.mipMapLevels, bufferSize);
     istrm.readBytes(img.data.ptr, bufferSize);
