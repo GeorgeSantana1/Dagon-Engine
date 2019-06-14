@@ -35,6 +35,7 @@ import std.conv;
 import std.getopt;
 import std.string;
 import std.file;
+import std.algorithm: canFind;
 import core.stdc.stdlib;
 
 import dlib.core.memory;
@@ -76,6 +77,36 @@ extern(System) nothrow void messageCallback(
     string empty = "";
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
         printf(msg.ptr, (type == GL_DEBUG_TYPE_ERROR ? err.ptr : empty.ptr), type, severity, message);
+}
+
+private
+{
+    __gshared int[] compressedTextureFormats;
+    
+    void enumerateCompressedTextureFormats()
+    {
+        int numCompressedFormats = 0;
+        glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedFormats);
+        if (numCompressedFormats)
+        {
+            compressedTextureFormats = New!(int[])(numCompressedFormats);
+            glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, compressedTextureFormats.ptr);
+        }
+    }
+    
+    void releaseCompressedTextureFormats()
+    {
+        if (compressedTextureFormats.length)
+            Delete(compressedTextureFormats);
+    }
+}
+
+bool compressedTextureFormatSupported(GLenum format)
+{
+    if (compressedTextureFormats.length)
+        return compressedTextureFormats.canFind(format);
+    else
+        return false;
 }
 
 /++
@@ -200,7 +231,10 @@ class Application: EventListener
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         SDL_GL_SwapWindow(window);
+        
+        enumerateCompressedTextureFormats();
 
+        // Debug output
         debug
         {
             if (hasKHRDebug)
@@ -213,6 +247,16 @@ class Application: EventListener
                 writeln("GL_KHR_debug is not supported, debug output is not available");
             }
         }
+    }
+    
+    ~this()
+    {
+        releaseCompressedTextureFormats();
+        
+        SDL_GL_DeleteContext(glcontext);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        Delete(_eventManager);
     }
 
     void maximizeWindow()
@@ -272,13 +316,5 @@ class Application: EventListener
     void exit()
     {
         eventManager.exit();
-    }
-
-    ~this()
-    {
-        SDL_GL_DeleteContext(glcontext);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        Delete(_eventManager);
     }
 }

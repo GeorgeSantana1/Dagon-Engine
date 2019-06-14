@@ -29,6 +29,7 @@ module dagon.graphics.texture;
 
 import std.stdio;
 import std.math;
+import std.algorithm;
 
 import dlib.core.memory;
 import dlib.core.ownership;
@@ -37,6 +38,12 @@ import dlib.image.image;
 import dlib.math.vector;
 
 import dagon.core.bindings;
+import dagon.core.application;
+import dagon.resource.dds; // TODO: import dagon.graphics.compressedimage;
+
+enum GL_COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;
+enum GL_COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;
+enum GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3;
 
 class Texture: Owner
 {
@@ -84,29 +91,76 @@ class Texture: Owner
         image = img;
         width = img.width;
         height = img.height;
-
-        if (!pixelFormatToTextureFormat(cast(PixelFormat)img.pixelFormat, format, intFormat, type))
-            writefln("Unsupported pixel format %s", img.pixelFormat);
-
+        
         glGenTextures(1, &tex);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex);
-
+            
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-        //if (DerelictGL.isExtSupported("GL_EXT_texture_filter_anisotropic"))
-        //    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, intFormat, width, height, 0, format, type, cast(void*)img.data.ptr);
-
-        useMipmapFiltering = genMipmaps;
-        if (useMipmapFiltering)
+        
+        CompressedImage compressedImg = cast(CompressedImage)img;
+        if (compressedImg)
         {
-            glGenerateMipmap(GL_TEXTURE_2D);
-            mipmapGenerated = true;
+            uint blockSize;
+            if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_DXT1)
+            {
+                intFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+                blockSize = 8;
+            }
+            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_DXT3)
+            {
+                intFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+                blockSize = 16;
+            }
+            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_DXT5)
+            {
+                intFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                blockSize = 16;
+            }
+            
+            if (!compressedTextureFormatSupported(intFormat))
+                writeln("Unsupported compressed texture format ", compressedImg.compressedFormat);
+            else
+            {
+                uint numMipMaps = compressedImg.mipMapLevels;
+                
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numMipMaps - 1);
+                
+                uint w = width;
+                uint h = height;
+                uint offset = 0;
+                for (uint i = 0; i < numMipMaps; i++)
+                {
+                    uint size = ((w + 3) / 4) * ((h + 3) / 4) * blockSize;
+                    glCompressedTexImage2D(GL_TEXTURE_2D, i, intFormat, w, h, 0, size, cast(void*)(img.data.ptr + offset));
+                    offset += size;
+                    w /= 2;
+                    h /= 2;
+                }
+                
+                useMipmapFiltering = genMipmaps;
+                mipmapGenerated = true;
+            }
+        }
+        else
+        {
+            if (!pixelFormatToTextureFormat(cast(PixelFormat)img.pixelFormat, format, intFormat, type))
+                writeln("Unsupported pixel format ", img.pixelFormat);
+            else
+            {
+                glTexImage2D(GL_TEXTURE_2D, 0, intFormat, width, height, 0, format, type, cast(void*)img.data.ptr);
+            
+                useMipmapFiltering = genMipmaps;
+                if (useMipmapFiltering)
+                {
+                    glGenerateMipmap(GL_TEXTURE_2D);
+                    mipmapGenerated = true;
+                }
+            }
         }
 
         glBindTexture(GL_TEXTURE_2D, 0);

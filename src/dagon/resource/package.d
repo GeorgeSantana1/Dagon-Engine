@@ -32,6 +32,7 @@ public
     import dagon.resource.asset;
     import dagon.resource.binary;
     import dagon.resource.boxfs;
+    import dagon.resource.dds;
     import dagon.resource.font;
     import dagon.resource.image;
     import dagon.resource.obj;

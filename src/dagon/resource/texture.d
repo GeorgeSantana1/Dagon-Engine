@@ -44,8 +44,9 @@ import dlib.image.unmanaged;
 import dlib.image.hdri;
 import dlib.filesystem.filesystem;
 
-import dagon.resource.asset;
 import dagon.graphics.texture;
+import dagon.resource.asset;
+import dagon.resource.dds;
 
 class TextureAsset: Asset
 {
@@ -75,6 +76,14 @@ class TextureAsset: Asset
         {
             Compound!(SuperHDRImage, string) res;
             res = loadHDR(istrm, hdrImageFactory);
+            texture.image = res[0];
+            errMsg = res[1];
+        }
+        else if (filename.extension == ".dds" ||
+                 filename.extension == ".DDS")
+        {
+            Compound!(CompressedImage, string) res;
+            res = loadDDS(istrm);
             texture.image = res[0];
             errMsg = res[1];
         }
