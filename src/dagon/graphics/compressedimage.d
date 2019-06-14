@@ -37,7 +37,8 @@ enum CompressedImageFormat
 {
     S3TC_DXT1,
     S3TC_DXT3,
-    S3TC_DXT5
+    S3TC_DXT5,
+    BPTC_UNORM
 }
 
 class CompressedImage: SuperImage

@@ -45,6 +45,7 @@ import dlib.image.hdri;
 import dlib.filesystem.filesystem;
 
 import dagon.graphics.texture;
+import dagon.graphics.compressedimage;
 import dagon.resource.asset;
 import dagon.resource.dds;
 

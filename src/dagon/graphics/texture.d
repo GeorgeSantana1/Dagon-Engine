@@ -39,11 +39,33 @@ import dlib.math.vector;
 
 import dagon.core.bindings;
 import dagon.core.application;
-import dagon.resource.dds; // TODO: import dagon.graphics.compressedimage;
+import dagon.graphics.compressedimage;
 
+// S3TC formats
 enum GL_COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;
 enum GL_COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;
 enum GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3;
+
+// BPTC formats
+enum GL_COMPRESSED_RGBA_BPTC_UNORM_ARB = 0x8E8C;
+enum GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB = 0x8E8E;
+enum GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB = 0x8E8F;
+
+// ASTC formats
+enum GL_COMPRESSED_RGBA_ASTC_4x4_KHR = 0x93B0;
+enum GL_COMPRESSED_RGBA_ASTC_5x4_KHR = 0x93B1;
+enum GL_COMPRESSED_RGBA_ASTC_5x5_KHR = 0x93B2;
+enum GL_COMPRESSED_RGBA_ASTC_6x5_KHR = 0x93B3;
+enum GL_COMPRESSED_RGBA_ASTC_6x6_KHR = 0x93B4;
+enum GL_COMPRESSED_RGBA_ASTC_8x5_KHR = 0x93B5;
+enum GL_COMPRESSED_RGBA_ASTC_8x6_KHR = 0x93B6;
+enum GL_COMPRESSED_RGBA_ASTC_8x8_KHR = 0x93B7;
+enum GL_COMPRESSED_RGBA_ASTC_10x5_KHR = 0x93B8;
+enum GL_COMPRESSED_RGBA_ASTC_10x6_KHR = 0x93B9;
+enum GL_COMPRESSED_RGBA_ASTC_10x8_KHR = 0x93BA;
+enum GL_COMPRESSED_RGBA_ASTC_10x10_KHR = 0x93BB;
+enum GL_COMPRESSED_RGBA_ASTC_12x10_KHR = 0x93BC;
+enum GL_COMPRESSED_RGBA_ASTC_12x12_KHR = 0x93BD;
 
 class Texture: Owner
 {
@@ -118,6 +140,11 @@ class Texture: Owner
             else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_DXT5)
             {
                 intFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                blockSize = 16;
+            }
+            else if (compressedImg.compressedFormat == CompressedImageFormat.BPTC_UNORM)
+            {
+                intFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
                 blockSize = 16;
             }
             
