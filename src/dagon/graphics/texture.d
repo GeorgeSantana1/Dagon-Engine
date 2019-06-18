@@ -118,41 +118,15 @@ class Texture: Owner
         if (compressedImg)
         {
             uint blockSize;
-            if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_RGB_DXT1)
-            {
-                intFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-                blockSize = 8;
-            }
-            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_RGBA_DXT3)
-            {
-                intFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-                blockSize = 16;
-            }
-            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_RGBA_DXT5)
-            {
-                intFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-                blockSize = 16;
-            }
-            else if (compressedImg.compressedFormat == CompressedImageFormat.BPTC_RGBA_UNORM)
-            {
-                intFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
-                blockSize = 16;
-            }
-            else if (compressedImg.compressedFormat == CompressedImageFormat.BPTC_SRGBA_UNORM)
-            {
-                intFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB;
-                blockSize = 16;
-            }
+            uint numMipMaps = compressedImg.mipMapLevels;
 
-            if (!compressedTextureFormatSupported(intFormat))
+            if (!compressedFormatToTextureFormat(compressedImg.compressedFormat, intFormat, blockSize))
             {
                 writeln("Unsupported compressed texture format ", compressedImg.compressedFormat);
                 fallback();
             }
             else
             {
-                uint numMipMaps = compressedImg.mipMapLevels;
-
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numMipMaps - 1);
 
@@ -278,6 +252,22 @@ bool pixelFormatToTextureFormat(PixelFormat pixelFormat, out GLenum textureForma
         case PixelFormat.RGB8:       textureInternalFormat = GL_RGB8;    textureFormat = GL_RGB;  pixelType = GL_UNSIGNED_BYTE; break;
         case PixelFormat.RGBA8:      textureInternalFormat = GL_RGBA8;   textureFormat = GL_RGBA; pixelType = GL_UNSIGNED_BYTE; break;
         case PixelFormat.RGBA_FLOAT: textureInternalFormat = GL_RGBA32F; textureFormat = GL_RGBA; pixelType = GL_FLOAT; break;
+        default:
+            return false;
+    }
+
+    return true;
+}
+
+bool compressedFormatToTextureFormat(CompressedImageFormat compFormat, out GLint textureInternalFormat, out uint blockSize)
+{
+    switch (compFormat)
+    {
+        case CompressedImageFormat.S3TC_RGB_DXT1:    textureInternalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;         blockSize = 8;  break;
+        case CompressedImageFormat.S3TC_RGBA_DXT3:   textureInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;        blockSize = 16; break;
+        case CompressedImageFormat.S3TC_RGBA_DXT5:   textureInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;        blockSize = 16; break;
+        case CompressedImageFormat.BPTC_RGBA_UNORM:  textureInternalFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;       blockSize = 16; break;
+        case CompressedImageFormat.BPTC_SRGBA_UNORM: textureInternalFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB; blockSize = 16; break;
         default:
             return false;
     }
