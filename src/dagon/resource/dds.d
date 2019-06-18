@@ -324,22 +324,63 @@ Compound!(CompressedImage, string) loadDDS(InputStream istrm)
     }
 
     CompressedImageFormat format;
-    switch(hdr.format.fourCC)
+
+    if (hdr.format.fourCC == FOURCC_DX10)
     {
-        case FOURCC_DXT1:
-            version(DDSDebug) writeln("FOURCC_DXT1");
-            format = CompressedImageFormat.S3TC_DXT1;
-            break;
-        case FOURCC_DXT3:
-            version(DDSDebug) writeln("FOURCC_DXT3");
-            format = CompressedImageFormat.S3TC_DXT3;
-            break;
-        case FOURCC_DXT5:
-            version(DDSDebug) writeln("FOURCC_DXT5");
-            format = CompressedImageFormat.S3TC_DXT5;
-            break;
-        default:
-            return error("loadDDS error: unsupported compression type");
+        DDSHeaderDXT10 dx10 = readStruct!DDSHeaderDXT10(istrm);
+
+        DXGIFormat fmt = cast(DXGIFormat)dx10.dxgiFormat;
+        version(DDSDebug) writeln(fmt);
+
+        switch(fmt)
+        {
+            case DXGIFormat.BC4_UNORM:
+                format = CompressedImageFormat.RGTC1_R;
+                break;
+            case DXGIFormat.BC4_SNORM:
+                format = CompressedImageFormat.RGTC1_R_S;
+                break;
+            case DXGIFormat.BC5_UNORM:
+                format = CompressedImageFormat.RGTC2_RG;
+                break;
+            case DXGIFormat.BC5_SNORM:
+                format = CompressedImageFormat.RGTC2_RG_S;
+                break;
+            case DXGIFormat.BC7_UNORM:
+                format = CompressedImageFormat.BPTC_RGBA_UNORM;
+                break;
+            case DXGIFormat.BC7_UNORM_SRGB:
+                format = CompressedImageFormat.BPTC_SRGBA_UNORM;
+                break;
+            case DXGIFormat.BC6H_SF16:
+                format = CompressedImageFormat.BPTC_RGB_SF;
+                break;
+            case DXGIFormat.BC6H_UF16:
+                format = CompressedImageFormat.BPTC_RGB_UF;
+                break;
+            default:
+                return error("loadDDS error: unsupported compression type");
+        }
+    }
+    else
+    {
+        switch(hdr.format.fourCC)
+        {
+            case FOURCC_DXT1:
+                version(DDSDebug) writeln("FOURCC_DXT1");
+                format = CompressedImageFormat.S3TC_RGB_DXT1;
+                break;
+            case FOURCC_DXT3:
+                version(DDSDebug) writeln("FOURCC_DXT3");
+                format = CompressedImageFormat.S3TC_RGBA_DXT3;
+                break;
+            case FOURCC_DXT5:
+                version(DDSDebug) writeln("FOURCC_DXT5");
+                format = CompressedImageFormat.S3TC_RGBA_DXT5;
+                break;
+            default:
+                return error("loadDDS error: unsupported compression type");
+        }
     }
 
     size_t bufferSize = cast(size_t)(istrm.size - istrm.getPosition);

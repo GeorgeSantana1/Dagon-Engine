@@ -35,10 +35,19 @@ import dlib.image.image;
 
 enum CompressedImageFormat
 {
-    S3TC_DXT1,
-    S3TC_DXT3,
-    S3TC_DXT5,
-    BPTC_UNORM
+    S3TC_RGB_DXT1,
+    S3TC_RGBA_DXT3,
+    S3TC_RGBA_DXT5,
+
+    RGTC1_R,
+    RGTC1_R_S,
+    RGTC2_RG,
+    RGTC2_RG_S,
+
+    BPTC_RGBA_UNORM,
+    BPTC_SRGBA_UNORM,
+    BPTC_RGB_SF,
+    BPTC_RGB_UF
 }
 
 class CompressedImage: SuperImage
@@ -70,27 +79,27 @@ class CompressedImage: SuperImage
     {
         Delete(this);
     }
-    
-    @property uint width() 
+
+    @property uint width()
     {
         return _width;
     }
-    
+
     @property uint height()
     {
         return _height;
     }
-    
+
     @property uint bitDepth()
     {
         return 0;
     }
-    
+
     @property uint channels()
     {
         return 0;
     }
-    
+
     @property uint pixelSize()
     {
         return 0;
@@ -100,12 +109,12 @@ class CompressedImage: SuperImage
     {
         return PixelFormat.RGBA8;
     }
-    
+
     @property CompressedImageFormat compressedFormat()
     {
         return _compressedImageFormat;
     }
-    
+
     @property uint mipMapLevels()
     {
         return _mipMapLevels;
@@ -132,7 +141,7 @@ class CompressedImage: SuperImage
     {
         return Color4f(0.0f, 0.0f, 0.0f, 0.0f);
     }
-    
+
     Color4f opIndexAssign(Color4f c, int x, int y)
     {
         return Color4f(0.0f, 0.0f, 0.0f, 0.0f);

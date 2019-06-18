@@ -42,30 +42,21 @@ import dagon.core.application;
 import dagon.graphics.compressedimage;
 
 // S3TC formats
-enum GL_COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;
-enum GL_COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;
-enum GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3;
+enum GL_COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;  // DXT1/BC1_UNORM
+enum GL_COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2; // DXT3/BC2_UNORM
+enum GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3; // DXT5/BC3_UNORM
+
+// RGTC formats
+enum GL_COMPRESSED_RED_RGTC1 = 0x8DBB;        // BC4_UNORM
+enum GL_COMPRESSED_SIGNED_RED_RGTC1 = 0x8DBC; // BC4_SNORM
+enum GL_COMPRESSED_RG_RGTC2 = 0x8DBD;         // BC5_UNORM
+enum GL_COMPRESSED_SIGNED_RG_RGTC2 = 0x8DBE;  // BC5_SNORM
 
 // BPTC formats
-enum GL_COMPRESSED_RGBA_BPTC_UNORM_ARB = 0x8E8C;
-enum GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB = 0x8E8E;
-enum GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB = 0x8E8F;
-
-// ASTC formats
-enum GL_COMPRESSED_RGBA_ASTC_4x4_KHR = 0x93B0;
-enum GL_COMPRESSED_RGBA_ASTC_5x4_KHR = 0x93B1;
-enum GL_COMPRESSED_RGBA_ASTC_5x5_KHR = 0x93B2;
-enum GL_COMPRESSED_RGBA_ASTC_6x5_KHR = 0x93B3;
-enum GL_COMPRESSED_RGBA_ASTC_6x6_KHR = 0x93B4;
-enum GL_COMPRESSED_RGBA_ASTC_8x5_KHR = 0x93B5;
-enum GL_COMPRESSED_RGBA_ASTC_8x6_KHR = 0x93B6;
-enum GL_COMPRESSED_RGBA_ASTC_8x8_KHR = 0x93B7;
-enum GL_COMPRESSED_RGBA_ASTC_10x5_KHR = 0x93B8;
-enum GL_COMPRESSED_RGBA_ASTC_10x6_KHR = 0x93B9;
-enum GL_COMPRESSED_RGBA_ASTC_10x8_KHR = 0x93BA;
-enum GL_COMPRESSED_RGBA_ASTC_10x10_KHR = 0x93BB;
-enum GL_COMPRESSED_RGBA_ASTC_12x10_KHR = 0x93BC;
-enum GL_COMPRESSED_RGBA_ASTC_12x12_KHR = 0x93BD;
+enum GL_COMPRESSED_RGBA_BPTC_UNORM_ARB = 0x8E8C;         // BC7_UNORM
+enum GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB = 0x8E8D;   // BC7_UNORM_SRGB
+enum GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB = 0x8E8E;   // BC6H_SF16
+enum GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB = 0x8E8F; // BC6H_UF16
 
 class Texture: Owner
 {
@@ -113,50 +104,55 @@ class Texture: Owner
         image = img;
         width = img.width;
         height = img.height;
-        
+
         glGenTextures(1, &tex);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex);
-            
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        
+
         CompressedImage compressedImg = cast(CompressedImage)img;
         if (compressedImg)
         {
             uint blockSize;
-            if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_DXT1)
+            if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_RGB_DXT1)
             {
                 intFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
                 blockSize = 8;
             }
-            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_DXT3)
+            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_RGBA_DXT3)
             {
                 intFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
                 blockSize = 16;
             }
-            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_DXT5)
+            else if (compressedImg.compressedFormat == CompressedImageFormat.S3TC_RGBA_DXT5)
             {
                 intFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
                 blockSize = 16;
             }
-            else if (compressedImg.compressedFormat == CompressedImageFormat.BPTC_UNORM)
+            else if (compressedImg.compressedFormat == CompressedImageFormat.BPTC_RGBA_UNORM)
             {
                 intFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
                 blockSize = 16;
             }
-            
+            else if (compressedImg.compressedFormat == CompressedImageFormat.BPTC_SRGBA_UNORM)
+            {
+                intFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB;
+                blockSize = 16;
+            }
+
             if (!compressedTextureFormatSupported(intFormat))
                 writeln("Unsupported compressed texture format ", compressedImg.compressedFormat);
             else
             {
                 uint numMipMaps = compressedImg.mipMapLevels;
-                
+
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numMipMaps - 1);
-                
+
                 uint w = width;
                 uint h = height;
                 uint offset = 0;
@@ -168,7 +164,7 @@ class Texture: Owner
                     w /= 2;
                     h /= 2;
                 }
-                
+
                 useMipmapFiltering = genMipmaps;
                 mipmapGenerated = true;
             }
@@ -180,7 +176,7 @@ class Texture: Owner
             else
             {
                 glTexImage2D(GL_TEXTURE_2D, 0, intFormat, width, height, 0, format, type, cast(void*)img.data.ptr);
-            
+
                 useMipmapFiltering = genMipmaps;
                 if (useMipmapFiltering)
                 {
