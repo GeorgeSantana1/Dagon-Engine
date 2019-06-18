@@ -145,7 +145,10 @@ class Texture: Owner
             }
 
             if (!compressedTextureFormatSupported(intFormat))
+            {
                 writeln("Unsupported compressed texture format ", compressedImg.compressedFormat);
+                fallback();
+            }
             else
             {
                 uint numMipMaps = compressedImg.mipMapLevels;
@@ -172,7 +175,10 @@ class Texture: Owner
         else
         {
             if (!pixelFormatToTextureFormat(cast(PixelFormat)img.pixelFormat, format, intFormat, type))
+            {
                 writeln("Unsupported pixel format ", img.pixelFormat);
+                fallback();
+            }
             else
             {
                 glTexImage2D(GL_TEXTURE_2D, 0, intFormat, width, height, 0, format, type, cast(void*)img.data.ptr);
@@ -187,6 +193,11 @@ class Texture: Owner
         }
 
         glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    protected void fallback()
+    {
+        // TODO: make fallback texture
     }
 
     void bind()
