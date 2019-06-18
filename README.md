@@ -29,7 +29,7 @@ Made with Dagon
 
 Usage
 -----
-To use latest stable Dagon, add the following dependency to your `dub.json`:
+To use Dagon NG, add the following dependency to your `dub.json`:
 ```
 "dagon": "~dagon-ng"
 ```
