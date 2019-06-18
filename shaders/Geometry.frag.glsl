@@ -189,7 +189,7 @@ void main()
     N = normal(shiftedTexCoord, -1.0, tangentToEye);
     
     vec4 fragDiffuse = diffuse(shiftedTexCoord);
-    if (fragDiffuse.a < 1.0)
+    if (fragDiffuse.a < 0.5)
         discard;
     
     fragColor = vec4(fragDiffuse.rgb, layer);
