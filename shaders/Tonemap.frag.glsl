@@ -16,9 +16,6 @@ out vec4 fragColor;
  *
  * tonemapACES is based on a function by Krzysztof Narkowicz:
  * https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve
- *
- * LUT function (lookupColor) is based on a code by Matt DesLauriers:
- * https://github.com/mattdesl/glsl-lut
  */
  
 vec3 hableFunc(vec3 x)

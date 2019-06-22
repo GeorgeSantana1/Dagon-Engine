@@ -180,25 +180,21 @@ void main()
     
     vec3 f0 = mix(vec3(0.04), albedo, metallic);
 
-    vec3 radiance = vec3(0.0, 0.0, 0.0);
-
     float shadow = shadowMap(eyePos, N);
 
     // Sun light
-    {
-        vec3 L = lightDirection;
-        float NL = max(dot(N, L), 0.0);
-        vec3 H = normalize(E + L);
-        
-        float NDF = distributionGGX(N, H, roughness);
-        float G = geometrySmith(N, E, L, roughness);
-        vec3 F = fresnelRoughness(max(dot(H, E), 0.0), f0, roughness);
+    vec3 L = lightDirection;
+    float NL = max(dot(N, L), 0.0);
+    vec3 H = normalize(E + L);
 
-        vec3 kD = (1.0 - F) * (1.0 - metallic);
-        vec3 specular = (NDF * G * F) / max(4.0 * max(dot(N, E), 0.0) * NL, 0.001);
+    float NDF = distributionGGX(N, H, roughness);
+    float G = geometrySmith(N, E, L, roughness);
+    vec3 F = fresnelRoughness(max(dot(H, E), 0.0), f0, roughness);
 
-        radiance += (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
-    }
+    vec3 kD = (1.0 - F) * (1.0 - metallic);
+    vec3 specular = (NDF * G * F) / max(4.0 * max(dot(N, E), 0.0) * NL, 0.001);
+
+    vec3 radiance = (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
     
     // Fog
     float linearDepth = abs(eyePos.z);

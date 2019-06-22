@@ -14,6 +14,7 @@ out vec4 fragColor;
 
 float bilateral()
 {
+    vec2 invViewSize = 1.0 / viewSize;
     float center = texture(colorBuffer, texCoord).r;
 	float res = 0.0;
 	float total = 0.0;
@@ -21,7 +22,7 @@ float bilateral()
     {
 		for (float y = -radius; y <= radius; y += 1)
         {
-			float s = texture(colorBuffer, texCoord + vec2(x, y) / viewSize).r;
+			float s = texture(colorBuffer, texCoord + vec2(x, y) * invViewSize).r;
 			float weight = 1.0 - abs(s - center) * 0.25;
 			weight = pow(weight, exponent);
 			res += s * weight;

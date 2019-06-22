@@ -116,14 +116,12 @@ void main()
     
     vec3 f0 = mix(vec3(0.04), albedo, metallic);
 
-    vec3 radiance = vec3(0.0, 0.0, 0.0);
-
     // Ambient light
     vec3 ambientDiffuse = ambient(worldN, 0.99);
     vec3 ambientSpecular = ambient(worldR, roughness);
     vec3 F = fresnelRoughness(max(dot(N, E), 0.0), f0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
-    radiance += kD * ambientDiffuse * albedo * occlusion + F * ambientSpecular;
+    vec3 radiance = kD * ambientDiffuse * albedo * occlusion + F * ambientSpecular;
     
     // Fog
     float linearDepth = abs(eyePos.z);

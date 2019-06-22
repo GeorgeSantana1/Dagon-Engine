@@ -51,21 +51,14 @@ void main()
     float metallic = texture(pbrBuffer, texCoord).g;
     
     float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
-    
-    float colorWeight = float(outputMode == 1);
-    float normalWeight = float(outputMode == 2);
-    float posWeight = float(outputMode == 3);
-    float roughWeight = float(outputMode == 4);
-    float metWeight = float(outputMode == 5);
-    float occWeight = float(outputMode == 6);
 
     vec3 output = 
-        albedo * colorWeight + 
-        N * normalWeight + 
-        eyePos * posWeight +
-        vec3(roughness) * roughWeight +
-        vec3(metallic) * metWeight +
-        vec3(occlusion) * occWeight;
+        albedo * float(outputMode == 1) + 
+        N * float(outputMode == 2) + 
+        eyePos * float(outputMode == 3) +
+        vec3(roughness) * float(outputMode == 4) +
+        vec3(metallic) * float(outputMode == 5) +
+        vec3(occlusion) * float(outputMode == 6);
     
     fragColor = vec4(output, 1.0);
 }
