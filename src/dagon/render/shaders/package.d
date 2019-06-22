@@ -29,6 +29,7 @@ module dagon.render.shaders;
 
 public
 {
+    import dagon.render.shaders.arealight;
     import dagon.render.shaders.debugoutput;
     import dagon.render.shaders.environment;
     import dagon.render.shaders.fallback;

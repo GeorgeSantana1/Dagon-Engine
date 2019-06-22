@@ -58,6 +58,7 @@ class Scene: EventListener
     EntityGroupForeground foreground;
     EntityGroupLights lights;
     EntityGroupSunLights sunLights;
+    EntityGroupAreaLights areaLights;
     Environment environment;
     bool isLoading = false;
     bool loaded = false;
@@ -74,6 +75,7 @@ class Scene: EventListener
         foreground = New!EntityGroupForeground(entityManager, this);
         lights = New!EntityGroupLights(entityManager, this);
         sunLights = New!EntityGroupSunLights(entityManager, this);
+        areaLights = New!EntityGroupAreaLights(entityManager, this);
 
         environment = New!Environment(this);
 
@@ -434,6 +436,40 @@ class EntityGroupSunLights: Owner, EntityGroup
             if (light)
             {
                 if (light.type == LightType.Sun)
+                {
+                    res = dg(e);
+                    if (res)
+                        break;
+                }
+            }
+        }
+        return res;
+    }
+}
+
+class EntityGroupAreaLights: Owner, EntityGroup
+{
+    EntityManager entityManager;
+
+    this(EntityManager entityManager, Owner owner)
+    {
+        super(owner);
+        this.entityManager = entityManager;
+    }
+
+    int opApply(scope int delegate(Entity) dg)
+    {
+        int res = 0;
+        auto entities = entityManager.entities.data;
+        for(size_t i = 0; i < entities.length; i++)
+        {
+            auto e = entities[i];
+            Light light = cast(Light)e;
+            if (light)
+            {
+                if (light.type == LightType.AreaSphere ||
+                    light.type == LightType.AreaTube ||
+                    light.type == LightType.Spot)
                 {
                     res = dg(e);
                     if (res)

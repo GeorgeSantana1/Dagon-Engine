@@ -31,37 +31,47 @@ import std.stdio;
 
 import dlib.core.memory;
 import dlib.core.ownership;
+import dlib.math.vector;
+import dlib.math.matrix;
+import dlib.math.transformation;
 
 import dagon.core.bindings;
 import dagon.graphics.screensurface;
 import dagon.graphics.entity;
 import dagon.graphics.light;
+import dagon.graphics.shapes;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.framebuffer;
 import dagon.render.gbuffer;
 import dagon.render.shaders.sunlight;
+import dagon.render.shaders.arealight;
 
 class DeferredLightStage: RenderStage
 {
     GBuffer gbuffer;
     ScreenSurface screenSurface;
+    ShapeSphere lightVolume;
     SunLightShader sunLightShader;
+    AreaLightShader areaLightShader;
     Framebuffer outputBuffer;
     Framebuffer occlusionBuffer;
     EntityGroup groupSunLights;
+    EntityGroup groupAreaLights;
 
     this(RenderPipeline pipeline, GBuffer gbuffer)
     {
         super(pipeline);
         this.gbuffer = gbuffer;
         screenSurface = New!ScreenSurface(this);
+        lightVolume = New!ShapeSphere(1.0f, 8, 4, false, this);
         sunLightShader = New!SunLightShader(this);
+        areaLightShader = New!AreaLightShader(this);
     }
 
     override void render()
     {
-        if (groupSunLights && outputBuffer && gbuffer)
+        if (groupSunLights && groupAreaLights && outputBuffer && gbuffer)
         {
             outputBuffer.bind();
 
@@ -81,7 +91,6 @@ class DeferredLightStage: RenderStage
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
             sunLightShader.bind();
-            
             foreach(entity; groupSunLights)
             {
                 Light light = cast(Light)entity;
@@ -97,10 +106,46 @@ class DeferredLightStage: RenderStage
                     }
                 }
             }
-            
             sunLightShader.unbind();
             
-            // TODO: other light types
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+        
+            areaLightShader.bind();
+            foreach(entity; groupAreaLights)
+            {
+                Light light = cast(Light)entity;
+                if (light)
+                {
+                    if (light.shining)
+                    {
+                        state.light = light;
+                        
+                        //state.modelViewMatrix = state.viewMatrix * light.absoluteTransformation;
+                        
+                        state.modelViewMatrix = 
+                            state.viewMatrix * 
+                            translationMatrix(light.positionAbsolute) *
+                            scaleMatrix(Vector3f(light.volumeRadius, light.volumeRadius, light.volumeRadius));
+                        
+                        state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+
+                        areaLightShader.bindParameters(&state);
+                        lightVolume.render(&state);
+                        areaLightShader.unbindParameters(&state);
+                    }
+                }
+            }
+            areaLightShader.unbind();
+            
+            glCullFace(GL_BACK);
+            glDisable(GL_CULL_FACE);
+            
+            glDepthMask(GL_TRUE);
+            glEnable(GL_DEPTH_TEST);
 
             glDisable(GL_BLEND);
 

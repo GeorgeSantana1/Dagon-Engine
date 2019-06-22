@@ -131,7 +131,7 @@ class Entity: Owner, Updateable
             parent.removeChild(this);
 
         parent = e;
-        parent.addChild(e);
+        parent.addChild(this);
     }
 
     void addChild(Entity e)

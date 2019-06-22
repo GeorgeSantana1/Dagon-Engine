@@ -25,7 +25,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.shaders.sunlight;
+module dagon.render.shaders.arealight;
 
 import std.stdio;
 import std.math;
@@ -36,49 +36,32 @@ import dlib.math.vector;
 import dlib.math.matrix;
 import dlib.math.transformation;
 import dlib.math.interpolation;
+import dlib.math.utils;
 import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.graphics.shader;
 import dagon.graphics.state;
-import dagon.graphics.csm;
+import dagon.graphics.light;
 
-class SunLightShader: Shader
+class AreaLightShader: Shader
 {
-    string vs = import("SunLight.vert.glsl");
-    string fs = import("SunLight.frag.glsl");
-
-    Matrix4x4f defaultShadowMatrix;
-    GLuint defaultShadowTexture;
+    string vs = import("AreaLight.vert.glsl");
+    string fs = import("AreaLight.frag.glsl");
 
     this(Owner owner)
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
 
-        debug writeln("SunLightShader: program ", program.program);
-
-        defaultShadowMatrix = Matrix4x4f.identity;
-
-        glGenTextures(1, &defaultShadowTexture);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, defaultShadowTexture);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24, 1, 1, 3, 0, GL_DEPTH_COMPONENT, GL_FLOAT, null);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-    }
-
-    ~this()
-    {
-        if (glIsFramebuffer(defaultShadowTexture))
-            glDeleteFramebuffers(1, &defaultShadowTexture);
+        debug writeln("AreaLightShader: program ", program.program);
     }
 
     override void bindParameters(GraphicsState* state)
     {
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
+        setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
         setParameter("invProjectionMatrix", state.invProjectionMatrix);
         setParameter("resolution", state.resolution);
@@ -100,25 +83,54 @@ class SunLightShader: Shader
         }
 
         // Light
-        Vector4f lightDirHg;
+        Vector3f lightPos;
         Color4f lightColor;
         float lightEnergy = 1.0f;
         if (state.light)
         {
-            lightDirHg = Vector4f(state.light.directionAbsolute);
-            lightDirHg.w = 0.0;
-            lightColor = state.light.color;
-            lightEnergy = state.light.energy;
+            auto light = state.light;
+            
+            lightPos = light.positionAbsolute * state.viewMatrix;
+            lightColor = light.color;
+            lightEnergy = light.energy;
+            
+            if (light.type == LightType.AreaSphere)
+            {
+                setParameterSubroutine("lightRadiance", ShaderType.Fragment, "lightRadianceAreaSphere");
+            }
+            else if (light.type == LightType.AreaTube)
+            {
+                Vector3f lightPosition2Eye = (light.positionAbsolute + light.directionAbsolute * light.length) * state.viewMatrix;
+                setParameter("lightPosition2", lightPosition2Eye);
+                setParameterSubroutine("lightRadiance", ShaderType.Fragment, "lightRadianceAreaTube");
+            }
+            else if (light.type == LightType.Spot)
+            {
+                setParameter("lightSpotCosCutoff", cos(degtorad(light.spotOuterCutoff)));
+                setParameter("lightSpotCosInnerCutoff", cos(degtorad(light.spotInnerCutoff)));
+                Vector4f lightDirHg = Vector4f(light.directionAbsolute);
+                lightDirHg.w = 0.0;
+                Vector3f spotDirection = (lightDirHg * state.viewMatrix).xyz;
+                setParameter("lightSpotDirection", spotDirection);
+                setParameterSubroutine("lightRadiance", ShaderType.Fragment, "lightRadianceSpot");
+            }
+            else // unsupported light type
+            {
+                setParameterSubroutine("lightRadiance", ShaderType.Fragment, "lightRadianceFallback");
+            }
+            
+            setParameter("lightPosition", lightPos);
+            setParameter("lightColor", lightColor);
+            setParameter("lightEnergy", lightEnergy);
+            setParameter("lightRadius", light.volumeRadius);
+            setParameter("lightAreaRadius", light.radius);
         }
         else
         {
-            lightDirHg = Vector4f(0.0f, 0.0f, 1.0f, 0.0f);
-            lightColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            //lightPos = Vector3f(0.0f, 0.0f, 0.0f);
+            //lightColor = Color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            setParameterSubroutine("lightRadiance", ShaderType.Fragment, "lightRadianceFallback");
         }
-        Vector3f lightDir = (lightDirHg * state.viewMatrix).xyz;
-        setParameter("lightDirection", lightDir);
-        setParameter("lightColor", lightColor);
-        setParameter("lightEnergy", lightEnergy);
 
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
@@ -139,34 +151,6 @@ class SunLightShader: Shader
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, state.pbrTexture);
         setParameter("pbrBuffer", 3);
-
-        // Texture 4 - shadow map
-        if (state.light)
-        {
-            if (state.light.shadowEnabled)
-            {
-                CascadedShadowMap csm = cast(CascadedShadowMap)state.light.shadowMap;
-
-                glActiveTexture(GL_TEXTURE4);
-                glBindTexture(GL_TEXTURE_2D_ARRAY, csm.depthTexture);
-                setParameter("shadowTextureArray", 4);
-                setParameter("shadowResolution", cast(float)csm.resolution);
-                setParameter("shadowMatrix1", csm.area1.shadowMatrix);
-                setParameter("shadowMatrix2", csm.area2.shadowMatrix);
-                setParameter("shadowMatrix3", csm.area3.shadowMatrix);
-                setParameterSubroutine("shadowMap", ShaderType.Fragment, "shadowMapCascaded");
-            }
-            else
-            {
-                glActiveTexture(GL_TEXTURE4);
-                glBindTexture(GL_TEXTURE_2D_ARRAY, defaultShadowTexture);
-                setParameter("shadowTextureArray", 4);
-                setParameter("shadowMatrix1", defaultShadowMatrix);
-                setParameter("shadowMatrix2", defaultShadowMatrix);
-                setParameter("shadowMatrix3", defaultShadowMatrix);
-                setParameterSubroutine("shadowMap", ShaderType.Fragment, "shadowMapNone");
-            }
-        }
 
         // Texture 5 - occlusion buffer
         if (glIsTexture(state.occlusionTexture))
@@ -201,9 +185,6 @@ class SunLightShader: Shader
 
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
-
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, 0);

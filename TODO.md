@@ -25,7 +25,7 @@ Status:
 * [x] Materials, shaders
 * [x] Environment maps
 * [x] Sun lights
-* [ ] Area lights
+* [x] Area lights
 * [x] Shadows
 * [x] Terrain
 * [x] Sky

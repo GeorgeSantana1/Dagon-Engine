@@ -126,6 +126,7 @@ class DeferredRenderer: Renderer
         stageBackground.group = s.background;
         stageGeom.group = s.spatialOpaque;
         stageLight.groupSunLights = s.sunLights;
+        stageLight.groupAreaLights = s.areaLights;
 
         stageBackground.state.environment = s.environment;
         stageGeom.state.environment = s.environment;
