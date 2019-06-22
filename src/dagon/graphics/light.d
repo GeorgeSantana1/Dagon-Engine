@@ -80,6 +80,8 @@ class Light: Entity
         volumeRadius = 1.0f;
         radius = 0.0f;
         energy = 1.0f;
+        spotOuterCutoff = 30.0f;
+        spotInnerCutoff = 15.0f;
         type = LightType.AreaSphere;
         shadowEnabled = false;
     }
@@ -88,8 +90,8 @@ class Light: Entity
     {
         if (_shadowMap is null && shadowEnabled)
         {
-            //if (type == LightType.Sun)
-            _shadowMap = New!CascadedShadowMap(this, this);
+            if (type == LightType.Sun)
+                _shadowMap = New!CascadedShadowMap(this, this);
         }
         
         return _shadowMap;
