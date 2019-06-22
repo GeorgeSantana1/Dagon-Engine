@@ -95,14 +95,14 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 /*
  * Light radiance subroutines
  */
-subroutine vec3 srtLightRadiance(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic);
+subroutine vec3 srtLightRadiance(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic, in float occlusion);
 
-subroutine(srtLightRadiance) vec3 lightRadianceFallback(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic)
+subroutine(srtLightRadiance) vec3 lightRadianceFallback(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic, in float occlusion)
 {
     return vec3(0.0);
 }
 
-subroutine(srtLightRadiance) vec3 lightRadianceAreaSphere(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic)
+subroutine(srtLightRadiance) vec3 lightRadianceAreaSphere(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic, in float occlusion)
 {
     vec3 R = reflect(E, N);
 
@@ -134,12 +134,12 @@ subroutine(srtLightRadiance) vec3 lightRadianceAreaSphere(in vec3 pos, in vec3 N
     float denominator = 4.0 * max(dot(N, E), 0.0) * NL;
     vec3 specular = numerator / max(denominator, 0.001);
 
-    vec3 radiance = (kD * albedo / PI + specular) * toLinear(lightColor.rgb) * attenuation * NL;
+    vec3 radiance = (kD * albedo / PI * occlusion + specular) * toLinear(lightColor.rgb) * attenuation * NL;
 
     return radiance;
 }
 
-subroutine(srtLightRadiance) vec3 lightRadianceAreaTube(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic)
+subroutine(srtLightRadiance) vec3 lightRadianceAreaTube(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic, in float occlusion)
 {
     vec3 R = reflect(E, N);
     vec3 f0 = vec3(0.04); 
@@ -178,12 +178,12 @@ subroutine(srtLightRadiance) vec3 lightRadianceAreaTube(in vec3 pos, in vec3 N, 
     float denominator = 4.0 * max(dot(N, E), 0.0) * NL;
     vec3 specular = numerator / max(denominator, 0.001);
 
-    vec3 radiance = (kD * albedo / PI + specular) * toLinear(lightColor.rgb) * attenuation * NL;
+    vec3 radiance = (kD * albedo / PI * occlusion + specular) * toLinear(lightColor.rgb) * attenuation * NL;
 
     return radiance;
 }
 
-subroutine(srtLightRadiance) vec3 lightRadianceSpot(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic)
+subroutine(srtLightRadiance) vec3 lightRadianceSpot(in vec3 pos, in vec3 N, in vec3 E, in vec3 albedo, in float roughness, in float metallic, in float occlusion)
 {
     vec3 R = reflect(E, N);
     vec3 f0 = vec3(0.04); 
@@ -215,7 +215,7 @@ subroutine(srtLightRadiance) vec3 lightRadianceSpot(in vec3 pos, in vec3 N, in v
     float denominator = 4.0 * max(dot(N, E), 0.0) * NL;
     vec3 specular = numerator / max(denominator, 0.001);
 
-    vec3 radiance = (kD * albedo / PI + specular) * toLinear(lightColor.rgb) * attenuation * NL;
+    vec3 radiance = (kD * albedo / PI * occlusion + specular) * toLinear(lightColor.rgb) * attenuation * NL;
 
     return radiance;
 }
@@ -239,16 +239,13 @@ void main()
     vec3 worldPos = (invViewMatrix * vec4(eyePos, 1.0)).xyz;
     vec3 N = normalize(texture(normalBuffer, texCoord).rgb);
     vec3 E = normalize(-eyePos);
-    //vec3 R = reflect(E, N);
     
     float roughness = texture(pbrBuffer, texCoord).r;
     float metallic = texture(pbrBuffer, texCoord).g;
     
-    //float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
-    
-    //vec3 f0 = mix(vec3(0.04), albedo, metallic);
+    float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
 
-    vec3 radiance = lightRadiance(eyePos, N, E, albedo, roughness, metallic);
+    vec3 radiance = lightRadiance(eyePos, N, E, albedo, roughness, metallic, occlusion);
     
     // Fog
     float linearDepth = abs(eyePos.z);
