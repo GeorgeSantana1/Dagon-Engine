@@ -216,12 +216,12 @@ void main()
     // Volumetric fog
     if (lightScattering)
     {
-        const int volumetricSteps = 30;
+        const int volumetricSteps = 40;
         vec3 startPosition = vec3(0.0);    
         vec3 rayVector = eyePos;
         float rayLength = length(rayVector);
         vec3 rayDirection = rayVector / rayLength;
-        vec3 step = rayDirection * 0.3;
+        vec3 step = rayDirection * (rayLength / float(volumetricSteps)); //rayDirection * 0.3;
         vec3 currentPosition = startPosition;
         float accumScatter = 0.0;
         for (int i = 0; i < volumetricSteps; i++)
