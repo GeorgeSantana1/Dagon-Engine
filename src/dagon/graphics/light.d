@@ -67,6 +67,8 @@ class Light: Entity
     float spotInnerCutoff;
     LightType type;
     bool shadowEnabled;
+    bool scatteringEnabled;
+    float scattering;
     ShadowMap _shadowMap;
 
     this(EntityManager manager)
@@ -84,6 +86,8 @@ class Light: Entity
         spotInnerCutoff = 15.0f;
         type = LightType.AreaSphere;
         shadowEnabled = false;
+        scatteringEnabled = false;
+        scattering = 0.5f;
     }
     
     ShadowMap shadowMap()

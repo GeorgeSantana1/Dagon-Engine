@@ -25,6 +25,8 @@ uniform float fogEnd;
 uniform vec3 lightDirection;
 uniform vec4 lightColor;
 uniform float lightEnergy;
+uniform bool lightScattering;
+uniform float lightScatteringG;
 
 uniform sampler2DArrayShadow shadowTextureArray;
 uniform float shadowResolution;
@@ -157,12 +159,21 @@ subroutine(srtShadow) float shadowMapCascaded(in vec3 pos, in vec3 N)
 
 subroutine uniform srtShadow shadowMap;
 
+
+// Mie scaterring approximated with Henyey-Greenstein phase function.
+float scattering(float lightDotView)
+{
+    float result = 1.0 - lightScatteringG * lightScatteringG;
+    result /= 4.0 * PI * pow(1.0 + lightScatteringG * lightScatteringG - (2.0 * lightScatteringG) * lightDotView, 1.5);
+    return result;
+}
+
 void main()
 {
     vec4 col = texture(colorBuffer, texCoord);
     
-    if (col.a < 1.0)
-        discard;
+    //if (col.a < 1.0)
+    //    discard;
 
     vec3 albedo = toLinear(col.rgb);
     
@@ -181,25 +192,52 @@ void main()
     vec3 f0 = mix(vec3(0.04), albedo, metallic);
 
     float shadow = shadowMap(eyePos, N);
+    
+    vec3 radiance = vec3(0.0);
 
     // Sun light
     vec3 L = lightDirection;
-    float NL = max(dot(N, L), 0.0);
-    vec3 H = normalize(E + L);
+    
+    if (col.a == 1.0)
+    {
+        float NL = max(dot(N, L), 0.0);
+        vec3 H = normalize(E + L);
 
-    float NDF = distributionGGX(N, H, roughness);
-    float G = geometrySmith(N, E, L, roughness);
-    vec3 F = fresnelRoughness(max(dot(H, E), 0.0), f0, roughness);
+        float NDF = distributionGGX(N, H, roughness);
+        float G = geometrySmith(N, E, L, roughness);
+        vec3 F = fresnelRoughness(max(dot(H, E), 0.0), f0, roughness);
 
-    vec3 kD = (1.0 - F) * (1.0 - metallic);
-    vec3 specular = (NDF * G * F) / max(4.0 * max(dot(N, E), 0.0) * NL, 0.001);
+        vec3 kD = (1.0 - F) * (1.0 - metallic);
+        vec3 specular = (NDF * G * F) / max(4.0 * max(dot(N, E), 0.0) * NL, 0.001);
 
-    vec3 radiance = (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
+        radiance += (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
+    }
+    
+    // Volumetric fog
+    if (lightScattering)
+    {
+        const int volumetricSteps = 30;
+        vec3 startPosition = vec3(0.0);    
+        vec3 rayVector = eyePos;
+        float rayLength = length(rayVector);
+        vec3 rayDirection = rayVector / rayLength;
+        vec3 step = rayDirection * 0.3;
+        vec3 currentPosition = startPosition;
+        float accumScatter = 0.0;
+        for (int i = 0; i < volumetricSteps; i++)
+        {    
+            accumScatter += shadowLookup(shadowTextureArray, 1.0, shadowMatrix2 * vec4(currentPosition, 1.0), vec2(0.0));
+            currentPosition += step;
+        }
+        accumScatter /= float(volumetricSteps);
+        float scattFactor = accumScatter * scattering(dot(-L, E));
+        radiance += toLinear(lightColor.rgb) * 1.0 * scattFactor;
+    }
     
     // Fog
-    float linearDepth = abs(eyePos.z);
-    float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
-    radiance *= fogFactor;
+    //float linearDepth = abs(eyePos.z);
+    //float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
+    //radiance *= fogFactor;
     
     fragColor = vec4(radiance, 1.0);
 }
