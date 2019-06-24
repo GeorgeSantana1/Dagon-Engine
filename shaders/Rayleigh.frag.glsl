@@ -66,8 +66,9 @@ void main()
     
     float sundisk = smoothstep(sunAngularDiameterCos, sunAngularDiameterCos + 0.00002, cosTheta);
     L0 += (vSunE * 19000.0 * Fex) * sundisk;
+    L0 = pow(L0, vec3(1.0 / (1.0 + (1.0 * vSunfade))));
     vec3 color = (Lin + L0) * 0.04 + vec3(0.0, 0.0003, 0.00075);
-    vec3 env = pow(color, vec3(1.0 / (1.0 + (1.0 * vSunfade))));
+    vec3 env = color; //pow(color, vec3(1.0 / (1.0 + (1.0 * vSunfade))));
 
     fragColor = vec4(env, 1.0);
 }
