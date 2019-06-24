@@ -171,13 +171,11 @@ float scattering(float lightDotView)
     return result;
 }
 
-float random(vec2 p)
+float hash(vec2 p)
 {
-    const vec2 K1 = vec2(
-        23.14069263277926, // e^pi (Gelfond constant)
-        2.665144142690225 // 2^sqrt(2) (Gelfond-Schneider constant)
-    );
-    return fract(cos(dot(p, K1)) * 12345.6789);
+    vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.11369, 0.13787));
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
 }
 
 void main()
@@ -239,7 +237,7 @@ void main()
         for (float i = 0; i < float(lightScatteringSamples); i+=1.0f)
         {
             accumScatter += shadowLookup(shadowTextureArray, 1.0, shadowMatrix2 * vec4(currentPosition, 1.0), vec2(0.0));
-            float offset = random(texCoord * 100.0);
+            float offset = hash(texCoord * 467.759);
             currentPosition += rayDirection * (stepSize - offset * lightScatteringMaxRandomStepOffset);
         }
         accumScatter *= invSamples;

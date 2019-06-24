@@ -63,7 +63,7 @@ float spiralSSAO(vec2 uv, vec3 p, vec3 n, float rad)
     float inv = 1.0 / float(ssaoSamples);
     float radius = 0.0;
 
-    float rotatePhase = hash(uv * 100.0) * 6.28;
+    float rotatePhase = hash(uv * 467.759) * 6.28;
     float rStep = inv * rad;
     vec2 spiralUV;
 
