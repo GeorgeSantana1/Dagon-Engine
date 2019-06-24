@@ -114,7 +114,7 @@ class SunLightShader: Shader
             lightEnergy = state.light.energy;
             lightScattering = state.light.scatteringEnabled;
             lightScatteringG = 1.0f - state.light.scattering;
-            lightScatteringDensity = state.light.scatteringDensity;
+            lightScatteringDensity = state.light.mediumDensity;
         }
         else
         {

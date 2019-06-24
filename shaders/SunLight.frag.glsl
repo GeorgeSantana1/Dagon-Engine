@@ -169,6 +169,15 @@ float scattering(float lightDotView)
     return result;
 }
 
+float random(vec2 p)
+{
+    const vec2 K1 = vec2(
+        23.14069263277926, // e^pi (Gelfond constant)
+        2.665144142690225 // 2^sqrt(2) (Gelfond-Schneider constant)
+    );
+    return fract(cos(dot(p, K1)) * 12345.6789);
+}
+
 void main()
 {
     vec4 col = texture(colorBuffer, texCoord);
@@ -217,22 +226,21 @@ void main()
     // Volumetric fog
     if (lightScattering)
     {
-        const int volumetricSteps = 40;
+        const int volumetricSteps = 40; // TODO: make uniform
         vec3 startPosition = vec3(0.0);    
         vec3 rayVector = eyePos;
         float rayLength = length(rayVector);
         vec3 rayDirection = rayVector / rayLength;
-        vec3 step = rayDirection * (rayLength / float(volumetricSteps));
+        float stepSize = rayLength / float(volumetricSteps);
         vec3 currentPosition = startPosition;
         float accumScatter = 0.0;
         float invSteps = 1.0 / float(volumetricSteps);
         float prevValue = 0.0;
         for (float i = 0; i < float(volumetricSteps); i+=1.0f)
         {
-            currentPosition = mix(startPosition, rayVector, pow(i * invSteps, 1.0 / 2.2));
-            float currValue = shadowLookup(shadowTextureArray, 1.0, shadowMatrix2 * vec4(currentPosition, 1.0), vec2(0.0));
-            accumScatter += (prevValue + currValue) * 0.5;
-            prevValue = currValue;
+            accumScatter += shadowLookup(shadowTextureArray, 1.0, shadowMatrix2 * vec4(currentPosition, 1.0), vec2(0.0));
+            float offset = random(texCoord * 100.0);
+            currentPosition += rayDirection * (stepSize - offset * 0.05);
         }
         accumScatter *= invSteps;
         float scattFactor = accumScatter * scattering(dot(-L, E));
@@ -240,9 +248,11 @@ void main()
     }
     
     // Fog
-    //float linearDepth = abs(eyePos.z);
-    //float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
-    //radiance *= fogFactor;
+    /*
+    float linearDepth = abs(eyePos.z);
+    float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
+    radiance *= fogFactor;
+    */
     
     fragColor = vec4(radiance, 1.0);
 }

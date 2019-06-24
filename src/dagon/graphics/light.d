@@ -69,7 +69,7 @@ class Light: Entity
     bool shadowEnabled;
     bool scatteringEnabled;
     float scattering;
-    float scatteringDensity;
+    float mediumDensity;
     ShadowMap _shadowMap;
 
     this(EntityManager manager)
@@ -89,7 +89,7 @@ class Light: Entity
         shadowEnabled = false;
         scatteringEnabled = false;
         scattering = 0.5f;
-        scatteringDensity = 0.2f;
+        mediumDensity = 0.2f;
     }
     
     ShadowMap shadowMap()
