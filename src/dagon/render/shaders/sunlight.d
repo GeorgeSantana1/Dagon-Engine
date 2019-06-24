@@ -106,15 +106,20 @@ class SunLightShader: Shader
         int lightScattering = 0;
         float lightScatteringG = 0.0f;
         float lightScatteringDensity = 0.0f;
+        int lightScatteringSamples = 1;
+        float lightScatteringMaxRandomStepOffset = 0.0f;
         if (state.light)
         {
-            lightDirHg = Vector4f(state.light.directionAbsolute);
+            auto light = state.light;
+            lightDirHg = Vector4f(light.directionAbsolute);
             lightDirHg.w = 0.0;
-            lightColor = state.light.color;
-            lightEnergy = state.light.energy;
-            lightScattering = state.light.scatteringEnabled;
-            lightScatteringG = 1.0f - state.light.scattering;
-            lightScatteringDensity = state.light.mediumDensity;
+            lightColor = light.color;
+            lightEnergy = light.energy;
+            lightScattering = light.scatteringEnabled;
+            lightScatteringG = 1.0f - light.scattering;
+            lightScatteringDensity = light.mediumDensity;
+            lightScatteringSamples = light.scatteringSamples;
+            lightScatteringMaxRandomStepOffset = light.scatteringMaxRandomStepOffset;
         }
         else
         {
@@ -128,6 +133,8 @@ class SunLightShader: Shader
         setParameter("lightScattering", lightScattering);
         setParameter("lightScatteringG", lightScatteringG);
         setParameter("lightScatteringDensity", lightScatteringDensity);
+        setParameter("lightScatteringSamples", lightScatteringSamples);
+        setParameter("lightScatteringMaxRandomStepOffset", lightScatteringMaxRandomStepOffset);
 
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);

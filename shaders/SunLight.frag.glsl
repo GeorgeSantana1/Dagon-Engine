@@ -28,6 +28,8 @@ uniform float lightEnergy;
 uniform bool lightScattering;
 uniform float lightScatteringG;
 uniform float lightScatteringDensity;
+uniform int lightScatteringSamples;
+uniform float lightScatteringMaxRandomStepOffset;
 
 uniform sampler2DArrayShadow shadowTextureArray;
 uniform float shadowResolution;
@@ -223,26 +225,24 @@ void main()
         radiance += (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
     }
     
-    // Volumetric fog
     if (lightScattering)
     {
-        const int volumetricSteps = 40; // TODO: make uniform
         vec3 startPosition = vec3(0.0);    
         vec3 rayVector = eyePos;
         float rayLength = length(rayVector);
         vec3 rayDirection = rayVector / rayLength;
-        float stepSize = rayLength / float(volumetricSteps);
+        float stepSize = rayLength / float(lightScatteringSamples);
         vec3 currentPosition = startPosition;
         float accumScatter = 0.0;
-        float invSteps = 1.0 / float(volumetricSteps);
+        float invSamples = 1.0 / float(lightScatteringSamples);
         float prevValue = 0.0;
-        for (float i = 0; i < float(volumetricSteps); i+=1.0f)
+        for (float i = 0; i < float(lightScatteringSamples); i+=1.0f)
         {
             accumScatter += shadowLookup(shadowTextureArray, 1.0, shadowMatrix2 * vec4(currentPosition, 1.0), vec2(0.0));
             float offset = random(texCoord * 100.0);
-            currentPosition += rayDirection * (stepSize - offset * 0.05);
+            currentPosition += rayDirection * (stepSize - offset * lightScatteringMaxRandomStepOffset);
         }
-        accumScatter *= invSteps;
+        accumScatter *= invSamples;
         float scattFactor = accumScatter * scattering(dot(-L, E));
         radiance += toLinear(lightColor.rgb) * lightEnergy * lightScatteringDensity * scattFactor;
     }

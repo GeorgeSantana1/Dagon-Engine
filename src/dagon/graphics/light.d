@@ -70,6 +70,8 @@ class Light: Entity
     bool scatteringEnabled;
     float scattering;
     float mediumDensity;
+    uint scatteringSamples;
+    float scatteringMaxRandomStepOffset;
     ShadowMap _shadowMap;
 
     this(EntityManager manager)
@@ -88,8 +90,10 @@ class Light: Entity
         type = LightType.AreaSphere;
         shadowEnabled = false;
         scatteringEnabled = false;
-        scattering = 0.5f;
-        mediumDensity = 0.2f;
+        scattering = 0.05f;
+        mediumDensity = 0.5f;
+        scatteringSamples = 20;
+        scatteringMaxRandomStepOffset = 0.2f;
     }
     
     ShadowMap shadowMap()
