@@ -104,7 +104,8 @@ class SunLightShader: Shader
         Color4f lightColor;
         float lightEnergy = 1.0f;
         int lightScattering = 0;
-        float lightScatteringG = 0.0;
+        float lightScatteringG = 0.0f;
+        float lightScatteringDensity = 0.0f;
         if (state.light)
         {
             lightDirHg = Vector4f(state.light.directionAbsolute);
@@ -112,7 +113,8 @@ class SunLightShader: Shader
             lightColor = state.light.color;
             lightEnergy = state.light.energy;
             lightScattering = state.light.scatteringEnabled;
-            lightScatteringG = state.light.scattering;
+            lightScatteringG = 1.0f - state.light.scattering;
+            lightScatteringDensity = state.light.scatteringDensity;
         }
         else
         {
@@ -125,6 +127,7 @@ class SunLightShader: Shader
         setParameter("lightEnergy", lightEnergy);
         setParameter("lightScattering", lightScattering);
         setParameter("lightScatteringG", lightScatteringG);
+        setParameter("lightScatteringDensity", lightScatteringDensity);
 
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);

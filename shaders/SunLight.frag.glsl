@@ -27,6 +27,7 @@ uniform vec4 lightColor;
 uniform float lightEnergy;
 uniform bool lightScattering;
 uniform float lightScatteringG;
+uniform float lightScatteringDensity;
 
 uniform sampler2DArrayShadow shadowTextureArray;
 uniform float shadowResolution;
@@ -221,17 +222,21 @@ void main()
         vec3 rayVector = eyePos;
         float rayLength = length(rayVector);
         vec3 rayDirection = rayVector / rayLength;
-        vec3 step = rayDirection * (rayLength / float(volumetricSteps)); //rayDirection * 0.3;
+        vec3 step = rayDirection * (rayLength / float(volumetricSteps));
         vec3 currentPosition = startPosition;
         float accumScatter = 0.0;
-        for (int i = 0; i < volumetricSteps; i++)
-        {    
-            accumScatter += shadowLookup(shadowTextureArray, 1.0, shadowMatrix2 * vec4(currentPosition, 1.0), vec2(0.0));
-            currentPosition += step;
+        float invSteps = 1.0 / float(volumetricSteps);
+        float prevValue = 0.0;
+        for (float i = 0; i < float(volumetricSteps); i+=1.0f)
+        {
+            currentPosition = mix(startPosition, rayVector, pow(i * invSteps, 1.0 / 2.2));
+            float currValue = shadowLookup(shadowTextureArray, 1.0, shadowMatrix2 * vec4(currentPosition, 1.0), vec2(0.0));
+            accumScatter += (prevValue + currValue) * 0.5;
+            prevValue = currValue;
         }
-        accumScatter /= float(volumetricSteps);
+        accumScatter *= invSteps;
         float scattFactor = accumScatter * scattering(dot(-L, E));
-        radiance += toLinear(lightColor.rgb) * 1.0 * scattFactor;
+        radiance += toLinear(lightColor.rgb) * lightEnergy * lightScatteringDensity * scattFactor;
     }
     
     // Fog
