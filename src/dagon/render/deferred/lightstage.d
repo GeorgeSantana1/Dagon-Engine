@@ -124,12 +124,11 @@ class DeferredLightStage: RenderStage
                     {
                         state.light = light;
                         
-                        //state.modelViewMatrix = state.viewMatrix * light.absoluteTransformation;
-                        
-                        state.modelViewMatrix = 
-                            state.viewMatrix * 
+                        state.modelMatrix = 
                             translationMatrix(light.positionAbsolute) *
                             scaleMatrix(Vector3f(light.volumeRadius, light.volumeRadius, light.volumeRadius));
+                        
+                        state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
                         
                         state.normalMatrix = state.modelViewMatrix.inverse.transposed;
 

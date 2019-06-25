@@ -113,7 +113,8 @@ class ShadowStage: RenderStage
         foreach(entity; group)
         if (entity.castShadow)
         {
-            state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
+            state.modelMatrix = entity.absoluteTransformation;
+            state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
             state.normalMatrix = state.modelViewMatrix.inverse.transposed;
 
             if (entity.material)

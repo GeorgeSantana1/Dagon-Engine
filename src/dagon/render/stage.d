@@ -112,7 +112,8 @@ class RenderStage: EventListener
             {
                 state.layer = entity.layer;
 
-                state.modelViewMatrix = state.viewMatrix * entity.absoluteTransformation;
+                state.modelMatrix = entity.absoluteTransformation;
+                state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
 
                 if (entity.material)
