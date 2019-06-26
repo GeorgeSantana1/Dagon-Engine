@@ -89,6 +89,8 @@ class DeferredBackgroundStage: RenderStage
                 if (entity.material.shader)
                     shader = entity.material.shader;
                 
+                state.shader = shader;
+                
                 shader.bind();
                 shader.bindParameters(&state);
 

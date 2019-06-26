@@ -84,6 +84,7 @@ class HUDStage: RenderStage
                     entity.material.bind(&state);
                     if (entity.material.shader)
                     {
+                        state.shader = entity.material.shader;
                         entity.material.shader.bind();
                         entity.material.shader.bindParameters(&state);
                     }

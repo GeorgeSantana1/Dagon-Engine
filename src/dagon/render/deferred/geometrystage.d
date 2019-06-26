@@ -72,6 +72,7 @@ class DeferredGeometryStage: RenderStage
                 state.modelMatrix = entity.absoluteTransformation;
                 state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+                state.shader = geometryShader;
 
                 if (entity.material)
                     entity.material.bind(&state);
@@ -79,7 +80,7 @@ class DeferredGeometryStage: RenderStage
                     defaultMaterial.bind(&state);
 
                 geometryShader.bindParameters(&state);
-
+                
                 entity.drawable.render(&state);
 
                 geometryShader.unbindParameters(&state);

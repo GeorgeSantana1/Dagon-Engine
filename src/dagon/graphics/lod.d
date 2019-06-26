@@ -35,10 +35,12 @@ import dlib.container.array;
 
 import dagon.core.bindings;
 import dagon.graphics.drawable;
+import dagon.graphics.material;
 
 struct LODLevel
 {
     Drawable drawable;
+    Material material;
     float distanceSqr;
 }
 
@@ -56,9 +58,9 @@ class LODDrawable: Owner, Drawable
         levels.free();
     }
     
-    void addLevel(Drawable drawable, float dist)
+    void addLevel(Drawable drawable, Material material, float dist)
     {
-        levels.append(LODLevel(drawable, dist * dist));
+        levels.append(LODLevel(drawable, material, dist * dist));
     }
     
     void render(GraphicsState* state)
@@ -85,7 +87,23 @@ class LODDrawable: Owner, Drawable
         }
         
         if (levelToDraw)
+        {
             if (levelToDraw.drawable)
+            {
+                if (levelToDraw.material)
+                {
+                    levelToDraw.material.bind(state);
+                    state.shader.bindParameters(state);
+                }
+                
                 levelToDraw.drawable.render(state);
+                
+                if (levelToDraw.material)
+                {
+                    state.shader.unbindParameters(state);
+                    levelToDraw.material.unbind(state);
+                }
+            }
+        }
     }
 }

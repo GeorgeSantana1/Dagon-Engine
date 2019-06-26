@@ -470,41 +470,10 @@ class Material: Owner
         }
 
         state.material = this;
-
-        /*
-        GraphicsState stateLocal = *state;
-        stateLocal.material = this;
-
-        if (state.overrideShader)
-        {
-            state.overrideShader.bind(&stateLocal);
-        }
-        else if (shader)
-        {
-            shader.bind(&stateLocal);
-        }
-        */
     }
 
     void unbind(GraphicsState* state)
     {
-        //auto icolorWrite = "colorWrite" in inputs;
-        //auto idepthWrite = "depthWrite" in inputs;
-
-        /*
-        GraphicsState stateLocal = *state;
-        stateLocal.material = this;
-
-        if (state.overrideShader)
-        {
-            state.overrideShader.unbind(&stateLocal);
-        }
-        else if (shader)
-        {
-            shader.unbind(&stateLocal);
-        }
-        */
-
         state.material = null;
 
         glDepthMask(GL_TRUE);

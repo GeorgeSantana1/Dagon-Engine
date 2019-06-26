@@ -95,6 +95,7 @@ class LoadingScreen: EventListener
 
         state.modelViewMatrix = state.viewMatrix * eLoadingProgressBar.absoluteTransformation;
         state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+        state.shader = hudShader;
 
         if (eLoadingProgressBar.material)
             eLoadingProgressBar.material.bind(&state);

@@ -116,6 +116,7 @@ class ShadowStage: RenderStage
             state.modelMatrix = entity.absoluteTransformation;
             state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
             state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+            state.shader = shader;
 
             if (entity.material)
                 entity.material.bind(&state);
