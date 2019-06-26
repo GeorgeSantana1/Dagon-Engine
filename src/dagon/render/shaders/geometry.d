@@ -74,6 +74,8 @@ class GeometryShader: Shader
         setParameter("invViewMatrix", state.invViewMatrix);
 
         setParameter("layer", cast(float)(state.layer));
+        
+        setParameter("opacity", state.opacity);
 
         setParameter("textureScale", itextureScale.asVector2f);
 

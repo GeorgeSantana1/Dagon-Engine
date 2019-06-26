@@ -67,6 +67,8 @@ struct GraphicsState
     bool depthMask;
 
     bool culling;
+    
+    float opacity;
 
     GLuint colorTexture;
     GLuint depthTexture;
@@ -105,6 +107,8 @@ struct GraphicsState
         depthMask = true;
 
         culling = true;
+        
+        opacity = 1.0f;
 
         colorTexture = 0;
         depthTexture = 0;

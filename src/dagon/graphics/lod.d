@@ -41,12 +41,16 @@ struct LODLevel
 {
     Drawable drawable;
     Material material;
-    float distanceSqr;
+    float startDistance;
+    float endDistance;
+    float fadeDistance;
 }
 
 class LODDrawable: Owner, Drawable
 {
     DynamicArray!LODLevel levels;
+    
+    public:
 
     this(Owner owner)
     {
@@ -58,14 +62,52 @@ class LODDrawable: Owner, Drawable
         levels.free();
     }
     
-    void addLevel(Drawable drawable, Material material, float dist)
+    void addLevel(Drawable drawable, Material material, float startDist, float endDist, float fadeDist)
     {
-        levels.append(LODLevel(drawable, material, dist * dist));
+        levels.append(LODLevel(drawable, material, startDist, endDist, fadeDist));
+    }
+    
+    void renderLevel(LODLevel* level, float dist, GraphicsState* state)
+    {
+        if (level.drawable)
+        {
+            if (dist < level.startDistance + level.fadeDistance)
+                state.opacity = (dist - level.startDistance) / level.fadeDistance;
+            else if (dist > level.endDistance - level.fadeDistance)
+                state.opacity = (level.endDistance - dist) / level.fadeDistance;
+            else
+                state.opacity = 1.0f;
+             
+            if (level.material)
+            {
+                level.material.bind(state);
+                state.shader.bindParameters(state);
+            }
+              
+            level.drawable.render(state);
+               
+            if (level.material)
+            {
+                state.shader.unbindParameters(state);
+                level.material.unbind(state);
+            }
+        }
     }
     
     void render(GraphicsState* state)
     {
-        float distanceToCamSqr = distancesqr(state.cameraPosition, state.modelMatrix.translation);
+        float distanceToCam = distance(state.cameraPosition, state.modelMatrix.translation);
+        
+        for(size_t i = 0; i < levels.length; i++)
+        {
+            LODLevel* level = &levels.data[i];
+            if (distanceToCam >= level.startDistance && distanceToCam < level.endDistance)
+            {
+                renderLevel(level, distanceToCam, state);
+            }
+        }
+        
+        /*
         LODLevel* levelToDraw = null;
         for(size_t i = 0; i < levels.length; i++)
         {
@@ -90,6 +132,9 @@ class LODDrawable: Owner, Drawable
         {
             if (levelToDraw.drawable)
             {
+                if (distanceToCamSqr > fadeoutStartSqr)
+                    state.opacity = 1.0f - (distanceToCamSqr - fadeoutStartSqr) * fadeoutCoef;
+                
                 if (levelToDraw.material)
                 {
                     levelToDraw.material.bind(state);
@@ -105,5 +150,6 @@ class LODDrawable: Owner, Drawable
                 }
             }
         }
+        */
     }
 }

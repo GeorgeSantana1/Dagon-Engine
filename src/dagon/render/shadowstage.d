@@ -117,6 +117,7 @@ class ShadowStage: RenderStage
             state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
             state.normalMatrix = state.modelViewMatrix.inverse.transposed;
             state.shader = shader;
+            state.opacity = 1.0f;
 
             if (entity.material)
                 entity.material.bind(&state);

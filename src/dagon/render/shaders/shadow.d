@@ -62,6 +62,7 @@ class ShadowShader: Shader
         setParameter("normalMatrix", state.normalMatrix);
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
+        setParameter("opacity", state.opacity);
 
         super.bindParameters(state);
     }

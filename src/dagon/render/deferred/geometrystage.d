@@ -73,6 +73,7 @@ class DeferredGeometryStage: RenderStage
                 state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
                 state.shader = geometryShader;
+                state.opacity = 1.0f;
 
                 if (entity.material)
                     entity.material.bind(&state);
