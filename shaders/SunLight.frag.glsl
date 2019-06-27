@@ -181,9 +181,6 @@ float hash(vec2 p)
 void main()
 {
     vec4 col = texture(colorBuffer, texCoord);
-    
-    //if (col.a < 1.0)
-    //    discard;
 
     vec3 albedo = toLinear(col.rgb);
     
@@ -221,8 +218,14 @@ void main()
         vec3 specular = (NDF * G * F) / max(4.0 * max(dot(N, E), 0.0) * NL, 0.001);
 
         radiance += (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
+        
+        // Fog
+        float linearDepth = abs(eyePos.z);
+        float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
+        radiance *= fogFactor;
     }
     
+    float scattFactor = 0.0;
     if (lightScattering)
     {
         vec3 startPosition = vec3(0.0);    
@@ -241,16 +244,9 @@ void main()
             currentPosition += rayDirection * (stepSize - offset * lightScatteringMaxRandomStepOffset);
         }
         accumScatter *= invSamples;
-        float scattFactor = accumScatter * scattering(dot(-L, E));
-        radiance += toLinear(lightColor.rgb) * lightEnergy * lightScatteringDensity * scattFactor;
+        scattFactor = accumScatter * scattering(dot(-L, E)) * lightScatteringDensity;
+        radiance += toLinear(lightColor.rgb) * lightEnergy * scattFactor;
     }
-    
-    // Fog
-    /*
-    float linearDepth = abs(eyePos.z);
-    float fogFactor = clamp((fogEnd - linearDepth) / (fogEnd - fogStart), 0.0, 1.0);
-    radiance *= fogFactor;
-    */
     
     fragColor = vec4(radiance, 1.0);
 }
