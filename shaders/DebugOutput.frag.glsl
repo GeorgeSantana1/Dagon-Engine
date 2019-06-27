@@ -52,6 +52,9 @@ void main()
     
     float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
 
+    if (outputMode == 0)
+        discard;
+
     vec3 output = 
         albedo * float(outputMode == 1) + 
         N * float(outputMode == 2) + 

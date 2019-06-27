@@ -66,6 +66,8 @@ class GeometryShader: Shader
         auto imetallic = "metallic" in state.material.inputs;
         auto itextureScale = "textureScale" in state.material.inputs;
         auto iparallax = "parallax" in state.material.inputs;
+        auto iemission = "emission" in state.material.inputs;
+        auto ienergy = "energy" in state.material.inputs;
 
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
@@ -74,9 +76,7 @@ class GeometryShader: Shader
         setParameter("invViewMatrix", state.invViewMatrix);
 
         setParameter("layer", cast(float)(state.layer));
-        
         setParameter("opacity", state.opacity);
-
         setParameter("textureScale", itextureScale.asVector2f);
 
         int parallaxMethod = iparallax.asInteger;
@@ -222,6 +222,21 @@ class GeometryShader: Shader
         {
             setParameterSubroutine("metallic", ShaderType.Fragment, "metallicMap");
         }
+        
+        // Emission
+        if (iemission.texture)
+        {
+            glActiveTexture(GL_TEXTURE3);
+            iemission.texture.bind();
+            setParameter("emissionTexture", cast(int)3);
+            setParameterSubroutine("emission", ShaderType.Fragment, "emissionColorTexture");
+        }
+        else
+        {
+            setParameter("emissionVector", iemission.asVector4f);
+            setParameterSubroutine("emission", ShaderType.Fragment, "emissionColorValue");
+        }
+        setParameter("energy", ienergy.asFloat);
 
         glActiveTexture(GL_TEXTURE0);
 
@@ -239,6 +254,9 @@ class GeometryShader: Shader
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE0);

@@ -33,6 +33,7 @@ import dlib.core.memory;
 import dlib.core.ownership;
 
 import dagon.core.bindings;
+import dagon.render.framebuffer;
 
 class GBuffer: Owner
 {
@@ -44,13 +45,15 @@ class GBuffer: Owner
     GLuint depthTexture = 0;
     GLuint normalTexture = 0;
     GLuint pbrTexture = 0;
+    Framebuffer radiance;
     
-    this(uint w, uint h, Owner owner)
+    this(uint w, uint h, Framebuffer radiance, Owner owner)
     {
         super(owner);
         
         width = w;
         height = h;
+        this.radiance = radiance;
         createFramebuffer();
     }
     
@@ -101,9 +104,10 @@ class GBuffer: Owner
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, pbrTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, radiance.colorTexture(), 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
         
-        GLenum[3] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
+        GLenum[4] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3];
         glDrawBuffers(drawBuffers.length, drawBuffers.ptr);
 
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

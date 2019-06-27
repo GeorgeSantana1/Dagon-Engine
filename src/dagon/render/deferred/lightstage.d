@@ -88,7 +88,7 @@ class DeferredLightStage: RenderStage
             glViewport(0, 0, outputBuffer.width, outputBuffer.height);
 
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            glBlendFunc(GL_ONE, GL_ONE);
 
             sunLightShader.bind();
             foreach(entity; groupSunLights)

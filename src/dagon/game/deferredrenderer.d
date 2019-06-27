@@ -78,12 +78,17 @@ class DeferredRenderer: Renderer
         occlusionNoisyBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
         occlusionBuffer = New!FramebufferR8(occlusionView.width, occlusionView.height, this);
 
-        gbuffer = New!GBuffer(view.width, view.height, this);
-
         // HDR buffer
-        outputBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
+        auto radianceBuffer = New!FramebufferRGBA16f(eventManager.windowWidth, eventManager.windowHeight, this);
+        outputBuffer = radianceBuffer;
+
+        gbuffer = New!GBuffer(view.width, view.height, radianceBuffer, this);
 
         stageShadow = New!ShadowStage(pipeline);
+
+        stageBackground = New!DeferredBackgroundStage(pipeline);
+        stageBackground.view = view;
+        stageBackground.outputBuffer = radianceBuffer;
 
         stageGeom = New!DeferredGeometryStage(pipeline, gbuffer);
         stageGeom.view = view;
@@ -98,24 +103,20 @@ class DeferredRenderer: Renderer
         stageOcclusionDenoise.inputBuffer = occlusionNoisyBuffer;
         stageOcclusionDenoise.outputBuffer = occlusionBuffer;
 
-        stageBackground = New!DeferredBackgroundStage(pipeline);
-        stageBackground.view = view;
-        stageBackground.outputBuffer = outputBuffer;
-
         stageEnvironment = New!DeferredEnvironmentStage(pipeline, gbuffer);
         stageEnvironment.view = view;
-        stageEnvironment.outputBuffer = outputBuffer;
+        stageEnvironment.outputBuffer = radianceBuffer;
         stageEnvironment.occlusionBuffer = occlusionBuffer;
 
         stageLight = New!DeferredLightStage(pipeline, gbuffer);
         stageLight.view = view;
-        stageLight.outputBuffer = outputBuffer;
+        stageLight.outputBuffer = radianceBuffer;
         stageLight.occlusionBuffer = occlusionBuffer;
 
         stageDebug = New!DeferredDebugOutputStage(pipeline, gbuffer);
         stageDebug.view = view;
         stageDebug.active = false;
-        stageDebug.outputBuffer = outputBuffer;
+        stageDebug.outputBuffer = radianceBuffer;
         stageDebug.occlusionBuffer = occlusionBuffer;
     }
 
@@ -153,8 +154,8 @@ class DeferredRenderer: Renderer
     {
         super.setViewport(x, y, w, h);
 
-        gbuffer.resize(view.width, view.height);
         outputBuffer.resize(view.width, view.height);
+        gbuffer.resize(view.width, view.height);
 
         occlusionView.resize(view.width / 2, view.height / 2);
         occlusionNoisyBuffer.resize(occlusionView.width, occlusionView.height);

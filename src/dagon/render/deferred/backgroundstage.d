@@ -64,7 +64,7 @@ class DeferredBackgroundStage: RenderStage
             Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 0.0f);
             if (state.environment)
                 backgroundColor = state.environment.backgroundColor;
-
+            
             glClearColor(
                 backgroundColor.r,
                 backgroundColor.g,
