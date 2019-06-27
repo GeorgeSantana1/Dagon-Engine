@@ -199,10 +199,7 @@ void main()
         16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
     );
     
-    if (fragDiffuse.a < 0.5)
-        discard;
-    
-    if (opacity < bayer[int(mod(gl_FragCoord.y, 4.0)) * 4 + int(mod(gl_FragCoord.x, 4.0))])
+    if ((fragDiffuse.a * opacity) < bayer[int(mod(gl_FragCoord.y, 4.0)) * 4 + int(mod(gl_FragCoord.x, 4.0))])
         discard;
     
     fragColor = vec4(fragDiffuse.rgb, layer);
