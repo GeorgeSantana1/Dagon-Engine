@@ -125,6 +125,15 @@ class Terrain: Owner, Drawable
         mesh.generateNormals();
         mesh.prepareVAO();
     }
+    
+    float getHeight(Entity e, Vector3f pos)
+    {
+        Vector3f ts = (pos - e.position) / e.scaling;
+        float x = ts.x / width;
+        float z = ts.z / height;
+        float y = heightmap.getHeight(x, z);
+        return y * e.scaling.y;
+    }
 
     TerrainSphereTraverseAggregate traverseBySphere(Sphere* sphere)
     {
