@@ -79,7 +79,7 @@ class DeferredBackgroundStage: RenderStage
                 state.modelMatrix = entity.absoluteTransformation;
                 state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
-                state.opacity = 1.0f;
+                state.opacity = entity.opacity;
 
                 if (entity.material)
                     entity.material.bind(&state);

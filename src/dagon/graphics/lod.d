@@ -71,13 +71,15 @@ class LODDrawable: Owner, Drawable
     {
         if (level.drawable)
         {
+            /*
             if (dist < level.startDistance + level.fadeDistance)
                 state.opacity = (dist - level.startDistance) / level.fadeDistance;
             else if (dist > level.endDistance - level.fadeDistance)
                 state.opacity = (level.endDistance - dist) / level.fadeDistance;
             else
                 state.opacity = 1.0f;
-             
+            */
+            
             if (level.material)
             {
                 level.material.bind(state);
@@ -106,50 +108,5 @@ class LODDrawable: Owner, Drawable
                 renderLevel(level, distanceToCam, state);
             }
         }
-        
-        /*
-        LODLevel* levelToDraw = null;
-        for(size_t i = 0; i < levels.length; i++)
-        {
-            LODLevel* level = &levels.data[i];
-            if (distanceToCamSqr >= level.distanceSqr)
-            {
-                if (levelToDraw)
-                {
-                    if (distanceToCamSqr > levelToDraw.distanceSqr)
-                    {
-                        levelToDraw = level;
-                    }
-                }
-                else
-                {
-                    levelToDraw = level;
-                }
-            }
-        }
-        
-        if (levelToDraw)
-        {
-            if (levelToDraw.drawable)
-            {
-                if (distanceToCamSqr > fadeoutStartSqr)
-                    state.opacity = 1.0f - (distanceToCamSqr - fadeoutStartSqr) * fadeoutCoef;
-                
-                if (levelToDraw.material)
-                {
-                    levelToDraw.material.bind(state);
-                    state.shader.bindParameters(state);
-                }
-                
-                levelToDraw.drawable.render(state);
-                
-                if (levelToDraw.material)
-                {
-                    state.shader.unbindParameters(state);
-                    levelToDraw.material.unbind(state);
-                }
-            }
-        }
-        */
     }
 }
