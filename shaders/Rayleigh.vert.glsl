@@ -7,6 +7,10 @@ uniform mat4 modelViewMatrix;
 uniform mat4 normalMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 invViewMatrix;
+uniform mat4 prevModelViewMatrix;
+
+out vec4 currPosition;
+out vec4 prevPosition;
 
 out vec3 vWorldPosition;
 out float vSunfade;
@@ -57,6 +61,9 @@ void main()
     float rayleighCoefficient = rayleigh - (1.0 * (1.0 - vSunfade));
     vBetaR = totalRayleigh * rayleighCoefficient;
     vBetaM = totalMie(turbidity) * mieCoefficient;
+    
+    currPosition = projectionMatrix * pos;
+    prevPosition = projectionMatrix * prevModelViewMatrix * vec4(va_Vertex, 1.0);
 
-    gl_Position = projectionMatrix * pos;
+    gl_Position = currPosition;
 }

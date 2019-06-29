@@ -10,10 +10,15 @@ in vec3 vBetaR;
 in vec3 vBetaM;
 in float vSunE;
 
+in vec4 currPosition;
+in vec4 prevPosition;
+
 uniform vec3 cameraPosition;
 uniform vec3 sunDirection;
 
-layout(location = 0) out vec4 fragColor;
+//layout(location = 0) out vec4 fragColor;
+layout(location = 3) out vec4 fragRadiance;
+layout(location = 4) out vec4 fragVelocity;
 
 const float mieDirectionalG = 0.8;
 
@@ -69,6 +74,13 @@ void main()
     L0 = pow(L0, vec3(1.0 / (1.0 + (1.0 * vSunfade))));
     vec3 color = (Lin + L0) * 0.04 + vec3(0.0, 0.0003, 0.00075);
     vec3 env = color; //pow(color, vec3(1.0 / (1.0 + (1.0 * vSunfade))));
+    
+    vec2 posScreen = (currPosition.xy / currPosition.w) * 0.5 + 0.5;
+    vec2 prevPosScreen = (prevPosition.xy / prevPosition.w) * 0.5 + 0.5;
+    vec2 velocity = posScreen - prevPosScreen;
+    const float blurMask = 1.0; 
 
-    fragColor = vec4(env, 1.0);
+    //fragColor = vec4(env, 1.0);
+    fragRadiance = vec4(env, 0.0);
+    fragVelocity = vec4(velocity, blurMask, 0.0);
 }

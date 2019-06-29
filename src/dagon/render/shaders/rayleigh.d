@@ -63,6 +63,7 @@ class RayleighShader: Shader
         setParameter("normalMatrix", state.normalMatrix);
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
+        setParameter("prevModelViewMatrix", state.prevModelViewMatrix);
         
         setParameter("cameraPosition", state.cameraPosition);
         setParameter("sunDirection", -sunDirection);
