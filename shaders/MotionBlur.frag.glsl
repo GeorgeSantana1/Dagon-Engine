@@ -26,6 +26,7 @@ void main()
         blurVec = blurVec / (timeStep * shutterFps);
 
         float speed = length(blurVec * viewSize);
+        speed = (speed < 20.0)? 1.0 : speed;
         int nSamples = clamp(int(speed), 1, motionBlurSamples);
 
         float invSamplesMinusOne = 1.0 / float(nSamples - 1);
