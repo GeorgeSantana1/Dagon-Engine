@@ -63,7 +63,7 @@ class Game: Application
 
         deferredRenderer = New!DeferredRenderer(eventManager, this);
         renderer = deferredRenderer;
-        postProcRenderer = New!PostProcRenderer(eventManager, deferredRenderer.outputBuffer, this);
+        postProcRenderer = New!PostProcRenderer(eventManager, deferredRenderer.outputBuffer, deferredRenderer.gbuffer, this);
         presentRenderer = New!PresentRenderer(eventManager, postProcRenderer.outputBuffer, this);
         hudRenderer = New!HUDRenderer(eventManager, this);
     }

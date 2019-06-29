@@ -39,11 +39,13 @@ import dagon.render.view;
 import dagon.render.framebuffer;
 import dagon.render.framebuffer_rgba8;
 import dagon.render.framebuffer_rgba16f;
+import dagon.render.gbuffer;
 import dagon.postproc.filterstage;
 import dagon.postproc.blurstage;
 import dagon.postproc.presentstage;
 import dagon.postproc.shaders.brightpass;
 import dagon.postproc.shaders.glow;
+import dagon.postproc.shaders.motionblur;
 import dagon.postproc.shaders.tonemap;
 import dagon.postproc.shaders.fxaa;
 import dagon.game.renderer;
@@ -60,12 +62,14 @@ class PostProcRenderer: Renderer
     Framebuffer hdrBuffer1;
     Framebuffer hdrBuffer2;
     Framebuffer hdrBuffer3;
+    Framebuffer hdrBuffer4;
     
     RenderView viewHalf;
     BlurStage stageBlur;
     
     BrightPassShader brightPassShader;
     GlowShader glowShader;
+    MotionBlurShader motionBlurShader;
     TonemapShader tonemapShader;
     FXAAShader fxaaShader;
     
@@ -77,7 +81,7 @@ class PostProcRenderer: Renderer
     Tonemapper tonemapper = Tonemapper.ACES;
     float exposure = 1.0f;
     
-    this(EventManager eventManager, Framebuffer inputBuffer, Owner owner)
+    this(EventManager eventManager, Framebuffer inputBuffer, GBuffer gbuffer, Owner owner)
     {
         super(eventManager, owner);
         
@@ -91,6 +95,7 @@ class PostProcRenderer: Renderer
         hdrBuffer1 = New!FramebufferRGBA16f(viewHalf.width, viewHalf.height, this);
         hdrBuffer2 = New!FramebufferRGBA16f(viewHalf.width, viewHalf.height, this);
         hdrBuffer3 = New!FramebufferRGBA16f(view.width, view.height, this);
+        hdrBuffer4 = New!FramebufferRGBA16f(view.width, view.height, this);
         
         brightPassShader = New!BrightPassShader(this);
         brightPassShader.luminanceThreshold = glowThreshold;
@@ -114,10 +119,17 @@ class PostProcRenderer: Renderer
         stageGlow.inputBuffer = inputBuffer;
         stageGlow.outputBuffer = hdrBuffer3;
         
+        motionBlurShader = New!MotionBlurShader(this);
+        motionBlurShader.gbuffer = gbuffer;
+        auto stageMotionBlur = New!FilterStage(pipeline, motionBlurShader);
+        stageMotionBlur.view = view;
+        stageMotionBlur.inputBuffer = stageGlow.outputBuffer;
+        stageMotionBlur.outputBuffer = hdrBuffer4;
+        
         tonemapShader = New!TonemapShader(this);
         auto stageTonemap = New!FilterStage(pipeline, tonemapShader);
         stageTonemap.view = view;
-        stageTonemap.inputBuffer = stageGlow.outputBuffer;
+        stageTonemap.inputBuffer = stageMotionBlur.outputBuffer;
         stageTonemap.outputBuffer = ldrBuffer1;
         
         fxaaShader = New!FXAAShader(this);
@@ -152,5 +164,6 @@ class PostProcRenderer: Renderer
         hdrBuffer1.resize(viewHalf.width, viewHalf.height);
         hdrBuffer2.resize(viewHalf.width, viewHalf.height);
         hdrBuffer3.resize(view.width, view.height);
+        hdrBuffer4.resize(view.width, view.height);
     }
 }

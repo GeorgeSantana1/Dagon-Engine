@@ -8,6 +8,9 @@ uniform mat4 invViewMatrix;
 in vec3 eyePosition;
 in vec3 worldNormal;
 
+in vec4 currPosition;
+in vec4 prevPosition;
+
 vec2 envMapEquirect(in vec3 dir)
 {
     float phi = acos(dir.y);
@@ -41,10 +44,23 @@ subroutine(srtEnv) vec3 environmentCubemap(in vec3 dir)
 subroutine uniform srtEnv environment;
 
 
+//layout(location = 0) out vec4 fragColor;
+
 layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragNormal;
+layout(location = 2) out vec4 fragPBR;
+layout(location = 3) out vec4 fragRadiance;
+layout(location = 4) out vec4 fragVelocity;
 
 void main()
 {
-    vec3 fragDiffuse = environment(normalize(worldNormal));    
-    fragColor = vec4(fragDiffuse, 0.0);
+    vec3 fragDiffuse = environment(normalize(worldNormal));
+    
+    vec2 posScreen = (currPosition.xy / currPosition.w) * 0.5 + 0.5;
+    vec2 prevPosScreen = (prevPosition.xy / prevPosition.w) * 0.5 + 0.5;
+    vec2 velocity = posScreen - prevPosScreen;
+    const float blurMask = 1.0; 
+    
+    fragRadiance = vec4(fragDiffuse, 0.0);
+    fragVelocity = vec4(velocity, blurMask, 0.0);
 }

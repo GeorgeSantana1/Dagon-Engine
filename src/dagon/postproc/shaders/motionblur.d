@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2019 Timur Gafarov
+Copyright (c) 2019 Timur Gafarov
 
 Boost Software License - Version 1.0 - August 17th, 2003
 Permission is hereby granted, free of charge, to any person or organization
@@ -25,70 +25,56 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-module dagon.render.shaders.sky;
+module dagon.postproc.shaders.motionblur;
 
 import std.stdio;
-import std.math;
-import std.conv;
 
 import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
 import dlib.math.matrix;
+import dlib.math.transformation;
+import dlib.math.interpolation;
 import dlib.image.color;
 
 import dagon.core.bindings;
-import dagon.graphics.state;
 import dagon.graphics.shader;
-import dagon.graphics.cubemap;
+import dagon.graphics.state;
+import dagon.render.gbuffer;
 
-class SkyShader: Shader
+class MotionBlurShader: Shader
 {
-    string vs = import("Sky.vert.glsl");
-    string fs = import("Sky.frag.glsl");
+    string vs = import("MotionBlur.vert.glsl");
+    string fs = import("MotionBlur.frag.glsl");
+
+    bool enabled = true;
+    
+    GBuffer gbuffer;
 
     this(Owner owner)
     {
         auto myProgram = New!ShaderProgram(vs, fs, this);
         super(myProgram, owner);
+
+        debug writeln("MotionBlurShader: program ", program.program);
     }
 
     override void bindParameters(GraphicsState* state)
     {
-        auto idiffuse = "diffuse" in state.material.inputs;
+        setParameter("viewSize", state.resolution);
+        setParameter("enabled", enabled);
 
-        // Matrices
-        setParameter("modelViewMatrix", state.modelViewMatrix);
-        setParameter("projectionMatrix", state.projectionMatrix);
-        setParameter("normalMatrix", state.normalMatrix);
-        setParameter("viewMatrix", state.viewMatrix);
-        setParameter("invViewMatrix", state.invViewMatrix);
-        setParameter("prevModelViewMatrix", state.prevModelViewMatrix);
+        // Texture 0 - color buffer
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, state.colorTexture);
+        setParameter("colorBuffer", 0);
 
-        // Diffuse
-        if (idiffuse.texture)
+        // Texture 1 - velocity buffer
+        if (gbuffer)
         {
-            glActiveTexture(GL_TEXTURE4);
-
-            auto cubemap = cast(Cubemap)idiffuse.texture;
-
-            if (cubemap)
-            {
-                cubemap.bind();
-                setParameter("envTextureCube", cast(int)4);
-                setParameterSubroutine("environment", ShaderType.Fragment, "environmentCubemap");
-            }
-            else
-            {
-                idiffuse.texture.bind();
-                setParameter("envTexture", cast(int)4);
-                setParameterSubroutine("environment", ShaderType.Fragment, "environmentTexture");
-            }
-        }
-        else
-        {
-            setParameter("envColor", idiffuse.asVector4f);
-            setParameterSubroutine("environment", ShaderType.Fragment, "environmentColor");
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, gbuffer.velocityTexture);
+            setParameter("velocityBuffer", 1);
         }
 
         glActiveTexture(GL_TEXTURE0);
@@ -100,9 +86,11 @@ class SkyShader: Shader
     {
         super.unbindParameters(state);
 
-        glActiveTexture(GL_TEXTURE4);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE0);
     }

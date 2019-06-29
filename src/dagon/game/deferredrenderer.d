@@ -86,9 +86,9 @@ class DeferredRenderer: Renderer
 
         stageShadow = New!ShadowStage(pipeline);
 
-        stageBackground = New!DeferredBackgroundStage(pipeline);
+        stageBackground = New!DeferredBackgroundStage(pipeline, gbuffer);
         stageBackground.view = view;
-        stageBackground.outputBuffer = radianceBuffer;
+        //stageBackground.outputBuffer = gbuffer;
 
         stageGeom = New!DeferredGeometryStage(pipeline, gbuffer);
         stageGeom.view = view;

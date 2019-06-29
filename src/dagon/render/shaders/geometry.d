@@ -74,6 +74,7 @@ class GeometryShader: Shader
         setParameter("normalMatrix", state.normalMatrix);
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
+        setParameter("prevModelViewMatrix", state.prevModelViewMatrix);
 
         setParameter("layer", cast(float)(state.layer));
         setParameter("opacity", state.opacity);

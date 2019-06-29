@@ -57,6 +57,9 @@ struct GraphicsState
 
     Matrix4x4f modelViewMatrix;
     Matrix4x4f normalMatrix;
+    
+    Matrix4x4f prevViewMatrix;
+    Matrix4x4f prevModelViewMatrix;
 
     Material material;
     Shader shader;
@@ -97,6 +100,9 @@ struct GraphicsState
 
         modelViewMatrix = Matrix4x4f.identity;
         normalMatrix = Matrix4x4f.identity;
+        
+        prevViewMatrix = Matrix4x4f.identity;
+        prevModelViewMatrix = Matrix4x4f.identity;
 
         material = null;
         shader = null;

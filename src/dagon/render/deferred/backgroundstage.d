@@ -38,39 +38,39 @@ import dagon.graphics.entity;
 import dagon.graphics.shader;
 import dagon.render.pipeline;
 import dagon.render.stage;
-import dagon.render.framebuffer;
+import dagon.render.gbuffer;
 import dagon.render.shaders.sky;
 
 class DeferredBackgroundStage: RenderStage
 {
+    GBuffer gbuffer;
     SkyShader skyShader;
-    Framebuffer outputBuffer;
 
-    this(RenderPipeline pipeline, EntityGroup group = null)
+    this(RenderPipeline pipeline, GBuffer gbuffer, EntityGroup group = null)
     {
         super(pipeline, group);
+        this.gbuffer = gbuffer;
         skyShader = New!SkyShader(this);
     }
 
     override void render()
     {
-        if (group && outputBuffer)
+        if (group && gbuffer)
         {
-            outputBuffer.bind();
+            gbuffer.bind();
 
-            glScissor(0, 0, outputBuffer.width, outputBuffer.height);
-            glViewport(0, 0, outputBuffer.width, outputBuffer.height);
+            glScissor(0, 0, gbuffer.width, gbuffer.height);
+            glViewport(0, 0, gbuffer.width, gbuffer.height);
 
             Color4f backgroundColor = Color4f(0.0f, 0.0f, 0.0f, 0.0f);
             if (state.environment)
                 backgroundColor = state.environment.backgroundColor;
             
-            glClearColor(
-                backgroundColor.r,
-                backgroundColor.g,
-                backgroundColor.b,
-                0.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            
+            Color4f zero = Color4f(0, 0, 0, 0);
+            glClearBufferfv(GL_COLOR, 3, zero.arrayof.ptr);
+            glClearBufferfv(GL_COLOR, 4, zero.arrayof.ptr);
             
             foreach(entity; group)
             if (entity.visible && entity.drawable)
@@ -79,6 +79,7 @@ class DeferredBackgroundStage: RenderStage
                 state.modelMatrix = entity.absoluteTransformation;
                 state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
                 state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+                state.prevModelViewMatrix = state.prevViewMatrix * entity.prevAbsoluteTransformation;
                 state.opacity = entity.opacity;
 
                 if (entity.material)
@@ -106,7 +107,7 @@ class DeferredBackgroundStage: RenderStage
                     defaultMaterial.unbind(&state);
             }
 
-            outputBuffer.unbind();
+            gbuffer.unbind();
         }
     }
 }

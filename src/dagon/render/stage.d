@@ -30,6 +30,7 @@ module dagon.render.stage;
 import dlib.core.memory;
 import dlib.core.ownership;
 import dlib.math.vector;
+import dlib.math.matrix;
 import dlib.image.color;
 
 import dagon.core.event;
@@ -53,6 +54,7 @@ class RenderStage: EventListener
     FallbackShader defaultShader;
     bool active = true;
     bool clear = true;
+    Matrix4x4f prevViewMatrix;
 
     this(RenderPipeline pipeline, EntityGroup group = null)
     {
@@ -63,6 +65,7 @@ class RenderStage: EventListener
         state.reset();
         defaultShader = New!FallbackShader(this);
         defaultMaterial = New!Material(this);
+        prevViewMatrix = Matrix4x4f.identity;
     }
 
     void update(Time t)
@@ -73,6 +76,9 @@ class RenderStage: EventListener
         {
             state.viewMatrix = view.viewMatrix();
             state.invViewMatrix = view.invViewMatrix();
+            
+            state.prevViewMatrix = prevViewMatrix;
+            prevViewMatrix = state.viewMatrix;
 
             state.projectionMatrix = view.projectionMatrix();
             state.invProjectionMatrix = state.projectionMatrix.inverse;

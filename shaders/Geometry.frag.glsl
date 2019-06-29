@@ -4,6 +4,9 @@ in vec3 eyeNormal;
 in vec3 eyePosition;
 in vec2 texCoord;
 
+in vec4 currPosition;
+in vec4 prevPosition;
+
 uniform float layer;
 uniform float energy;
 uniform float opacity;
@@ -198,6 +201,7 @@ layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragNormal;
 layout(location = 2) out vec4 fragPBR;
 layout(location = 3) out vec4 fragRadiance;
+layout(location = 4) out vec4 fragVelocity;
 
 void main()
 {
@@ -223,9 +227,14 @@ void main()
     if ((fragDiffuse.a * opacity) < bayer[int(mod(gl_FragCoord.y, 4.0)) * 4 + int(mod(gl_FragCoord.x, 4.0))])
         discard;
     
+    vec2 posScreen = (currPosition.xy / currPosition.w) * 0.5 + 0.5;
+    vec2 prevPosScreen = (prevPosition.xy / prevPosition.w) * 0.5 + 0.5;
+    vec2 velocity = posScreen - prevPosScreen;
+    const float blurMask = 1.0; 
+    
     fragColor = vec4(fragDiffuse.rgb, layer);
     fragNormal = vec4(N, 0.0);
     fragPBR = vec4(roughness(shiftedTexCoord), metallic(shiftedTexCoord), 0.0, 0.0);
-    
     fragRadiance = vec4(emission(shiftedTexCoord), 1.0);
+    fragVelocity = vec4(velocity, blurMask, 0.0);
 }
