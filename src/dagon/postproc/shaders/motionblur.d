@@ -63,18 +63,25 @@ class MotionBlurShader: Shader
     {
         setParameter("viewSize", state.resolution);
         setParameter("enabled", enabled);
+        setParameter("zNear", state.zNear);
+        setParameter("zFar", state.zFar);
 
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
+        
+        // Texture 1 - depth buffer
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, state.depthTexture);
+        setParameter("depthBuffer", 1);
 
-        // Texture 1 - velocity buffer
+        // Texture 2 - velocity buffer
         if (gbuffer)
         {
-            glActiveTexture(GL_TEXTURE1);
+            glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, gbuffer.velocityTexture);
-            setParameter("velocityBuffer", 1);
+            setParameter("velocityBuffer", 2);
         }
 
         glActiveTexture(GL_TEXTURE0);
@@ -90,6 +97,9 @@ class MotionBlurShader: Shader
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         glActiveTexture(GL_TEXTURE0);
