@@ -183,10 +183,13 @@ class Material: Owner
         setInput("particleColor", Color4f(1.0f, 1.0f, 1.0f, 1.0f));
         setInput("particleSphericalNormal", false);
         setInput("textureScale", Vector2f(1.0f, 1.0f));
+        setInput("sphericalNormal", false);
+        
         setInput("outputColor", true);
         setInput("outputNormal", true);
         setInput("outputPBR", true);
         setInput("outputEmission", true);
+        
         setInput("diffuse2", Color4f(0.8f, 0.8f, 0.8f, 1.0f));
         setInput("diffuse3", Color4f(0.8f, 0.8f, 0.8f, 1.0f));
         setInput("diffuse4", Color4f(0.8f, 0.8f, 0.8f, 1.0f));

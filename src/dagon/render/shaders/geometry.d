@@ -68,6 +68,7 @@ class GeometryShader: Shader
         auto iparallax = "parallax" in state.material.inputs;
         auto iemission = "emission" in state.material.inputs;
         auto ienergy = "energy" in state.material.inputs;
+        auto isphericalNormal = "sphericalNormal" in state.material.inputs;
 
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
@@ -85,6 +86,8 @@ class GeometryShader: Shader
             parallaxMethod = ParallaxOcclusionMapping;
         if (parallaxMethod < 0)
             parallaxMethod = 0;
+        
+        setParameter("sphericalNormal", cast(int)isphericalNormal.asBool);
 
         // Diffuse
         if (idiffuse.texture)
