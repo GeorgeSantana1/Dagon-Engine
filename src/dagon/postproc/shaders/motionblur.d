@@ -48,6 +48,9 @@ class MotionBlurShader: Shader
     string fs = import("MotionBlur.frag.glsl");
 
     bool enabled = true;
+    int samples = 16;
+    float currentFramerate = 60.0;
+    float shutterFramerate = 24.0;
     
     GBuffer gbuffer;
 
@@ -65,6 +68,9 @@ class MotionBlurShader: Shader
         setParameter("enabled", enabled);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
+        
+        setParameter("blurScale", currentFramerate / shutterFramerate);
+        setParameter("samples", samples);
 
         // Texture 0 - color buffer
         glActiveTexture(GL_TEXTURE0);

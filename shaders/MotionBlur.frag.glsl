@@ -14,9 +14,8 @@ uniform float zFar;
 in vec2 texCoord;
 out vec4 fragColor;
 
-const float currentFps = 60.0;
-const float shutterFps = 24.0;
-const int motionBlurSamples = 16;
+uniform float blurScale;
+uniform int samples;
 
 float linearizeDepth(float d)
 {
@@ -32,10 +31,10 @@ void main()
     if (enabled)
     {
         vec2 blurVec = velocity.xy;
-        blurVec = blurVec * (currentFps / shutterFps);
+        blurVec = blurVec * blurScale;
 
         float speed = length(blurVec * viewSize);
-        int nSamples = clamp(int(speed), 1, motionBlurSamples);
+        int nSamples = clamp(int(speed), 1, samples);
 
         float invSamplesMinusOne = 1.0 / float(nSamples - 1);
         float usedSamples = 1.0;

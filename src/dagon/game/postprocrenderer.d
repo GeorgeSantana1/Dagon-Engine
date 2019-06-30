@@ -81,6 +81,9 @@ class PostProcRenderer: Renderer
     Tonemapper tonemapper = Tonemapper.ACES;
     float exposure = 1.0f;
     
+    uint motionBlurSamples = 16;
+    uint motionBlurFramerate = 24;
+    
     this(EventManager eventManager, Framebuffer inputBuffer, GBuffer gbuffer, Owner owner)
     {
         super(eventManager, owner);
@@ -150,6 +153,9 @@ class PostProcRenderer: Renderer
         stageBlur.radius = glowRadius;
         tonemapShader.tonemapper = tonemapper;
         tonemapShader.exposure = exposure;
+        motionBlurShader.samples = motionBlurSamples;
+        motionBlurShader.currentFramerate = 1.0 / t.delta;
+        motionBlurShader.shutterFramerate = motionBlurFramerate;
     }
     
     override void setViewport(uint x, uint y, uint w, uint h)
