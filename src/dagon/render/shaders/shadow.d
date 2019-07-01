@@ -57,13 +57,39 @@ class ShadowShader: Shader
 
     override void bindParameters(GraphicsState* state)
     {
+        auto idiffuse = "diffuse" in state.material.inputs;
+        auto itextureScale = "textureScale" in state.material.inputs;
+        
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
         setParameter("normalMatrix", state.normalMatrix);
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
         setParameter("opacity", state.opacity);
+        setParameter("textureScale", itextureScale.asVector2f);
+        
+        // Diffuse
+        if (idiffuse.texture)
+        {
+            glActiveTexture(GL_TEXTURE0);
+            idiffuse.texture.bind();
+            setParameter("diffuseTexture", cast(int)0);
+            setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseColorTexture");
+        }
+        else
+        {
+            setParameter("diffuseVector", idiffuse.asVector4f);
+            setParameterSubroutine("diffuse", ShaderType.Fragment, "diffuseColorValue");
+        }
 
         super.bindParameters(state);
+    }
+    
+    override void unbindParameters(GraphicsState* state)
+    {
+        super.unbindParameters(state);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }

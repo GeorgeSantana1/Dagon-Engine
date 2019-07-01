@@ -217,14 +217,7 @@ void main()
     
     vec4 fragDiffuse = diffuse(shiftedTexCoord);
     
-    const float bayer[16] = float[16](
-        1.0 / 17.0,  9.0 / 17.0,  3.0 / 17.0, 11.0 / 17.0,
-        13.0 / 17.0,  5.0 / 17.0, 15.0 / 17.0,  7.0 / 17.0,
-        4.0 / 17.0, 12.0 / 17.0,  2.0 / 17.0, 10.0 / 17.0,
-        16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
-    );
-    
-    if ((fragDiffuse.a * opacity) < bayer[int(mod(gl_FragCoord.y, 4.0)) * 4 + int(mod(gl_FragCoord.x, 4.0))])
+    if ((fragDiffuse.a * opacity) < 0.5)
         discard;
     
     vec2 posScreen = (currPosition.xy / currPosition.w) * 0.5 + 0.5;
