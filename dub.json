@@ -39,7 +39,7 @@
             "targetType": "library",
             "dependencies": {
                 "bindbc-freetype": "~>0.5.0",
-                "bindbc-nuklear": "~>0.1.2"
+                "bindbc-nuklear": "~>0.2.0"
             }
         },
         {
@@ -51,7 +51,7 @@
             "name": "NoFreetype",
             "targetType": "library",
             "dependencies": {
-                "bindbc-nuklear": "~>0.1.2"
+                "bindbc-nuklear": "~>0.2.0"
             },
             "versions": ["NoFreetype"]
         },
