@@ -17,10 +17,14 @@ out vec4 fragColor;
 uniform float blurScale;
 uniform int samples;
 
-float linearizeDepth(float d)
+uniform mat4 invProjectionMatrix;
+
+// Converts normalized device coordinates to eye space position
+vec3 unproject(vec3 ndc)
 {
-    float z_n = 2.0 * d - 1.0;
-    return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+    vec4 clipPos = vec4(ndc * 2.0 - 1.0, 1.0);
+    vec4 res = invProjectionMatrix * clipPos;
+    return res.xyz / res.w;
 }
 
 void main()
@@ -38,11 +42,15 @@ void main()
 
         float invSamplesMinusOne = 1.0 / float(nSamples - 1);
         float usedSamples = 1.0;
+        
+        float zCenter = unproject(vec3(texCoord, texture(depthBuffer, texCoord).x)).z;
 
         for (int i = 1; i < nSamples; i++)
         {
             vec2 offset = blurVec * (float(i) * invSamplesMinusOne - 0.5);
             float mask = texture(velocityBuffer, texCoord + offset).z;
+            float z = unproject(vec3(texCoord, texture(depthBuffer, texCoord + offset).x)).z; 
+            mask *= 1.0 - clamp(abs(zCenter - z), 0.0, 100.0) / 100.0;
             res += texture(colorBuffer, texCoord + offset).rgb * mask;
             usedSamples += mask;
         }

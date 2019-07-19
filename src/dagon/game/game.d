@@ -76,6 +76,7 @@ class Game: Application
             deferredRenderer.scene = currentScene;
             hudRenderer.scene = currentScene;
             deferredRenderer.update(t);
+            postProcRenderer.activeCamera = deferredRenderer.activeCamera;
             postProcRenderer.update(t);
             presentRenderer.update(t);
             hudRenderer.update(t);

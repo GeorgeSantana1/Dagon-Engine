@@ -100,11 +100,18 @@ class PostProcRenderer: Renderer
         hdrBuffer3 = New!FramebufferRGBA16f(view.width, view.height, this);
         hdrBuffer4 = New!FramebufferRGBA16f(view.width, view.height, this);
         
+        motionBlurShader = New!MotionBlurShader(this);
+        motionBlurShader.gbuffer = gbuffer;
+        auto stageMotionBlur = New!FilterStage(pipeline, motionBlurShader);
+        stageMotionBlur.view = view;
+        stageMotionBlur.inputBuffer = inputBuffer; //stageGlow.outputBuffer;
+        stageMotionBlur.outputBuffer = hdrBuffer4;
+        
         brightPassShader = New!BrightPassShader(this);
         brightPassShader.luminanceThreshold = glowThreshold;
         auto stageBrightPass = New!FilterStage(pipeline, brightPassShader);
         stageBrightPass.view = viewHalf;
-        stageBrightPass.inputBuffer = inputBuffer;
+        stageBrightPass.inputBuffer = hdrBuffer4; //inputBuffer;
         stageBrightPass.outputBuffer = hdrBuffer1;
         
         stageBlur = New!BlurStage(pipeline);
@@ -119,20 +126,13 @@ class PostProcRenderer: Renderer
         glowShader.intensity = glowIntensity;
         auto stageGlow = New!FilterStage(pipeline, glowShader);
         stageGlow.view = view;
-        stageGlow.inputBuffer = inputBuffer;
+        stageGlow.inputBuffer = hdrBuffer4; //inputBuffer;
         stageGlow.outputBuffer = hdrBuffer3;
-        
-        motionBlurShader = New!MotionBlurShader(this);
-        motionBlurShader.gbuffer = gbuffer;
-        auto stageMotionBlur = New!FilterStage(pipeline, motionBlurShader);
-        stageMotionBlur.view = view;
-        stageMotionBlur.inputBuffer = stageGlow.outputBuffer;
-        stageMotionBlur.outputBuffer = hdrBuffer4;
         
         tonemapShader = New!TonemapShader(this);
         auto stageTonemap = New!FilterStage(pipeline, tonemapShader);
         stageTonemap.view = view;
-        stageTonemap.inputBuffer = stageMotionBlur.outputBuffer;
+        stageTonemap.inputBuffer = stageGlow.outputBuffer;
         stageTonemap.outputBuffer = ldrBuffer1;
         
         fxaaShader = New!FXAAShader(this);

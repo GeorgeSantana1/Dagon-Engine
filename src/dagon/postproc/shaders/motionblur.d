@@ -69,6 +69,8 @@ class MotionBlurShader: Shader
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
         
+        setParameter("invProjectionMatrix", state.invProjectionMatrix);
+        
         setParameter("blurScale", currentFramerate / shutterFramerate);
         setParameter("samples", samples);
 
@@ -77,14 +79,14 @@ class MotionBlurShader: Shader
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
         
-        // Texture 1 - depth buffer
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, state.depthTexture);
-        setParameter("depthBuffer", 1);
-
-        // Texture 2 - velocity buffer
         if (gbuffer)
         {
+            // Texture 1 - depth buffer
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, gbuffer.depthTexture);
+            setParameter("depthBuffer", 1);
+            
+            // Texture 2 - velocity buffer
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, gbuffer.velocityTexture);
             setParameter("velocityBuffer", 2);
