@@ -32,7 +32,7 @@ Status:
 * [ ] Water
 * [ ] Particles
 * [ ] Decals
-* [ ] Post-processing
+* [x] Post-processing
 * [x] Text rendering
 * [x] Nuklear GUI
 * [x] Freeview controller
