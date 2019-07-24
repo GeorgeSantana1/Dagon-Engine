@@ -83,9 +83,9 @@ class PostProcRenderer: Renderer
     FilterStage stageFXAA;
     PresentStage stagePresent;
     
-    bool _motionBlurEnabled = true;
-    bool _glowEnabled = true;
-    bool _fxaaEnabled = true;
+    bool _motionBlurEnabled = false;
+    bool _glowEnabled = false;
+    bool _fxaaEnabled = false;
     
     public:
     
