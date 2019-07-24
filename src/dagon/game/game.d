@@ -51,7 +51,7 @@ class Game: Application
 
     Renderer renderer;
     DeferredRenderer deferredRenderer;
-    PostProcRenderer postProcRenderer;
+    PostProcRenderer postProcessingRenderer;
     PresentRenderer presentRenderer;
     HUDRenderer hudRenderer;
 
@@ -63,8 +63,8 @@ class Game: Application
 
         deferredRenderer = New!DeferredRenderer(eventManager, this);
         renderer = deferredRenderer;
-        postProcRenderer = New!PostProcRenderer(eventManager, deferredRenderer.outputBuffer, deferredRenderer.gbuffer, this);
-        presentRenderer = New!PresentRenderer(eventManager, postProcRenderer.outputBuffer, this);
+        postProcessingRenderer = New!PostProcRenderer(eventManager, deferredRenderer.outputBuffer, deferredRenderer.gbuffer, this);
+        presentRenderer = New!PresentRenderer(eventManager, postProcessingRenderer.outputBuffer, this);
         hudRenderer = New!HUDRenderer(eventManager, this);
     }
 
@@ -76,8 +76,8 @@ class Game: Application
             deferredRenderer.scene = currentScene;
             hudRenderer.scene = currentScene;
             deferredRenderer.update(t);
-            postProcRenderer.activeCamera = deferredRenderer.activeCamera;
-            postProcRenderer.update(t);
+            postProcessingRenderer.activeCamera = deferredRenderer.activeCamera;
+            postProcessingRenderer.update(t);
             presentRenderer.update(t);
             hudRenderer.update(t);
         }
@@ -95,7 +95,8 @@ class Game: Application
             if (currentScene.canRender)
             {
                 deferredRenderer.render();
-                postProcRenderer.render();
+                postProcessingRenderer.render();
+                presentRenderer.inputBuffer = postProcessingRenderer.outputBuffer;
                 presentRenderer.render();
                 hudRenderer.render();
             }

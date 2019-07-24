@@ -52,9 +52,12 @@ import dagon.game.renderer;
 
 class PostProcRenderer: Renderer
 {
+    public:
+    
     Framebuffer inputBuffer;
     Framebuffer outputBuffer;
-    PresentStage stagePresent;
+
+    protected:
     
     Framebuffer ldrBuffer1;
     Framebuffer ldrBuffer2;
@@ -72,6 +75,19 @@ class PostProcRenderer: Renderer
     MotionBlurShader motionBlurShader;
     TonemapShader tonemapShader;
     FXAAShader fxaaShader;
+    
+    FilterStage stageMotionBlur;
+    FilterStage stageBrightPass;
+    FilterStage stageGlow;
+    FilterStage stageTonemap;
+    FilterStage stageFXAA;
+    PresentStage stagePresent;
+    
+    bool _motionBlurEnabled = true;
+    bool _glowEnabled = true;
+    bool _fxaaEnabled = true;
+    
+    public:
     
     float glowViewScale = 0.33f;
     
@@ -102,16 +118,16 @@ class PostProcRenderer: Renderer
         
         motionBlurShader = New!MotionBlurShader(this);
         motionBlurShader.gbuffer = gbuffer;
-        auto stageMotionBlur = New!FilterStage(pipeline, motionBlurShader);
+        stageMotionBlur = New!FilterStage(pipeline, motionBlurShader);
         stageMotionBlur.view = view;
-        stageMotionBlur.inputBuffer = inputBuffer; //stageGlow.outputBuffer;
+        stageMotionBlur.inputBuffer = inputBuffer;
         stageMotionBlur.outputBuffer = hdrBuffer4;
         
         brightPassShader = New!BrightPassShader(this);
         brightPassShader.luminanceThreshold = glowThreshold;
-        auto stageBrightPass = New!FilterStage(pipeline, brightPassShader);
+        stageBrightPass = New!FilterStage(pipeline, brightPassShader);
         stageBrightPass.view = viewHalf;
-        stageBrightPass.inputBuffer = hdrBuffer4; //inputBuffer;
+        stageBrightPass.inputBuffer = stageMotionBlur.outputBuffer;
         stageBrightPass.outputBuffer = hdrBuffer1;
         
         stageBlur = New!BlurStage(pipeline);
@@ -124,24 +140,88 @@ class PostProcRenderer: Renderer
         glowShader = New!GlowShader(this);
         glowShader.blurredBuffer = stageBlur.outputBuffer;
         glowShader.intensity = glowIntensity;
-        auto stageGlow = New!FilterStage(pipeline, glowShader);
+        stageGlow = New!FilterStage(pipeline, glowShader);
         stageGlow.view = view;
-        stageGlow.inputBuffer = hdrBuffer4; //inputBuffer;
+        stageGlow.inputBuffer = stageMotionBlur.outputBuffer;
         stageGlow.outputBuffer = hdrBuffer3;
         
         tonemapShader = New!TonemapShader(this);
-        auto stageTonemap = New!FilterStage(pipeline, tonemapShader);
+        stageTonemap = New!FilterStage(pipeline, tonemapShader);
         stageTonemap.view = view;
         stageTonemap.inputBuffer = stageGlow.outputBuffer;
         stageTonemap.outputBuffer = ldrBuffer1;
         
         fxaaShader = New!FXAAShader(this);
-        auto stageFXAA = New!FilterStage(pipeline, fxaaShader);
+        stageFXAA = New!FilterStage(pipeline, fxaaShader);
         stageFXAA.view = view;
-        stageFXAA.inputBuffer = ldrBuffer1;
+        stageFXAA.inputBuffer = stageTonemap.outputBuffer;
         stageFXAA.outputBuffer = ldrBuffer2;
         
-        outputBuffer = ldrBuffer2;
+        outputBuffer = stageFXAA.outputBuffer;
+    }
+    
+    void motionBlurEnabled(bool mode) @property
+    {
+        _motionBlurEnabled = mode;
+        stageMotionBlur.active = mode;
+        if (!_motionBlurEnabled)
+        {
+            stageBrightPass.inputBuffer = inputBuffer;
+            stageGlow.inputBuffer = inputBuffer;
+        }
+        else
+        {
+            stageBrightPass.inputBuffer = stageMotionBlur.outputBuffer;
+            stageGlow.inputBuffer = stageMotionBlur.outputBuffer;
+        }
+    }
+    
+    bool motionBlurEnabled() @property
+    {
+        return _motionBlurEnabled;
+    }
+    
+    void glowEnabled(bool mode) @property
+    {
+        _glowEnabled = mode;
+        stageBrightPass.active = mode;
+        stageBlur.active = mode;
+        stageGlow.active = mode;
+        if (!_glowEnabled)
+        {
+            if (_motionBlurEnabled)
+                stageTonemap.inputBuffer = stageMotionBlur.outputBuffer;
+            else
+                stageTonemap.inputBuffer = inputBuffer;
+        }
+        else
+        {
+            stageTonemap.inputBuffer = stageGlow.outputBuffer;
+        }
+    }
+    
+    bool glowEnabled() @property
+    {
+        return _glowEnabled;
+    }
+    
+    void fxaaEnabled(bool mode) @property
+    {
+        _fxaaEnabled = mode;
+        stageFXAA.active = mode;
+        if (!_fxaaEnabled)
+        {
+            outputBuffer = stageTonemap.outputBuffer;
+        }
+        else
+        {
+            outputBuffer = stageFXAA.outputBuffer;
+        }
+    }
+    
+    bool fxaaEnabled() @property
+    {
+        return _fxaaEnabled;
     }
     
     override void update(Time t)
@@ -156,6 +236,21 @@ class PostProcRenderer: Renderer
         motionBlurShader.samples = motionBlurSamples;
         motionBlurShader.currentFramerate = 1.0 / t.delta;
         motionBlurShader.shutterFramerate = motionBlurFramerate;
+    }
+    
+    override void render()
+    {
+        if (outputBuffer)
+            outputBuffer.bind();
+        
+        foreach(stage; pipeline.stages.data)
+        {
+            if (stage.active)
+                stage.render();
+        }
+        
+        if (outputBuffer)
+            outputBuffer.unbind();
     }
     
     override void setViewport(uint x, uint y, uint w, uint h)

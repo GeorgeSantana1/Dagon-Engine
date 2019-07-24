@@ -41,16 +41,27 @@ import dagon.game.renderer;
 
 class PresentRenderer: Renderer
 {
-    Framebuffer inputBuffer;
+    Framebuffer _inputBuffer;
     PresentStage stagePresent;
     
     this(EventManager eventManager, Framebuffer inputBuffer, Owner owner)
     {
         super(eventManager, owner);
         
-        this.inputBuffer = inputBuffer;
+        this._inputBuffer = inputBuffer;
         stagePresent = New!PresentStage(pipeline);
         stagePresent.view = view;
         stagePresent.inputBuffer = inputBuffer;
+    }
+    
+    void inputBuffer(Framebuffer b)
+    {
+        _inputBuffer = b;
+        stagePresent.inputBuffer = b;
+    }
+    
+    Framebuffer inputBuffer()
+    {
+        return _inputBuffer;
     }
 }
