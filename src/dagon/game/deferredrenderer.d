@@ -64,6 +64,8 @@ class DeferredRenderer: Renderer
     FramebufferR8 occlusionBuffer;
 
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
+    
+    bool _ssaoEnabled = true;
 
     int ssaoSamples = 10;
     float ssaoRadius = 0.2f;
@@ -118,6 +120,28 @@ class DeferredRenderer: Renderer
         stageDebug.active = false;
         stageDebug.outputBuffer = radianceBuffer;
         stageDebug.occlusionBuffer = occlusionBuffer;
+    }
+    
+    void ssaoEnabled(bool mode) @property
+    {
+        _ssaoEnabled = mode;
+        stageOcclusion.active = mode;
+        stageOcclusionDenoise.active = mode;
+        if (_ssaoEnabled)
+        {
+            stageEnvironment.occlusionBuffer = occlusionBuffer;
+            stageLight.occlusionBuffer = occlusionBuffer;
+        }
+        else
+        {
+            stageEnvironment.occlusionBuffer = null;
+            stageLight.occlusionBuffer = null;
+        }
+    }
+    
+    bool ssaoEnabled() @property
+    {
+        return _ssaoEnabled;
     }
 
     override void scene(Scene s)
