@@ -104,7 +104,7 @@ class CascadedShadowMap: ShadowMap
     GLuint framebuffer2;
     GLuint framebuffer3;
     
-    float projectionSize1 = 5.0f;
+    float projectionSize1 = 10.0f;
     float projectionSize2 = 30.0f;
     float projectionSize3 = 200.0f;
     float zStart = -300.0f;
