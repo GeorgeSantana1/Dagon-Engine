@@ -76,6 +76,7 @@ class FreeviewComponent: EntityComponent
 
     bool zoomIn = false;
     float zoomSmoothFactor = 2.0f;
+    float translateSmoothFactor = 10.0f;
 
     Vector3f currentTranslate;
     Vector3f targetTranslate;
@@ -183,7 +184,7 @@ class FreeviewComponent: EntityComponent
         }
         if (currentTranslate != targetTranslate)
         {
-            Vector3f t = (targetTranslate - currentTranslate)/30.0f;
+            Vector3f t = (targetTranslate - currentTranslate) / translateSmoothFactor;
             currentTranslate += t;
             translateTarget(t);
         }
