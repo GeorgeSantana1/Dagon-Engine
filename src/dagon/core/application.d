@@ -82,7 +82,7 @@ extern(System) nothrow void messageCallback(
 private
 {
     __gshared int[] compressedTextureFormats;
-    
+
     void enumerateCompressedTextureFormats()
     {
         int numCompressedFormats = 0;
@@ -93,7 +93,7 @@ private
             glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, compressedTextureFormats.ptr);
         }
     }
-    
+
     void releaseCompressedTextureFormats()
     {
         if (compressedTextureFormats.length)
@@ -120,10 +120,7 @@ class Application: EventListener
     uint height;
     SDL_Window* window = null;
     SDL_GLContext glcontext;
-    string libdir;
-
     private EventManager _eventManager;
-
     private double elapsedTime = 0.0;
 
     /++
@@ -231,7 +228,7 @@ class Application: EventListener
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         SDL_GL_SwapWindow(window);
-        
+
         enumerateCompressedTextureFormats();
 
         // Debug output
@@ -248,11 +245,11 @@ class Application: EventListener
             }
         }
     }
-    
+
     ~this()
     {
         releaseCompressedTextureFormats();
-        
+
         SDL_GL_DeleteContext(glcontext);
         SDL_DestroyWindow(window);
         SDL_Quit();
