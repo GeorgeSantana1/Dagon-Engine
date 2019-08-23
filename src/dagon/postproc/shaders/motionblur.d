@@ -44,14 +44,14 @@ import dagon.render.gbuffer;
 
 class MotionBlurShader: Shader
 {
-    string vs = import("MotionBlur.vert.glsl");
-    string fs = import("MotionBlur.frag.glsl");
+    string vs = import("MotionBlur/MotionBlur.vert.glsl");
+    string fs = import("MotionBlur/MotionBlur.frag.glsl");
 
     bool enabled = true;
     int samples = 16;
     float currentFramerate = 60.0;
     float shutterFramerate = 24.0;
-    
+
     GBuffer gbuffer;
 
     this(Owner owner)
@@ -68,9 +68,9 @@ class MotionBlurShader: Shader
         setParameter("enabled", enabled);
         setParameter("zNear", state.zNear);
         setParameter("zFar", state.zFar);
-        
+
         setParameter("invProjectionMatrix", state.invProjectionMatrix);
-        
+
         setParameter("blurScale", currentFramerate / shutterFramerate);
         setParameter("samples", samples);
 
@@ -78,14 +78,14 @@ class MotionBlurShader: Shader
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, state.colorTexture);
         setParameter("colorBuffer", 0);
-        
+
         if (gbuffer)
         {
             // Texture 1 - depth buffer
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, gbuffer.depthTexture);
             setParameter("depthBuffer", 1);
-            
+
             // Texture 2 - velocity buffer
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, gbuffer.velocityTexture);
@@ -106,7 +106,7 @@ class MotionBlurShader: Shader
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
 

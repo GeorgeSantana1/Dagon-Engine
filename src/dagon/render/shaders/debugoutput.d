@@ -45,8 +45,8 @@ import dagon.render.deferred;
 
 class DebugOutputShader: Shader
 {
-    string vs = import("DebugOutput.vert.glsl");
-    string fs = import("DebugOutput.frag.glsl");
+    string vs = import("DebugOutput/DebugOutput.vert.glsl");
+    string fs = import("DebugOutput/DebugOutput.frag.glsl");
 
     DebugOutputMode outputMode = DebugOutputMode.Radiance;
 

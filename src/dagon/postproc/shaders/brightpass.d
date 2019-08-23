@@ -43,8 +43,8 @@ import dagon.graphics.state;
 
 class BrightPassShader: Shader
 {
-    string vs = import("BrightPass.vert.glsl");
-    string fs = import("BrightPass.frag.glsl");
+    string vs = import("BrightPass/BrightPass.vert.glsl");
+    string fs = import("BrightPass/BrightPass.frag.glsl");
 
     bool enabled = true;
     float luminanceThreshold = 1.0f;

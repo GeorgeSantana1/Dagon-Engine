@@ -44,9 +44,9 @@ import dagon.graphics.cubemap;
 
 class RayleighShader: Shader
 {
-    string vs = import("Rayleigh.vert.glsl");
-    string fs = import("Rayleigh.frag.glsl");
-    
+    string vs = import("Rayleigh/Rayleigh.vert.glsl");
+    string fs = import("Rayleigh/Rayleigh.frag.glsl");
+
     Vector3f sunDirection = Vector3f(-1.0f, -1.0f, -1.0f).normalized;
 
     this(Owner owner)
@@ -64,10 +64,10 @@ class RayleighShader: Shader
         setParameter("viewMatrix", state.viewMatrix);
         setParameter("invViewMatrix", state.invViewMatrix);
         setParameter("prevModelViewMatrix", state.prevModelViewMatrix);
-        
+
         setParameter("cameraPosition", state.cameraPosition);
         setParameter("sunDirection", -sunDirection);
-        
+
         super.bindParameters(state);
     }
 }

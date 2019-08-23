@@ -45,8 +45,8 @@ import dagon.graphics.state;
 
 class GeometryShader: Shader
 {
-    string vs = import("Geometry.vert.glsl");
-    string fs = import("Geometry.frag.glsl");
+    string vs = import("Geometry/Geometry.vert.glsl");
+    string fs = import("Geometry/Geometry.frag.glsl");
 
     this(Owner owner)
     {
@@ -86,7 +86,7 @@ class GeometryShader: Shader
             parallaxMethod = ParallaxOcclusionMapping;
         if (parallaxMethod < 0)
             parallaxMethod = 0;
-        
+
         setParameter("sphericalNormal", cast(int)isphericalNormal.asBool);
 
         // Diffuse
@@ -226,7 +226,7 @@ class GeometryShader: Shader
         {
             setParameterSubroutine("metallic", ShaderType.Fragment, "metallicMap");
         }
-        
+
         // Emission
         if (iemission.texture)
         {
@@ -259,7 +259,7 @@ class GeometryShader: Shader
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, 0);
 

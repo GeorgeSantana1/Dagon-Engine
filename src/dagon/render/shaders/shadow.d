@@ -44,8 +44,8 @@ import dagon.graphics.state;
 
 class ShadowShader: Shader
 {
-    string vs = import("Shadow.vert.glsl");
-    string fs = import("Shadow.frag.glsl");
+    string vs = import("Shadow/Shadow.vert.glsl");
+    string fs = import("Shadow/Shadow.frag.glsl");
 
     this(Owner owner)
     {
@@ -59,7 +59,7 @@ class ShadowShader: Shader
     {
         auto idiffuse = "diffuse" in state.material.inputs;
         auto itextureScale = "textureScale" in state.material.inputs;
-        
+
         setParameter("modelViewMatrix", state.modelViewMatrix);
         setParameter("projectionMatrix", state.projectionMatrix);
         setParameter("normalMatrix", state.normalMatrix);
@@ -67,7 +67,7 @@ class ShadowShader: Shader
         setParameter("invViewMatrix", state.invViewMatrix);
         setParameter("opacity", state.opacity);
         setParameter("textureScale", itextureScale.asVector2f);
-        
+
         // Diffuse
         if (idiffuse.texture)
         {
@@ -84,7 +84,7 @@ class ShadowShader: Shader
 
         super.bindParameters(state);
     }
-    
+
     override void unbindParameters(GraphicsState* state)
     {
         super.unbindParameters(state);

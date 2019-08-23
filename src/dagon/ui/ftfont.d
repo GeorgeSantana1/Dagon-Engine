@@ -106,8 +106,8 @@ final class FreeTypeFont: Font
     GLint glyphTextureLoc;
     GLint glyphColorLoc;
 
-    string vs = import("Glyph.vert.glsl");
-    string fs = import("Glyph.frag.glsl");
+    string vs = import("Glyph/Glyph.vert.glsl");
+    string fs = import("Glyph/Glyph.frag.glsl");
 
     this(uint height, Owner o)
     {
@@ -367,7 +367,7 @@ final class FreeTypeFont: Font
         glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, state.projectionMatrix.arrayof.ptr);
         glUniform4fv(glyphColorLoc, 1, color.arrayof.ptr);
         glUniform1i(glyphTextureLoc, 0);
-        
+
         float shift = 0.0f;
         UTF8Decoder dec = UTF8Decoder(str);
         int ch;

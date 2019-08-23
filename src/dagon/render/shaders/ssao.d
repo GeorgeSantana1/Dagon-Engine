@@ -44,8 +44,8 @@ import dagon.graphics.state;
 
 class SSAOShader: Shader
 {
-    string vs = import("SSAO.vert.glsl");
-    string fs = import("SSAO.frag.glsl");
+    string vs = import("SSAO/SSAO.vert.glsl");
+    string fs = import("SSAO/SSAO.frag.glsl");
 
     int samples = 16;
     float radius = 0.2f;

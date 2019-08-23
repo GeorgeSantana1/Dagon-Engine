@@ -46,8 +46,8 @@ import dagon.graphics.light;
 
 class AreaLightShader: Shader
 {
-    string vs = import("AreaLight.vert.glsl");
-    string fs = import("AreaLight.frag.glsl");
+    string vs = import("AreaLight/AreaLight.vert.glsl");
+    string fs = import("AreaLight/AreaLight.frag.glsl");
 
     this(Owner owner)
     {
@@ -89,11 +89,11 @@ class AreaLightShader: Shader
         if (state.light)
         {
             auto light = state.light;
-            
+
             lightPos = light.positionAbsolute * state.viewMatrix;
             lightColor = light.color;
             lightEnergy = light.energy;
-            
+
             if (light.type == LightType.AreaSphere)
             {
                 setParameterSubroutine("lightRadiance", ShaderType.Fragment, "lightRadianceAreaSphere");
@@ -118,7 +118,7 @@ class AreaLightShader: Shader
             {
                 setParameterSubroutine("lightRadiance", ShaderType.Fragment, "lightRadianceFallback");
             }
-            
+
             setParameter("lightPosition", lightPos);
             setParameter("lightColor", lightColor);
             setParameter("lightEnergy", lightEnergy);
