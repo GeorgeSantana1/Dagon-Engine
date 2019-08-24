@@ -35,21 +35,53 @@ import dlib.image.color;
 
 import dagon.core.bindings;
 import dagon.graphics.entity;
+import dagon.graphics.terrain;
+import dagon.graphics.shader;
 import dagon.render.pipeline;
 import dagon.render.stage;
 import dagon.render.gbuffer;
 import dagon.render.shaders.geometry;
+import dagon.render.shaders.terrain;
 
 class DeferredGeometryStage: RenderStage
 {
     GBuffer gbuffer;
     GeometryShader geometryShader;
+    TerrainShader terrainShader;
 
     this(RenderPipeline pipeline, GBuffer gbuffer, EntityGroup group = null)
     {
         super(pipeline, group);
         this.gbuffer = gbuffer;
         geometryShader = New!GeometryShader(this);
+        terrainShader = New!TerrainShader(this);
+    }
+    
+    void renderEntity(Entity entity, Shader shader)
+    {
+        state.layer = entity.layer;
+        state.modelMatrix = entity.absoluteTransformation;
+        state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
+        state.normalMatrix = state.modelViewMatrix.inverse.transposed;
+        state.prevModelViewMatrix = state.prevViewMatrix * entity.prevAbsoluteTransformation;
+        state.shader = shader;
+        state.opacity = entity.opacity;
+
+        if (entity.material)
+            entity.material.bind(&state);
+        else
+            defaultMaterial.bind(&state);
+
+        shader.bindParameters(&state);
+          
+        entity.drawable.render(&state);
+
+        shader.unbindParameters(&state);
+
+        if (entity.material)
+            entity.material.unbind(&state);
+        else
+            defaultMaterial.unbind(&state);
     }
 
     override void render()
@@ -69,36 +101,26 @@ class DeferredGeometryStage: RenderStage
             glClearBufferfv(GL_COLOR, 2, zero.arrayof.ptr);
 
             geometryShader.bind();
-            
             foreach(entity; group)
-            if (entity.visible && entity.drawable)
             {
-                state.layer = entity.layer;
-                state.modelMatrix = entity.absoluteTransformation;
-                state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
-                state.normalMatrix = state.modelViewMatrix.inverse.transposed;
-                state.prevModelViewMatrix = state.prevViewMatrix * entity.prevAbsoluteTransformation;
-                state.shader = geometryShader;
-                state.opacity = entity.opacity;
-
-                if (entity.material)
-                    entity.material.bind(&state);
-                else
-                    defaultMaterial.bind(&state);
-
-                geometryShader.bindParameters(&state);
-                
-                entity.drawable.render(&state);
-
-                geometryShader.unbindParameters(&state);
-
-                if (entity.material)
-                    entity.material.unbind(&state);
-                else
-                    defaultMaterial.unbind(&state);
+                if (entity.visible && entity.drawable)
+                {
+                    if (!entityIsTerrain(entity))
+                        renderEntity(entity, geometryShader);
+                }
             }
-            
             geometryShader.unbind();
+            
+            terrainShader.bind();
+            foreach(entity; group)
+            {
+                if (entity.visible && entity.drawable)
+                {
+                    if (entityIsTerrain(entity))
+                        renderEntity(entity, terrainShader);
+                }
+            }
+            terrainShader.unbind();
 
             gbuffer.unbind();
         }

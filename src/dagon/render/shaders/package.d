@@ -40,4 +40,5 @@ public
     import dagon.render.shaders.sky;
     import dagon.render.shaders.ssao;
     import dagon.render.shaders.sunlight;
+    import dagon.render.shaders.terrain;
 }
