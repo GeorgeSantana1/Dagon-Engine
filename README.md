@@ -20,6 +20,8 @@ Screenshots
 -----------
 [![Screenshot1](https://1.bp.blogspot.com/-qC2fIlkQA7E/XO2335jW2iI/AAAAAAAAD8M/Tc9Wjg2CkzUMyo2k_Kg35y70qkUj7-FIwCPcBGAYYCw/s1600/2019-05-29%2B01_20_42-Dagon%2BNG.jpg)](https://1.bp.blogspot.com/-qC2fIlkQA7E/XO2335jW2iI/AAAAAAAAD8M/Tc9Wjg2CkzUMyo2k_Kg35y70qkUj7-FIwCPcBGAYYCw/s1600/2019-05-29%2B01_20_42-Dagon%2BNG.jpg)
 
+[![Screenshot2](https://1.bp.blogspot.com/-IaDVtXOtJZw/XWG0FeJPFuI/AAAAAAAAEHQ/lk9WdRFGlegSSt0hnNLFEdGw_6XyrS7NgCLcBGAs/s1600/ng-terrain-bushes.jpg)
+
 Made with Dagon
 ---------------
 * [dagon-demo](https://github.com/gecko0307/dagon-demo) - a test application that demonstrates most of Dagon's features
