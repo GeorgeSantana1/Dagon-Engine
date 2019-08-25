@@ -109,8 +109,10 @@ void main()
     vec3 worldN = normalize(N * mat3(viewMatrix));
     vec3 worldR = reflect(worldE, worldN);
     
-    float roughness = texture(pbrBuffer, texCoord).r;
-    float metallic = texture(pbrBuffer, texCoord).g;
+    vec4 pbr = texture(pbrBuffer, texCoord);
+    float roughness = pbr.r;
+    float metallic = pbr.g;
+    float specularity = pbr.b;
     
     float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
     
@@ -118,7 +120,7 @@ void main()
 
     // Ambient light
     vec3 ambientDiffuse = ambient(worldN, 0.99);
-    vec3 ambientSpecular = ambient(worldR, roughness);
+    vec3 ambientSpecular = ambient(worldR, roughness) * specularity;
     vec3 F = fresnelRoughness(max(dot(N, E), 0.0), f0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
     vec3 radiance = kD * ambientDiffuse * albedo * occlusion + F * ambientSpecular;

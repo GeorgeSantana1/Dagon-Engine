@@ -64,6 +64,7 @@ class GeometryShader: Shader
         auto ipbr = "pbr" in state.material.inputs;
         auto iroughness = "roughness" in state.material.inputs;
         auto imetallic = "metallic" in state.material.inputs;
+        auto ispecularity = "specularity" in state.material.inputs;
         auto itextureScale = "textureScale" in state.material.inputs;
         auto iparallax = "parallax" in state.material.inputs;
         auto iemission = "emission" in state.material.inputs;
@@ -177,7 +178,7 @@ class GeometryShader: Shader
         }
         if (ipbr.texture is null)
         {
-            ipbr.texture = state.material.makeTexture(*iroughness, *imetallic, materialInput(0.0f), materialInput(0.0f));
+            ipbr.texture = state.material.makeTexture(*iroughness, *imetallic, *ispecularity, materialInput(0.0f));
         }
         glActiveTexture(GL_TEXTURE2);
         ipbr.texture.bind();
@@ -225,6 +226,28 @@ class GeometryShader: Shader
         else
         {
             setParameterSubroutine("metallic", ShaderType.Fragment, "metallicMap");
+        }
+        
+        if (ispecularity.texture is null)
+        {
+            setParameterSubroutine("specularity", ShaderType.Fragment, "specularityValue");
+
+            if (ispecularity.type == MaterialInputType.Float)
+                setParameter("specularityScalar", ispecularity.asFloat);
+            else if (ispecularity.type == MaterialInputType.Bool)
+                setParameter("specularityScalar", cast(float)ispecularity.asBool);
+            else if (ispecularity.type == MaterialInputType.Integer)
+                setParameter("specularityScalar", cast(float)ispecularity.asInteger);
+            else if (ispecularity.type == MaterialInputType.Vec2)
+                setParameter("specularityScalar", ispecularity.asVector2f.r);
+            else if (ispecularity.type == MaterialInputType.Vec3)
+                setParameter("specularityScalar", ispecularity.asVector3f.r);
+            else if (ispecularity.type == MaterialInputType.Vec4)
+                setParameter("specularityScalar", ispecularity.asVector4f.r);
+        }
+        else
+        {
+            setParameterSubroutine("specularity", ShaderType.Fragment, "specularityMap");
         }
 
         // Emission

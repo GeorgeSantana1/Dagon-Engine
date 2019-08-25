@@ -191,8 +191,10 @@ void main()
     vec3 E = normalize(-eyePos);
     vec3 R = reflect(E, N);
     
-    float roughness = texture(pbrBuffer, texCoord).r;
-    float metallic = texture(pbrBuffer, texCoord).g;
+    vec4 pbr = texture(pbrBuffer, texCoord);
+    float roughness = pbr.r;
+    float metallic = pbr.g;
+    float specularity = pbr.b;
     
     float occlusion = haveOcclusionBuffer? texture(occlusionBuffer, texCoord).r : 1.0;
     
@@ -217,7 +219,7 @@ void main()
         vec3 kD = (1.0 - F) * (1.0 - metallic);
         vec3 specular = (NDF * G * F) / max(4.0 * max(dot(N, E), 0.0) * NL, 0.001);
 
-        radiance += (kD * albedo * invPI * occlusion + specular) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
+        radiance += (kD * albedo * invPI * occlusion + specular * specularity) * toLinear(lightColor.rgb) * NL * lightEnergy * shadow;
         
         // Fog
         float linearDepth = abs(eyePos.z);

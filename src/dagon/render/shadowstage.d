@@ -111,7 +111,7 @@ class ShadowStage: RenderStage
     void renderEntities(Shader shader)
     {
         foreach(entity; group)
-        if (entity.castShadow)
+        if (entity.visible && entity.castShadow)
         {
             state.modelMatrix = entity.absoluteTransformation;
             state.modelViewMatrix = state.viewMatrix * state.modelMatrix;
